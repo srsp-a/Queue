@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDB QUEUE - Redesigned</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f7f5fa;
+        }
+        .main-container {
+            max-width: 1200px;
+            background: #fff;
+            border-radius: 2rem;
+            border: 1px solid #e9e4f5;
+            box-shadow: 0 10px 40px rgba(100, 80, 150, 0.1);
+        }
+        .pink-gradient-btn {
+            background-image: linear-gradient(to right, #ff758c 0%, #ff7eb3 100%);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 126, 179, 0.4);
+        }
+        .job-tab {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .job-tab.active {
+            color: #8338ec;
+            background-color: #f0eaff;
+            border-color: #d8c3ff;
+        }
+        .check-icon {
+            color: #2ecc71;
+            font-size: 1.75rem;
+        }
+        .cross-icon {
+            color: #e74c3c;
+            font-size: 1.75rem;
+        }
+        .daily-rate-input {
+            width: 60px;
+            font-size: 0.75rem;
+            padding: 1px 3px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            margin-top: 4px;
+            background-color: #fafafa;
+            color: #666;
+            font-weight: 400;
+            -moz-appearance: textfield;
+        }
+        .daily-rate-input::-webkit-outer-spin-button,
+        .daily-rate-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .daily-rate-input:focus {
+            outline: none;
+            border-color: #8338ec;
+            box-shadow: 0 0 0 2px rgba(131, 56, 236, 0.2);
+        }
+        .summary-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-backdrop.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
+            transform: scale(0.95) translateY(20px);
+        }
+        .modal-backdrop.visible .modal-content {
+            transform: scale(1) translateY(0);
+        }
+        #total-budget-input {
+            -moz-appearance: textfield;
+        }
+        #total-budget-input::-webkit-outer-spin-button,
+        #total-budget-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        [contenteditable="true"] {
+            outline: none;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        [contenteditable="true"]:focus {
+            background-color: #f0eaff;
+            box-shadow: 0 0 0 2px #d8c3ff;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-10">
+
+    <div id="app-container" class="main-container mx-auto p-5 sm:p-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-4">
+                <img src="https://placehold.co/60x60/8338EC/FFFFFF?text=LDB" class="rounded-full">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">LDB QUEUE</h1>
+            </div>
+            <button class="pink-gradient-btn flex items-center space-x-2">
+                <i class="fa-solid fa-user"></i>
+                <span>ก๊อต</span>
+            </button>
+        </header>
+
+        <!-- Job Tabs -->
+        <nav class="flex items-center space-x-2 mb-6">
+            <div class="job-tab active flex items-center space-x-2"><i class="fa-solid fa-video"></i><span>OB Laos</span></div>
+            <div class="job-tab flex items-center space-x-2"><i class="fa-solid fa-camera-retro"></i><span>OB หนองคาย</span></div>
+            <div class="job-tab flex items-center space-x-2"><i class="fa-solid fa-film"></i><span>OB อุดรธานี</span></div>
+            <button class="text-gray-400 hover:text-gray-600 ml-2"><i class="fa-solid fa-plus-circle text-2xl"></i></button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <!-- Left Column: Team Table -->
+            <div class="lg:col-span-3">
+                <section id="job-details" class="mb-6">
+                    <h2 id="job-name" contenteditable="true" class="text-2xl font-bold text-gray-800">OB Laos</h2>
+                    <p class="text-gray-500"><i class="fa-solid fa-calendar-alt mr-2"></i><span id="job-daterange" contenteditable="true">(29 ก.ค. - 1 ส.ค.)</span></p>
+                    <p class="text-gray-500"><i class="fa-solid fa-map-marker-alt mr-2"></i><span id="job-location" contenteditable="true">ประเทศลาว</span></p>
+                </section>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead id="table-header">
+                            <!-- Header row will be injected by JS -->
+                        </thead>
+                        <tbody id="team-list" class="divide-y">
+                            <!-- Team members injected here -->
+                        </tbody>
+                    </table>
+                </div>
+                <button id="add-person-btn" class="mt-4 text-gray-500 hover:text-blue-600 transition">
+                    <i class="fa-solid fa-plus-circle text-3xl"></i>
+                </button>
+            </div>
+
+            <!-- Right Column: BG & Other Costs -->
+            <div class="lg:col-span-2">
+                <section class="bg-violet-600 text-white p-6 rounded-2xl text-right mb-6 shadow-lg">
+                    <p class="text-lg opacity-80">BG</p>
+                    <p id="bg-amount" class="text-5xl font-bold">9,000 <span class="text-3xl font-medium">บาท</span></p>
+                </section>
+
+                <div class="summary-box">
+                    <h3 class="font-bold text-lg mb-3 border-b pb-2">ค่าใช้จ่ายอื่น</h3>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-left py-1">ตำแหน่ง</th>
+                                <th class="text-right py-1">ค่าใช้จ่าย</th>
+                                <th class="text-center py-1">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="other-costs-list">
+                            <!-- Other costs injected here -->
+                        </tbody>
+                    </table>
+                    <button id="add-expense-btn" class="mt-3 w-full text-sm text-green-600 hover:bg-green-50 p-2 rounded-lg border border-dashed border-green-400 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>เพิ่มรายการ</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Summary -->
+        <footer class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left: Cost Breakdown -->
+            <div class="summary-box">
+                <h3 class="font-bold text-lg mb-4">ค่าใช้จ่าย</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between"><span>ค่าทีมงานรวม</span> <span id="summary-team-cost" class="font-semibold">0</span></div>
+                    <div class="flex justify-between"><span>ค่าใช้จ่ายอื่นรวม</span> <span id="summary-other-cost" class="font-semibold">0</span></div>
+                </div>
+                <hr class="my-4">
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="wht-toggle" class="mr-2 h-4 w-4 rounded accent-violet-500">
+                            <label for="wht-toggle">หัก ณ ที่จ่าย</label>
+                            (<input type="number" id="wht-percent" value="3" class="w-12 text-right mx-1 p-0.5 border rounded">)
+                        </div>
+                        <span id="summary-wht" class="font-semibold text-red-500">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                         <div class="flex items-center">
+                            <input type="checkbox" id="vat-toggle" class="mr-2 h-4 w-4 rounded accent-violet-500" checked>
+                            <label for="vat-toggle">VAT (7%)</label>
+                        </div>
+                        <span id="summary-vat" class="font-semibold text-green-500">0</span>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div class="flex justify-between font-bold text-xl text-blue-700">
+                   <span>รวมทั้งสิ้น</span>
+                   <span id="summary-grand-total">0</span>
+                </div>
+            </div>
+            <!-- Right: Budget & Profit/Loss -->
+            <div class="summary-box flex flex-col justify-between">
+                 <div>
+                    <h3 class="font-bold text-lg mb-2">งบประมาณ</h3>
+                    <!-- Editable Budget Input -->
+                    <div class="relative">
+                        <input type="number" id="total-budget-input" class="text-5xl font-bold text-gray-800 bg-transparent w-full pr-24 focus:outline-none focus:bg-gray-100 rounded-lg p-2" value="60000">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-3xl font-medium text-gray-500 pointer-events-none">บาท</span>
+                    </div>
+                </div>
+                <div id="profit-loss-container" class="p-4 rounded-lg text-center my-4">
+                    <!-- Profit/Loss display here -->
+                </div>
+                <button id="save-to-sheet-btn" class="w-full p-3 bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition transform hover:scale-105 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>บันทึกลง Sheet</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Add Person Modal -->
+    <div id="add-person-modal" class="fixed inset-0 modal-backdrop items-center justify-center flex z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md modal-content">
+            <h3 class="text-xl font-bold mb-4">เลือกทีมงาน</h3>
+            <div id="modal-member-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="cancel-add-person" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Date Modal -->
+    <div id="add-date-modal" class="fixed inset-0 modal-backdrop items-center justify-center flex z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm modal-content">
+            <h3 class="text-xl font-bold mb-4">เพิ่มวันที่ใหม่</h3>
+            <div>
+                <label for="new-date-input" class="block text-sm font-medium text-gray-700">วันที่ (เช่น 2 ส.ค.)</label>
+                <input type="text" id="new-date-input" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-violet-500 focus:border-violet-500 sm:text-sm">
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="cancel-add-date" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">ยกเลิก</button>
+                <button id="confirm-add-date" class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700">เพิ่ม</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIG & STATE ---
+        const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzrTxTuex5D7dzQZRaUej0up-sIOPQRrXqCMyKKMVOhPNmvGb-U-efwsHM7isrA3mEz/exec';
+
+        let state = {
+            jobName: 'OB Laos',
+            dateRange: '(29 ก.ค. - 1 ส.ค.)',
+            location: 'ประเทศลาว',
+            budget: 60000,
+            bg: 9000,
+            dates: ['29 ก.ค.', '30 ก.ค.', '1 ส.ค.'],
+            team: [
+                { id: 1, name: 'ก๊อต', role: 'Director', isLeader: true, avatar: 'https://placehold.co/60x60/FFC107/FFFFFF?text=G', dailyPay: { '29 ก.ค.': 3000, '30 ก.ค.': 3000, '1 ส.ค.': 3000 } },
+                { id: 2, name: 'บิ๊กซ์', role: 'Camera', avatar: 'https://placehold.co/60x60/4CAF50/FFFFFF?text=B', dailyPay: { '29 ก.ค.': 2500, '30 ก.ค.': 0, '1 ส.ค.': 0 } },
+                { id: 3, name: 'ต้า', role: 'Camera', avatar: 'https://placehold.co/60x60/2196F3/FFFFFF?text=T', dailyPay: { '29 ก.ค.': 2500, '30 ก.ค.': 2500, '1 ส.ค.': 0 } },
+                { id: 4, name: 'เฟรม', role: 'Switcher', avatar: 'https://placehold.co/60x60/F44336/FFFFFF?text=F', dailyPay: { '29 ก.ค.': 2200, '30 ก.ค.': 2200, '1 ส.ค.': 2200 } },
+            ],
+            availableMembers: [
+                 { id: 5, name: 'เจมส์', role: 'Sound Engineer', avatar: 'https://placehold.co/60x60/9C27B0/FFFFFF?text=J', rate: 2800 },
+                 { id: 6, name: 'แอน', role: 'Lighting', avatar: 'https://placehold.co/60x60/3F51B5/FFFFFF?text=A', rate: 2600 },
+            ],
+            otherCosts: [
+                { position: 'Switcher', cost: 6000 },
+                { position: 'Camera', cost: 7000 },
+                { position: 'Camera', cost: 6500 },
+                { position: 'ค่าอาหาร', cost: 2000 },
+                { position: 'ค่า Vmix', cost: 3500 },
+            ],
+            wht: { percent: 3 },
+            vat: { percent: 7 }
+        };
+
+        // --- DOM ELEMENTS ---
+        const jobNameEl = document.getElementById('job-name');
+        const jobDateRangeEl = document.getElementById('job-daterange');
+        const jobLocationEl = document.getElementById('job-location');
+        const tableHeader = document.getElementById('table-header');
+        const teamList = document.getElementById('team-list');
+        const otherCostsList = document.getElementById('other-costs-list');
+        
+        const addPersonModal = document.getElementById('add-person-modal');
+        const modalMemberList = document.getElementById('modal-member-list');
+        
+        const addDateModal = document.getElementById('add-date-modal');
+        const newDateInput = document.getElementById('new-date-input');
+        
+        const budgetInput = document.getElementById('total-budget-input');
+
+        // --- RENDER FUNCTIONS ---
+        function renderTableHeader() {
+            const dateHeaders = state.dates.map(date => 
+                `<th class="py-2 text-center font-semibold text-gray-700">${date}</th>`
+            ).join('');
+            
+            tableHeader.innerHTML = `
+                <tr class="border-b-2">
+                    <th class="py-2 w-2/5">ชื่อ</th>
+                    ${dateHeaders}
+                    <th class="py-2 text-center w-16">
+                        <button id="add-date-btn" class="text-gray-400 hover:text-blue-500 text-lg">
+                            <i class="fa-solid fa-plus-circle"></i>
+                        </button>
+                    </th>
+                </tr>
+            `;
+        }
+
+        function renderTeam() {
+            teamList.innerHTML = state.team.map(member => {
+                const dateCells = state.dates.map(date => `
+                    <td class="py-2 text-center">
+                        <div class="flex flex-col items-center">
+                            ${(member.dailyPay[date] || 0) > 0 ? '<i class="check-icon fa-solid fa-circle-check"></i>' : '<i class="cross-icon fa-solid fa-circle-xmark"></i>'}
+                            <input type="number" class="daily-rate-input" value="${member.dailyPay[date] || 0}" data-date="${date}" data-member-id="${member.id}">
+                        </div>
+                    </td>
+                `).join('');
+
+                return `
+                    <tr data-id="${member.id}">
+                        <td class="py-2">
+                            <div class="flex items-center space-x-3">
+                                <img src="${member.avatar}" alt="${member.name}" class="w-10 h-10 rounded-full">
+                                <div>
+                                    <div class="font-bold text-gray-800 flex items-center">
+                                        ${member.name}
+                                        ${member.isLeader ? '<i class="fas fa-crown text-yellow-500 ml-2"></i>' : ''}
+                                    </div>
+                                    <div class="team-member-role text-sm text-gray-500" contenteditable="true" data-member-id="${member.id}">${member.role}</div>
+                                </div>
+                            </div>
+                        </td>
+                        ${dateCells}
+                        <td class="py-2 text-center">
+                            <button class="remove-member-btn text-gray-400 hover:text-red-500" data-id="${member.id}">
+                                <i class="fa-solid fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderOtherCosts() {
+            otherCostsList.innerHTML = state.otherCosts.map((item, index) => `
+                <tr data-index="${index}">
+                    <td class="py-1"><input type="text" value="${item.position}" class="cost-position-input p-1 border rounded w-full bg-gray-50"></td>
+                    <td class="py-1"><input type="number" value="${item.cost}" class="cost-amount-input p-1 border rounded w-24 text-right bg-gray-50"></td>
+                    <td class="py-1 text-center"><button class="remove-cost-btn text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-alt"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAll() {
+            renderTableHeader();
+            renderTeam();
+            renderOtherCosts();
+            calculateAndRenderSummary();
+        }
+
+        // --- CALCULATION & SUMMARY ---
+        function calculateAndRenderSummary() {
+            let teamCost = 0;
+            state.team.forEach(member => {
+                teamCost += Object.values(member.dailyPay).reduce((sum, pay) => sum + (pay || 0), 0);
+            });
+            document.getElementById('summary-team-cost').textContent = teamCost.toLocaleString();
+
+            let otherCostsTotal = state.otherCosts.reduce((sum, item) => sum + Number(item.cost), 0);
+            document.getElementById('summary-other-cost').textContent = otherCostsTotal.toLocaleString();
+
+            const subtotal = teamCost + otherCostsTotal;
+            const whtEnabled = document.getElementById('wht-toggle').checked;
+            const vatEnabled = document.getElementById('vat-toggle').checked;
+            state.wht.percent = Number(document.getElementById('wht-percent').value) || 0;
+
+            const whtAmount = whtEnabled ? (subtotal * state.wht.percent / 100) : 0;
+            const vatAmount = vatEnabled ? (subtotal * state.vat.percent / 100) : 0;
+            const grandTotal = subtotal - whtAmount + vatAmount;
+
+            document.getElementById('summary-wht').textContent = `-${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('summary-vat').textContent = `+${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('summary-grand-total').textContent = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            const profitLoss = state.budget - grandTotal;
+            const profitLossContainer = document.getElementById('profit-loss-container');
+            if (profitLoss >= 0) {
+                profitLossContainer.innerHTML = `<p class="text-sm text-green-600">กำไร</p><p class="text-4xl font-bold text-green-600">${profitLoss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>`;
+                profitLossContainer.className = 'p-4 rounded-lg text-center bg-green-50 border border-green-200';
+            } else {
+                profitLossContainer.innerHTML = `<p class="text-sm text-red-600">ขาดทุน</p><p class="text-4xl font-bold text-red-600">${Math.abs(profitLoss).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>`;
+                profitLossContainer.className = 'p-4 rounded-lg text-center bg-red-50 border border-red-200';
+            }
+        }
+        
+        // --- EVENT HANDLERS ---
+        function toggleModal(modal, show) {
+            if (show) {
+                modal.classList.add('visible');
+            } else {
+                modal.classList.remove('visible');
+            }
+        }
+
+        function handleAddDate() {
+            const newDateStr = newDateInput.value;
+            if (newDateStr && newDateStr.trim() !== '') {
+                const trimmedDate = newDateStr.trim();
+                if (state.dates.includes(trimmedDate)) {
+                    alert("วันที่นี้มีอยู่แล้ว");
+                    return;
+                }
+                state.dates.push(trimmedDate);
+                state.team.forEach(member => {
+                    member.dailyPay[trimmedDate] = 0;
+                });
+                newDateInput.value = '';
+                toggleModal(addDateModal, false);
+                renderAll();
+            }
+        }
+
+        function handleRemoveMember(memberId) {
+            const memberIndex = state.team.findIndex(m => m.id === memberId);
+            if (memberIndex > -1) {
+                const [removedMember] = state.team.splice(memberIndex, 1);
+                if (!state.availableMembers.some(m => m.id === removedMember.id)) {
+                    state.availableMembers.push(removedMember);
+                }
+                renderAll();
+            }
+        }
+
+        function handleBudgetChange(e) {
+            state.budget = parseFloat(e.target.value) || 0;
+            calculateAndRenderSummary();
+        }
+        
+        function handleRoleChange(e) {
+            const memberId = parseInt(e.target.dataset.memberId);
+            const newRole = e.target.textContent;
+            const member = state.team.find(m => m.id === memberId);
+            if (member) {
+                member.role = newRole;
+            }
+        }
+
+        function handleDailyRateChange(e) {
+            const inputElement = e.target;
+            const memberId = parseInt(inputElement.dataset.memberId);
+            const date = inputElement.dataset.date;
+            const newPay = parseFloat(inputElement.value) || 0;
+            
+            const member = state.team.find(m => m.id === memberId);
+            if (member) {
+                member.dailyPay[date] = newPay;
+                
+                const iconElement = inputElement.parentElement.querySelector('i');
+                if (newPay > 0) {
+                    iconElement.className = 'check-icon fa-solid fa-circle-check';
+                } else {
+                    iconElement.className = 'cross-icon fa-solid fa-circle-xmark';
+                }
+                
+                calculateAndRenderSummary();
+            }
+        }
+        
+        function handleCostChange(e) {
+            const index = parseInt(e.target.closest('[data-index]').dataset.index);
+            if (e.target.classList.contains('cost-position-input')) state.otherCosts[index].position = e.target.value;
+            if (e.target.classList.contains('cost-amount-input')) state.otherCosts[index].cost = parseFloat(e.target.value) || 0;
+            calculateAndRenderSummary();
+        }
+
+        function handleRemoveCost(e) {
+            const index = parseInt(e.target.closest('[data-index]').dataset.index);
+            state.otherCosts.splice(index, 1);
+            renderAll();
+        }
+
+        function handleAddExpense() {
+            state.otherCosts.push({ position: 'รายการใหม่', cost: 0 });
+            renderAll();
+        }
+
+        function openAddPersonModal() {
+            modalMemberList.innerHTML = state.availableMembers.map(member => `
+                <div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100 cursor-pointer" data-id="${member.id}">
+                    <div class="flex items-center space-x-3"><img src="${member.avatar}" class="w-10 h-10 rounded-full"><div><p class="font-semibold">${member.name}</p><p class="text-sm text-gray-500">${member.role}</p></div></div>
+                    <button class="add-member-action bg-blue-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-600">เพิ่ม</button>
+                </div>`).join('');
+            toggleModal(addPersonModal, true);
+        }
+
+        function handleAddMember(e) {
+            const memberId = parseInt(e.target.closest('[data-id]').dataset.id);
+            const memberIndex = state.availableMembers.findIndex(m => m.id === memberId);
+            if (memberIndex > -1) {
+                const [memberToAdd] = state.availableMembers.splice(memberIndex, 1);
+                memberToAdd.dailyPay = {};
+                state.dates.forEach(d => memberToAdd.dailyPay[d] = 0);
+                state.team.push(memberToAdd);
+                toggleModal(addPersonModal, false);
+                renderAll();
+            }
+        }
+        
+        function handleJobDetailsChange() {
+            state.jobName = jobNameEl.textContent;
+            state.dateRange = jobDateRangeEl.textContent;
+            state.location = jobLocationEl.textContent;
+        }
+
+        async function saveToSheet() {
+            if (GOOGLE_APP_SCRIPT_URL === 'YOUR_GOOGLE_APP_SCRIPT_URL_HERE') {
+                alert('กรุณาตั้งค่า GOOGLE_APP_SCRIPT_URL ในไฟล์โค้ดก่อน โดยทำตามคู่มือการติดตั้ง');
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+
+            const dataToSave = {
+                jobName: state.jobName,
+                dateRange: state.dateRange,
+                location: state.location,
+                budget: state.budget,
+                bg: state.bg,
+                team: state.team.map(m => ({ 
+                    name: m.name, 
+                    role: m.role, 
+                    totalPay: Object.values(m.dailyPay).reduce((sum, pay) => sum + (pay || 0), 0)
+                })),
+                otherCosts: state.otherCosts,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(GOOGLE_APP_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    redirect: 'follow',
+                    body: JSON.stringify(dataToSave)
+                });
+                alert('ส่งข้อมูลเพื่อบันทึกแล้ว! กรุณาตรวจสอบที่ Google Sheet ของคุณ');
+            } catch (error) {
+                console.error('Error saving to Google Sheet:', error);
+                alert('เกิดข้อผิดพลาดในการส่งข้อมูลเพื่อบันทึก');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fa-solid fa-file-excel mr-2"></i>บันทึกลง Sheet';
+            }
+        }
+
+        // --- EVENT LISTENERS (DELEGATED TO BODY FOR ROBUSTNESS) ---
+        document.body.addEventListener('click', (e) => {
+            const target = e.target;
+            const addDateBtn = target.closest('#add-date-btn');
+            const addPersonBtn = target.closest('#add-person-btn');
+            const addExpenseBtn = target.closest('#add-expense-btn');
+            const removeCostBtn = target.closest('.remove-cost-btn');
+            const addMemberAction = target.closest('.add-member-action');
+            const confirmAddDateBtn = target.closest('#confirm-add-date');
+            const cancelAddDateBtn = target.closest('#cancel-add-date');
+            const cancelAddPersonBtn = target.closest('#cancel-add-person');
+            const saveBtn = target.closest('#save-to-sheet-btn');
+            const removeMemberBtn = target.closest('.remove-member-btn');
+
+            if (addDateBtn) toggleModal(addDateModal, true);
+            else if (addPersonBtn) openAddPersonModal();
+            else if (addExpenseBtn) handleAddExpense();
+            else if (removeCostBtn) handleRemoveCost(e);
+            else if (addMemberAction) handleAddMember(e);
+            else if (confirmAddDateBtn) handleAddDate();
+            else if (cancelAddDateBtn) toggleModal(addDateModal, false);
+            else if (cancelAddPersonBtn) toggleModal(addPersonModal, false);
+            else if (saveBtn) saveToSheet();
+            else if (removeMemberBtn) handleRemoveMember(parseInt(removeMemberBtn.dataset.id));
+        });
+
+        document.body.addEventListener('blur', (e) => {
+            if (e.target.classList.contains('team-member-role')) {
+                handleRoleChange(e);
+            } else if (e.target.id === 'job-name' || e.target.id === 'job-daterange' || e.target.id === 'job-location') {
+                handleJobDetailsChange();
+            }
+        }, true);
+
+        document.body.addEventListener('change', (e) => {
+            if (e.target.classList.contains('daily-rate-input')) {
+                handleDailyRateChange(e);
+            } else if (e.target.id === 'wht-toggle' || e.target.id === 'vat-toggle' || e.target.id === 'wht-percent') {
+                calculateAndRenderSummary();
+            }
+        });
+        
+        document.body.addEventListener('input', (e) => {
+            if (e.target.classList.contains('cost-position-input') || e.target.classList.contains('cost-amount-input')) {
+                handleCostChange(e);
+            } else if (e.target.id === 'total-budget-input') {
+                handleBudgetChange(e);
+            }
+        });
+
+        // --- INITIALIZATION ---
+        renderAll();
+    });
+    </script>
+</body>
+</html>
