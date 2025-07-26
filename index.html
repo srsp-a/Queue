@@ -3,1143 +3,747 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDB QUEUE</title>
+    <title>LDB QUEUE - Job Management</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Google Fonts: Kanit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <style>
-        /* --- Base Styles & Variables --- */
-        :root {
-            --primary-color: #8E2DE2;
-            --secondary-color: #4A00E0;
-            --text-light: #F0F0F0;
-            --text-dark: #333;
-            --bg-main: #121212;
-            --bg-card: #1E1E1E;
-            --bg-header: #2A2A2A;
-            --border-color: #444;
-            --green-profit: #28a745;
-            --red-loss: #dc3545;
-            --yellow-accent: #FFD700;
-            --blue-accent: #0d6efd;
-            --border-radius: 12px;
-            --shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Kanit', sans-serif;
-            background: #1c1c1c;
-            color: var(--text-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
+            background-color: #f0f2f5;
         }
-
-        /* --- Login Container --- */
-        #login-container {
-            background: var(--bg-card);
-            padding: 2.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border-top: 4px solid var(--primary-color);
-            transition: all 0.5s ease-in-out;
+        .gradient-bg {
+            background: linear-gradient(135deg, #6B73FF 0%, #A855F7 100%);
         }
-
-        #login-container h2 {
-            margin-bottom: 2rem;
-            color: var(--text-light);
-            font-weight: 600;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 1rem 1rem 1rem 3rem;
-            background: var(--bg-main);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-light);
-            font-family: 'Kanit', sans-serif;
-            font-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.3);
-        }
-
-        #login-btn {
-            width: 100%;
-            padding: 1rem;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.3s;
-        }
-
-        #login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
-        }
-        #login-error {
-            color: var(--red-loss);
-            margin-top: 1rem;
-            min-height: 1.2em;
-        }
-
-        /* --- App Container --- */
-        #app-container {
-            width: 100%;
-            max-width: 1400px;
-            background: var(--bg-card);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            border-top: 4px solid var(--primary-color);
-        }
-
-        header {
-            background: var(--bg-header);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        .main-gradient-text {
+            background: linear-gradient(90deg, #f97316, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .profit-text {
+            color: #22c55e; /* green-500 */
         }
-
-        #user-display-name {
-            font-weight: 500;
+        .loss-text {
+            color: #ef4444; /* red-500 */
         }
-
-        #logout-btn {
-            background: var(--red-loss);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #logout-btn:hover {
-            background: #c82333;
-        }
-        
-        main {
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-        }
-
-        /* --- Job Section --- */
-        .job-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            background: var(--bg-header);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1.5rem;
-        }
-
-        .job-info h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .job-info h2 i {
-            margin-right: 0.5rem;
-            color: var(--primary-color);
-        }
-        .job-info p {
-            color: #aaa;
-        }
-
-        .revenue-total {
-            text-align: right;
-        }
-        .revenue-total p {
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-        .revenue-total .amount {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--green-profit);
-        }
-
-        .queue-table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-
-        th {
-            background-color: rgba(255,255,255,0.05);
-            font-weight: 500;
-        }
-        
-        td:first-child {
-            text-align: left;
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary-color);
-        }
-        .team-leader .profile-name {
-            font-weight: 600;
-            color: var(--yellow-accent);
-        }
-        .team-leader .profile-name::before {
-            content: "\f521";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            margin-right: 0.5rem;
-        }
-
-        .daily-pay-input {
-            width: 80px;
-            background: var(--bg-main);
-            border: 1px solid var(--border-color);
-            color: var(--text-light);
-            border-radius: 6px;
-            padding: 0.3rem;
-            text-align: center;
-            margin-left: 0.5rem;
-            font-size: 0.9rem;
-        }
-        
-        .action-buttons {
-            margin-top: 1.5rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .app-btn {
-            background: var(--blue-accent);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Kanit', sans-serif;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-        .app-btn:hover {
-            background: #0b5ed7;
-            transform: translateY(-2px);
-        }
-        .app-btn i {
-            margin-right: 0.5rem;
-        }
-
-        /* --- Summary Section --- */
-        .summary-box {
-            background: var(--bg-header);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 2rem;
-        }
-        .summary-box h3 {
-            font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.8rem;
-            margin-bottom: 1rem;
-        }
-
-        #expense-list {
-            list-style: none;
-            margin-bottom: 1rem;
-        }
-        #expense-list li {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-        }
-        .delete-expense-btn {
-            background: none;
-            border: none;
-            color: var(--red-loss);
-            cursor: pointer;
-        }
-        .add-expense-form {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        .add-expense-form input {
-            flex: 1;
-            padding: 0.5rem;
-            background: var(--bg-main);
-            border: 1px solid var(--border-color);
-            color: var(--text-light);
-            border-radius: 6px;
-        }
-        .add-expense-form button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .financial-details p {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-        }
-        .financial-details .option-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        #wht-percent {
-            width: 50px;
-            background: var(--bg-main);
-            border: 1px solid var(--border-color);
-            color: var(--text-light);
-            border-radius: 4px;
-            padding: 0.2rem;
-        }
-        .final-total {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .profit-loss-box {
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: white;
-            transition: all 0.5s;
-        }
-        .profit {
-            background: linear-gradient(45deg, #28a745, #218838);
-        }
-        .loss {
-            background: linear-gradient(45deg, #dc3545, #c82333);
-        }
-
-        /* --- Modal --- */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.7);
-            animation: fadeIn 0.3s;
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
         }
         .modal-content {
-            background: var(--bg-card);
-            margin: 10% auto;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            width: 90%;
-            max-width: 500px;
+            transition: transform 0.3s ease;
+        }
+        .hidden {
+            display: none;
+        }
+        .date-header:hover .date-action-btn {
+            opacity: 1;
+        }
+        .custom-checkbox {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #d1d5db; /* gray-300 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: #f9fafb; /* gray-50 */
+        }
+        .custom-checkbox.checked {
+            background-color: #22c55e; /* green-500 */
+            border-color: #22c55e;
+        }
+        .custom-checkbox .ph-check {
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .custom-checkbox.checked .ph-check {
+            opacity: 1;
+        }
+        .tooltip {
             position: relative;
-            animation: slideIn 0.4s;
-            border-top: 4px solid var(--secondary-color);
+            display: inline-block;
         }
-        .close-btn {
-            color: #aaa;
-            position: absolute;
-            top: 1rem;
-            right: 1.5rem;
-            font-size: 1.8rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .modal h3 {
-            margin-bottom: 1.5rem;
-        }
-        #user-selection-list {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.5rem;
-        }
-        #user-selection-list label {
-            display: block;
-            padding: 0.8rem;
-            cursor: pointer;
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
             border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        #user-selection-list label:hover {
-            background: var(--bg-header);
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
-
-        @keyframes fadeIn {
-            from {opacity: 0;}
-            to {opacity: 1;}
-        }
-        @keyframes slideIn {
-            from {transform: translateY(-50px); opacity: 0;}
-            to {transform: translateY(0); opacity: 1;}
-        }
-
-        /* --- Utility & Responsive --- */
-        .hidden { display: none !important; }
-        .admin-only { display: none; } /* Controlled by JS */
-
-        @media (max-width: 992px) {
-            main {
-                grid-template-columns: 1fr;
-            }
-        }
-        @media (max-width: 768px) {
-            body { padding: 0; }
-            #app-container { border-radius: 0; }
-            main { padding: 1rem; }
-            header { padding: 1rem; }
-            .job-header { flex-direction: column; gap: 1rem; align-items: stretch; }
-            .revenue-total { text-align: left; }
-        }
-
     </style>
 </head>
-<body>
+<body class="antialiased text-gray-800">
 
-    <!-- Login Screen -->
-    <div id="login-container">
-        <h2>LDB QUEUE LOGIN</h2>
-        <!-- MODIFIED: Login with Username -->
-        <div class="input-group">
-            <i class="fas fa-user"></i>
-            <input type="text" id="login-username" placeholder="ชื่อผู้ใช้">
-        </div>
-        <div class="input-group">
-            <i class="fas fa-lock"></i>
-            <input type="password" id="login-password" placeholder="รหัสผ่าน">
-        </div>
-        <p id="login-error">&nbsp;</p>
-        <button id="login-btn">เข้าสู่ระบบ</button>
-    </div>
+    <!-- Main Container -->
+    <div id="app-container" class="min-h-screen">
 
-    <!-- Main App -->
-    <div id="app-container" class="hidden">
-        <header>
-            <h1>LDB QUEUE</h1>
-            <div class="user-info">
-                <span id="user-display-name"></span>
-                <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>
+        <!-- Login Screen -->
+        <div id="login-screen" class="flex items-center justify-center min-h-screen gradient-bg">
+            <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-xl">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold main-gradient-text">LDB QUEUE</h1>
+                    <p class="mt-2 text-gray-500">ลงชื่อเข้าใช้เพื่อจัดการคิวงาน</p>
+                </div>
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <!-- EDIT 2: Change label for login -->
+                        <label for="login-identifier" class="text-sm font-medium text-gray-700">อีเมล หรือ ชื่อเล่น</label>
+                        <input id="login-identifier" name="loginIdentifier" type="text" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="your@email.com หรือ nickname">
+                    </div>
+                    <div>
+                        <label for="password" class="text-sm font-medium text-gray-700">รหัสผ่าน</label>
+                        <input id="password" name="password" type="password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="••••••••">
+                    </div>
+                    <p id="login-error" class="text-sm text-red-500 hidden"></p>
+                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300">
+                        ลงชื่อเข้าใช้
+                    </button>
+                </form>
             </div>
-        </header>
-
-        <main>
-            <section class="queue-section">
-                <div class="job-header">
-                    <div class="job-info">
-                        <h2 id="job-name"><i class="fa-solid fa-video"></i> OB Laos</h2>
-                        <p id="job-dates">29 ก.ค. 2568 - 1 ส.ค. 2568</p>
+        </div>
+        
+        <!-- Change Password Modal -->
+        <div id="change-password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-backdrop">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 m-4 modal-content">
+                <h2 class="text-2xl font-bold text-center">เปลี่ยนรหัสผ่านใหม่</h2>
+                <p class="text-center text-gray-500 mt-2">เพื่อความปลอดภัย กรุณาตั้งรหัสผ่านใหม่สำหรับใช้งานครั้งแรก</p>
+                <form id="change-password-form" class="mt-6 space-y-4">
+                    <div>
+                        <label for="new-password" class="text-sm font-medium text-gray-700">รหัสผ่านใหม่</label>
+                        <input type="password" id="new-password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
                     </div>
-                    <div class="revenue-total">
-                        <p>รายได้ทั้งหมด</p>
-                        <span id="job-revenue" class="amount">20,000</span>
-                    </div>
-                </div>
+                    <p id="password-error" class="text-sm text-red-500 hidden"></p>
+                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                        ยืนยันและเข้าสู่ระบบ
+                    </button>
+                </form>
+            </div>
+        </div>
 
-                <div class="queue-table-container">
-                    <table id="queue-table">
-                        <thead>
-                            <tr id="table-header-row">
-                                <!-- Headers will be generated by JS -->
-                            </tr>
-                        </thead>
-                        <tbody id="queue-body">
-                            <!-- Team members will be generated by JS -->
-                        </tbody>
-                    </table>
+        <!-- Main App Screen -->
+        <div id="main-app" class="hidden p-4 sm:p-6 lg:p-8">
+            <header class="flex flex-wrap items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+                <div>
+                    <h1 class="text-4xl font-bold main-gradient-text">LDB QUEUE</h1>
+                    <p id="user-info" class="mt-1 text-gray-500">สวัสดี, <span id="user-name-display" class="font-medium"></span> (<span id="user-role" class="font-medium"></span>)</p>
+                    <p class="text-xs text-gray-400">User ID: <span id="user-id-display"></span></p>
                 </div>
-                <div class="action-buttons">
-                    <button id="add-member-btn" class="app-btn admin-only"><i class="fa-solid fa-user-plus"></i> เพิ่มสมาชิกในคิว</button>
-                    <button id="add-day-btn" class="app-btn admin-only"><i class="fa-solid fa-calendar-plus"></i> เพิ่มวันทำงาน</button>
+                <div class="flex items-center space-x-4 mt-4 sm:mt-0">
+                    <button id="manage-profile-button" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                        <i class="ph ph-gear mr-1"></i> จัดการโปรไฟล์
+                    </button>
+                    <button id="logout-button" class="px-4 py-2 font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors">
+                        <i class="ph ph-sign-out mr-1"></i> ออกจากระบบ
+                    </button>
                 </div>
+            </header>
+
+            <!-- Job List -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-semibold">รายการคิวงาน</h2>
+                    <button id="add-job-button" class="px-4 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 admin-only">
+                        <i class="ph ph-plus-circle mr-1"></i> เพิ่ม Job ใหม่
+                    </button>
+                </div>
+                <div id="job-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
             </section>
 
-            <section class="summary-section">
-                <div>
-                    <div class="summary-box">
-                        <h3>ค่าใช้จ่าย</h3>
-                        <ul id="expense-list">
-                            <!-- Expenses will be generated by JS -->
-                        </ul>
-                        <div class="add-expense-form admin-only">
-                            <input type="text" id="expense-desc" placeholder="รายละเอียด">
-                            <input type="number" id="expense-amount" placeholder="จำนวนเงิน">
-                            <button id="add-expense-btn">เพิ่ม</button>
+            <!-- Selected Job Details -->
+            <section id="job-details-section" class="mt-8 hidden">
+                <div class="p-6 bg-white rounded-2xl shadow-lg">
+                    <div class="flex flex-wrap items-start justify-between pb-4 mb-4 border-b">
+                        <div>
+                            <div class="flex items-center">
+                                <h3 id="job-title" class="text-3xl font-bold text-gray-800"></h3>
+                                <button id="edit-job-details-btn" class="ml-3 text-gray-400 hover:text-purple-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
+                            </div>
+                            <p id="job-dates" class="text-gray-500"></p>
+                            <p id="job-location" class="flex items-center mt-1 text-gray-500"><i class="ph ph-map-pin mr-2"></i><span id="job-location-text"></span></p>
                         </div>
-                    </div>
-
-                    <div class="summary-box">
-                        <h3>สรุปยอด</h3>
-                        <div class="financial-details">
-                            <p><span>ค่าทีมงานรวม</span> <span id="total-team-cost">0</span></p>
-                            <p><span>ค่าใช้จ่ายอื่นๆ</span> <span id="total-other-expense">0</span></p>
-                            <hr style="border-color: var(--border-color); margin: 1rem 0;">
-                            <p><span>ยอดรวม</span> <span id="sub-total">0</span></p>
-                            <p>
-                                <label class="option-label">
-                                    <input type="checkbox" id="wht-checkbox">
-                                    หัก ณ ที่จ่าย (<input type="number" id="wht-percent" value="3" class="admin-only" style="width: 50px;">%)
-                                </label>
-                                <span id="wht-amount">0</span>
-                            </p>
-                            <p>
-                                <label class="option-label">
-                                    <input type="checkbox" id="vat-checkbox">
-                                    VAT (7%)
-                                </label>
-                                <span id="vat-amount">0</span>
-                            </p>
-                            <div class="final-total">
-                                <span>รวมสุทธิ</span>
-                                <span id="grand-total">0</span>
+                        <div class="text-right mt-4 sm:mt-0">
+                            <p class="text-gray-500">งบประมาณ</p>
+                            <div class="flex items-center justify-end">
+                                <p id="job-income" class="text-3xl font-bold text-purple-600"></p>
+                                <button id="edit-budget-btn" class="ml-2 text-gray-400 hover:text-purple-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
                             </div>
                         </div>
                     </div>
-                    
-                    <div id="profit-loss-container" class="profit-loss-box">
-                       <!-- Profit/Loss will be generated by JS -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <h4 class="text-xl font-semibold mb-4">ทีมงาน</h4>
+                            <div class="overflow-x-auto"><table class="min-w-full bg-white"><thead id="schedule-head"></thead><tbody id="schedule-body"></tbody></table></div>
+                            <div class="mt-4 flex space-x-2">
+                                <button id="add-member-button" class="px-3 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 admin-only"><i class="ph ph-user-plus mr-1"></i> เพิ่มสมาชิก</button>
+                                <button id="add-day-button" class="px-3 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 admin-only"><i class="ph ph-calendar-plus mr-1"></i> เพิ่มวันทำงาน</button>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-4"><h4 class="text-xl font-semibold">ค่าใช้จ่ายอื่นๆ</h4><button id="add-expense-button" class="px-3 py-2 text-sm font-semibold text-white bg-orange-500 rounded-lg hover:bg-orange-600 admin-only"><i class="ph ph-plus mr-1"></i> เพิ่ม</button></div>
+                            <div id="expense-list" class="space-y-2"></div>
+                        </div>
+                    </div>
+                    <div class="mt-8 pt-6 border-t-2 border-dashed">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-xl font-semibold mb-4">สรุปค่าใช้จ่าย</h4>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center"><p>ค่าทีมงานรวม</p><p id="summary-team-cost" class="font-semibold">0 บาท</p></div>
+                                    <div class="flex justify-between items-center"><p>ค่าใช้จ่ายอื่นๆ รวม</p><p id="summary-other-expenses" class="font-semibold">0 บาท</p></div>
+                                    <hr>
+                                    <div class="flex justify-between items-center"><div class="flex items-center"><input type="checkbox" id="wht-toggle" class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"><label for="wht-toggle" class="ml-2">หัก ณ ที่จ่าย (<input type="number" id="wht-percent" value="3" class="w-12 text-center bg-gray-100 rounded">%)</label></div><p id="summary-wht" class="font-semibold">0 บาท</p></div>
+                                    <div class="flex justify-between items-center"><div class="flex items-center"><input type="checkbox" id="vat-toggle" class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"><label for="vat-toggle" class="ml-2">VAT (7%)</label></div><p id="summary-vat" class="font-semibold">0 บาท</p></div>
+                                    <hr>
+                                    <div class="flex justify-between items-center text-lg font-bold"><p>รวมค่าใช้จ่ายทั้งหมด</p><p id="summary-total-cost" class="text-red-500">0 บาท</p></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center justify-center p-6 rounded-2xl bg-gray-50"><p id="profit-loss-label" class="text-2xl font-semibold">กำไร</p><p id="summary-profit-loss" class="text-5xl font-bold mt-2">0.00 บาท</p></div>
+                        </div>
                     </div>
                 </div>
             </section>
-        </main>
-    </div>
-
-    <!-- Add Member Modal -->
-    <div id="add-member-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" id="close-member-modal">&times;</span>
-            <h3>เลือกสมาชิกเพื่อเพิ่มในคิว</h3>
-            <div id="user-selection-list">
-                <!-- User list will be populated by JS -->
-            </div>
-            <button id="confirm-add-member-btn" class="app-btn" style="margin-top: 1rem;">ยืนยัน</button>
-        </div>
-    </div>
-    
-    <!-- Change Password Modal -->
-    <div id="change-password-modal" class="modal">
-        <div class="modal-content">
-            <h3>ตั้งรหัสผ่านใหม่</h3>
-            <p>นี่คือการเข้าสู่ระบบครั้งแรก กรุณาตั้งรหัสผ่านใหม่เพื่อความปลอดภัย</p>
-            <div class="input-group" style="margin-top: 1.5rem;">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="new-password" placeholder="รหัสผ่านใหม่">
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="confirm-new-password" placeholder="ยืนยันรหัสผ่านใหม่">
-            </div>
-            <p id="password-error" style="color: var(--red-loss); min-height: 1.2em;">&nbsp;</p>
-            <button id="confirm-password-change-btn" class="app-btn">ยืนยัน</button>
+            <section id="user-management-section" class="mt-8 admin-only">
+                <h2 class="text-2xl font-semibold mb-4">การจัดการผู้ใช้</h2>
+                <div class="bg-white rounded-2xl shadow-lg p-6"><div id="user-list" class="space-y-4"></div></div>
+            </section>
         </div>
     </div>
 
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script>
-        // =================================================================================
-        // PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE
-        // วาง Object การตั้งค่า Firebase ของคุณที่นี่
-        // =================================================================================
-       const firebaseConfig = {
-        apiKey: "AIzaSyC6AnEE8aRM_9gw0CIi4Skl_zTPU_CG_CQ",
-        authDomain: "ldb-queue-app.firebaseapp.com",
-        projectId: "ldb-queue-app",
-        storageBucket: "ldb-queue-app.appspot.com",
-        messagingSenderId: "626818286678",
-        appId: "1:626818286678:web:db8080230e818dc1f7e7f7"
-    };
-        // =================================================================================
+        // --- START: PASTE YOUR FIREBASE CONFIG HERE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAedyGR43aEAO_BFufGmplJVuGkmIEYgG0",
+          authDomain: "job-queue-app.firebaseapp.com",
+          projectId: "job-queue-app",
+          storageBucket: "job-queue-app.appspot.com",
+          messagingSenderId: "247047529613",
+          appId: "1:247047529613:web:d27a980d1de33c22052ec4"
+        };
+        // --- END: PASTE YOUR FIREBASE CONFIG HERE ---
 
-        // --- Initialize Firebase ---
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // EDIT 3: Cloudinary Configuration
+        // **สำคัญ:** ไปที่ Cloudinary -> Settings -> Upload -> Upload presets
+        // สร้าง Upload Preset ใหม่ ตั้งค่า "Signing Mode" เป็น "Unsigned" แล้วคัดลอก "Upload preset name" มาใส่ที่นี่
+        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UNSIGNED_UPLOAD_PRESET"; // <--- ใส่ Upload Preset ของคุณที่นี่
+        const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME"; // <--- ใส่ Cloud Name ของคุณที่นี่
+        const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
-        // --- Global State ---
-        let currentUser = null;
-        let currentJobId = 'job01'; // Default job to load
-        let jobUnsubscribe = null; // To detach listener when logging out
 
-        // --- DOM Elements ---
-        const loginContainer = document.getElementById('login-container');
-        const appContainer = document.getElementById('app-container');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const loginError = document.getElementById('login-error');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null, currentUserData = null, currentUserRole = null;
+        let currentJobId = null, currentJobData = null;
+        let jobUnsubscribe = null, usersUnsubscribe = null;
+        let allUsers = [];
+
+        const loginScreen = document.getElementById('login-screen');
+        const mainApp = document.getElementById('main-app');
         
-        // Modals
-        const addMemberModal = document.getElementById('add-member-modal');
-        const changePasswordModal = document.getElementById('change-password-modal');
-
-        // --- Authentication ---
-        auth.onAuthStateChanged(async (user) => {
-            if (user && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists) {
-                    currentUser = { uid: user.uid, ...userDoc.data() };
-                    
-                    if (currentUser.mustChangePassword) {
-                        changePasswordModal.style.display = 'flex';
-                    } else {
-                        setupUI(currentUser);
-                    }
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    currentUserData = userDocSnap.data();
+                    currentUserRole = currentUserData.role;
+                    if (currentUserData.forcePasswordChange) showLoginScreen(null, true);
+                    else await initializeAppUI();
                 } else {
-                    console.log("User document not found in Firestore.");
-                    auth.signOut();
+                    const newUserDoc = { email: user.email, name: user.email.split('@')[0], nickname: '', role: 'member', forcePasswordChange: false, profilePic: '' };
+                    try {
+                        await setDoc(userDocRef, newUserDoc);
+                        currentUserData = newUserDoc;
+                        currentUserRole = 'member';
+                        await initializeAppUI();
+                    } catch (error) { showLoginScreen("เกิดข้อผิดพลาดในการตั้งค่าบัญชีผู้ใช้"); }
                 }
             } else {
-                currentUser = null;
-                setupUI(null);
+                currentUser = null; currentUserData = null; currentUserRole = null;
+                showLoginScreen();
             }
         });
 
-        // MODIFIED: Login with Username logic
-        loginBtn.addEventListener('click', () => {
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value;
-            loginError.textContent = '\u00A0';
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const identifier = e.target.loginIdentifier.value;
+            const password = e.target.password.value;
+            const loginError = document.getElementById('login-error');
+            loginError.classList.add('hidden');
+            let emailToLogin = identifier;
 
-            if (!username || !password) {
-                loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
-                return;
-            }
-            if (firebaseConfig.apiKey === "YOUR_API_KEY") {
-                loginError.textContent = 'กรุณาตั้งค่า Firebase Config ในโค้ดก่อน';
-                return;
-            }
-
-            // 1. Find user document by username
-            db.collection('users').where('username', '==', username).get()
-                .then(snapshot => {
-                    if (snapshot.empty) {
-                        loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-                        return;
-                    }
-                    
-                    // 2. Get the email from the found document
-                    const userDoc = snapshot.docs[0];
-                    const email = userDoc.data().email;
-                    
-                    // 3. Sign in with the retrieved email and user-provided password
-                    auth.signInWithEmailAndPassword(email, password)
-                        .catch(error => {
-                            console.error("Login failed:", error);
-                            loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-                        });
-                })
-                .catch(error => {
-                    console.error("Error fetching user by username:", error);
-                    loginError.textContent = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
-                });
-        });
-
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut();
-        });
-        
-        // --- Password Change Logic ---
-        document.getElementById('confirm-password-change-btn').addEventListener('click', () => {
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-new-password').value;
-            const passwordError = document.getElementById('password-error');
-            
-            if (newPassword.length < 6) {
-                passwordError.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                passwordError.textContent = 'รหัสผ่านไม่ตรงกัน';
-                return;
-            }
-
-            auth.currentUser.updatePassword(newPassword)
-                .then(() => {
-                    return db.collection('users').doc(currentUser.uid).update({ mustChangePassword: false });
-                })
-                .then(() => {
-                    changePasswordModal.style.display = 'none';
-                    alert('เปลี่ยนรหัสผ่านสำเร็จแล้ว');
-                    location.reload(); // Reload to apply changes
-                })
-                .catch(error => {
-                    console.error("Password change failed:", error);
-                    passwordError.textContent = 'เกิดข้อผิดพลาด: ' + error.message;
-                });
-        });
-
-        // --- UI Setup ---
-        function setupUI(user) {
-            if (user) {
-                loginContainer.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                document.getElementById('user-display-name').textContent = user.displayName;
-                
-                // Role-based access control
-                document.querySelectorAll('.admin-only').forEach(el => {
-                    el.style.display = user.role === 'admin' ? 'inline-block' : 'none';
-                });
-                
-                loadAndRenderJob(currentJobId);
-
-            } else {
-                loginContainer.classList.remove('hidden');
-                appContainer.classList.add('hidden');
-                if (jobUnsubscribe) jobUnsubscribe(); // Detach Firestore listener
-            }
-        }
-
-        // --- Data Loading & Rendering ---
-        function loadAndRenderJob(jobId) {
-            if (jobUnsubscribe) jobUnsubscribe(); // Detach previous listener
-
-            jobUnsubscribe = db.collection('jobs').doc(jobId).onSnapshot(async (doc) => {
-                if (!doc.exists) {
-                    console.error("Job not found!");
-                    // You could show a message on the UI here
+            // EDIT 2: Login with email or nickname
+            if (!identifier.includes('@')) {
+                // It's a nickname, find the corresponding email
+                // NOTE: For better performance in a large database, create an index on the 'nickname' field in Firestore.
+                const q = query(collection(db, "users"), where("nickname", "==", identifier));
+                const querySnapshot = await getDocs(q);
+                if (querySnapshot.empty) {
+                    loginError.textContent = "ชื่อเล่นนี้ไม่มีอยู่ในระบบ";
+                    loginError.classList.remove('hidden');
                     return;
                 }
-                const jobData = doc.data();
-                
-                // Render Job Header
-                document.getElementById('job-name').innerHTML = `<i class="fa-solid fa-video"></i> ${jobData.name}`;
-                document.getElementById('job-dates').textContent = `${jobData.startDate} - ${jobData.endDate}`;
-                document.getElementById('job-revenue').textContent = jobData.revenue.toLocaleString();
+                // Assuming nicknames are unique
+                emailToLogin = querySnapshot.docs[0].data().email;
+            }
 
-                // Render Table
-                await renderTable(jobData);
-                
-                // Render Expenses
-                renderExpenses(jobData.expenses || []);
+            signInWithEmailAndPassword(auth, emailToLogin, password)
+                .catch(error => {
+                    loginError.textContent = "ข้อมูลเข้าระบบไม่ถูกต้อง";
+                    loginError.classList.remove('hidden');
+                });
+        });
+        
+        document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('new-password').value;
+            const passwordError = document.getElementById('password-error');
+            if (newPassword.length < 6) {
+                passwordError.textContent = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+                passwordError.classList.remove('hidden');
+                return;
+            }
+            try {
+                await updatePassword(currentUser, newPassword);
+                await updateDoc(doc(db, "users", currentUser.uid), { forcePasswordChange: false });
+                document.getElementById('change-password-modal').classList.add('hidden');
+                await initializeAppUI();
+            } catch (error) {
+                passwordError.textContent = "ไม่สามารถเปลี่ยนรหัสผ่านได้: " + error.message;
+                passwordError.classList.remove('hidden');
+            }
+        });
 
-                // Calculate financials
-                calculateFinancials(jobData.revenue);
-                
-                // Add event listeners after rendering
-                addDynamicEventListeners();
+        document.getElementById('logout-button').addEventListener('click', () => {
+            if (jobUnsubscribe) jobUnsubscribe();
+            if (usersUnsubscribe) usersUnsubscribe();
+            signOut(auth);
+        });
 
-            }, error => {
-                console.error("Error fetching job data:", error);
+        function showLoginScreen(errorMsg = null, showChangePassword = false) {
+            loginScreen.classList.toggle('hidden', showChangePassword);
+            mainApp.classList.add('hidden');
+            document.getElementById('change-password-modal').classList.toggle('hidden', !showChangePassword);
+            if(errorMsg) {
+                const loginError = document.getElementById('login-error');
+                loginError.textContent = errorMsg;
+                loginError.classList.remove('hidden');
+            }
+        }
+
+        async function initializeAppUI() {
+            loginScreen.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            document.getElementById('user-name-display').textContent = currentUserData.nickname || currentUserData.name;
+            document.getElementById('user-role').textContent = currentUserRole;
+            document.getElementById('user-id-display').textContent = currentUser.uid;
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = currentUserRole === 'admin' ? '' : 'none';
+            });
+            listenForJobs();
+            listenForUsers();
+        }
+
+        function listenForJobs() {
+            onSnapshot(collection(db, "jobs"), (snapshot) => {
+                const jobList = document.getElementById('job-list');
+                jobList.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const job = doc.data();
+                    jobList.innerHTML += `<div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white" data-id="${doc.id}"><div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2"><i class="ph-fill ph-video-camera text-3xl text-gray-500"></i></div><h5 class="font-semibold truncate">${job.name}</h5><p class="text-xs text-gray-500">${formatDateRange(job.startDate, job.endDate)}</p></div>`;
+                });
+                document.querySelectorAll('.job-card').forEach(card => card.addEventListener('click', () => selectJob(card.dataset.id)));
             });
         }
         
-        async function renderTable(jobData) {
-            const headerRow = document.getElementById('table-header-row');
-            const tableBody = document.getElementById('queue-body');
-            
-            headerRow.innerHTML = '<th>ชื่อ</th>';
-            jobData.workDays.forEach(day => {
-                headerRow.innerHTML += `<th>${day}</th>`;
+        function listenForUsers() {
+            if (usersUnsubscribe) usersUnsubscribe();
+            usersUnsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+                allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (currentUserRole === 'admin') renderUserManagementSection();
             });
-            headerRow.innerHTML += '<th>จัดการ</th>';
-
-            tableBody.innerHTML = '';
-            // Using Promise.all to fetch all user data in parallel
-            const teamMemberPromises = jobData.team.map(memberId => db.collection('users').doc(memberId).get());
-            const teamMemberDocs = await Promise.all(teamMemberPromises);
-
-            teamMemberDocs.forEach((userDoc, index) => {
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    const row = document.createElement('tr');
-                    row.dataset.userId = userDoc.id;
-
-                    // Name column
-                    let nameHtml = `<div class="profile">
-                        <img src="${userData.profileImageUrl || `https://placehold.co/40x40/4A00E0/FFFFFF?text=${userData.displayName.charAt(0)}`}" alt="profile">
-                        <span class="profile-name">${userData.displayName}</span>
-                    </div>`;
-                    if (index === 0) { // First member is the leader
-                         row.classList.add('team-leader');
-                    }
-                    
-                    let rowHtml = `<td>${nameHtml}</td>`;
-                    
-                    // Workday columns
-                    jobData.workDays.forEach(day => {
-                        const dailyData = jobData.dailyPay[userDoc.id]?.[day] || { present: false, pay: 0 };
-                        rowHtml += `<td>
-                            <input type="checkbox" class="presence-check" data-day="${day}" ${dailyData.present ? 'checked' : ''}>
-                            <input type="number" class="daily-pay-input admin-only" value="${dailyData.pay}" data-day="${day}">
-                        </td>`;
-                    });
-
-                    // Action column
-                    rowHtml += `<td><button class="delete-member-btn admin-only" data-user-id="${userDoc.id}"><i class="fas fa-trash"></i></button></td>`;
-
-                    row.innerHTML = rowHtml;
-                    tableBody.appendChild(row);
+        }
+        
+        function selectJob(jobId) {
+            currentJobId = jobId;
+            document.getElementById('job-details-section').classList.remove('hidden');
+            document.querySelectorAll('.job-card').forEach(card => {
+                card.classList.toggle('gradient-bg', card.dataset.id === jobId);
+                card.classList.toggle('text-white', card.dataset.id === jobId);
+                card.classList.toggle('bg-white', card.dataset.id !== jobId);
+            });
+            if (jobUnsubscribe) jobUnsubscribe();
+            jobUnsubscribe = onSnapshot(doc(db, "jobs", jobId), (docSnap) => {
+                if (docSnap.exists()) {
+                    currentJobData = docSnap.data();
+                    renderJobDetails(currentJobData);
+                } else {
+                    document.getElementById('job-details-section').classList.add('hidden');
                 }
             });
         }
-        
-        function renderExpenses(expenses) {
+
+        function renderJobDetails(job) {
+            document.getElementById('job-title').textContent = job.name;
+            document.getElementById('job-dates').textContent = `${formatDateRange(job.startDate, job.endDate)} (${job.workdays.length} วัน)`;
+            document.getElementById('job-location-text').textContent = job.location;
+            document.getElementById('job-income').textContent = `${job.income.toLocaleString()} บาท`;
+            let headHTML = '<tr><th class="py-2 px-3 border-b text-left">ชื่อ</th>';
+            job.workdays.forEach(day => {
+                headHTML += `<th class="py-2 px-3 border-b text-center relative date-header">${formatShortDate(day)}<div class="absolute top-0 right-0 flex date-action-btn opacity-0 transition-opacity admin-only"><button class="edit-day-btn text-blue-500 hover:text-blue-700" data-day="${day}"><i class="ph-bold ph-pencil-simple text-xs"></i></button><button class="delete-day-btn text-red-500 hover:text-red-700" data-day="${day}"><i class="ph-bold ph-x-circle text-xs"></i></button></div></th>`;
+            });
+            headHTML += '<th class="py-2 px-3 border-b text-center admin-only">จัดการ</th></tr>';
+            document.getElementById('schedule-head').innerHTML = headHTML;
+            const scheduleBody = document.getElementById('schedule-body');
+            scheduleBody.innerHTML = '';
+            job.team.forEach((member, index) => {
+                const memberData = allUsers.find(u => u.id === member.userId);
+                if (!memberData) return;
+                const displayName = memberData.nickname || memberData.name;
+                let rowHTML = `<tr class="hover:bg-gray-50"><td class="py-2 px-3 border-b"><div class="flex items-center"><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3"><div><p class="font-medium">${displayName} ${index === 0 ? '<i class="ph-fill ph-crown text-yellow-500"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
+                job.workdays.forEach(day => {
+                    const isWorking = member.workdays.includes(day);
+                    const dailyRate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
+                    rowHTML += `<td class="py-2 px-3 border-b text-center"><div class="flex flex-col items-center justify-center space-y-1"><button class="custom-checkbox schedule-checkbox ${isWorking ? 'checked' : ''}" data-userid="${member.userId}" data-day="${day}"><i class="ph-bold ph-check text-lg"></i></button><span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span></div></td>`;
+                });
+                rowHTML += `<td class="py-2 px-3 border-b text-center admin-only"><button class="text-blue-500 hover:text-blue-700 mr-2 edit-member-btn" data-userid="${member.userId}"><i class="ph ph-pencil-simple"></i></button><button class="text-red-500 hover:text-red-700 remove-member-btn" data-userid="${member.userId}"><i class="ph ph-trash"></i></button></td></tr>`;
+                scheduleBody.innerHTML += rowHTML;
+            });
             const expenseList = document.getElementById('expense-list');
             expenseList.innerHTML = '';
-            let totalOtherExpense = 0;
-            expenses.forEach((exp, index) => {
-                expenseList.innerHTML += `
-                    <li>
-                        <span>${exp.desc}</span>
-                        <span>
-                            ${exp.amount.toLocaleString()}
-                            <button class="delete-expense-btn admin-only" data-index="${index}"><i class="fas fa-times-circle"></i></button>
-                        </span>
-                    </li>`;
-                totalOtherExpense += exp.amount;
+            job.expenses.forEach((expense, index) => {
+                expenseList.innerHTML += `<div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100"><div><p>${expense.name}</p></div><div class="flex items-center space-x-3"><p class="font-semibold">${expense.amount.toLocaleString()}</p><button class="text-red-500 hover:text-red-700 remove-expense-btn admin-only" data-index="${index}"><i class="ph ph-x-circle"></i></button></div></div>`;
             });
-            document.getElementById('total-other-expense').textContent = totalOtherExpense.toLocaleString();
+            updateCalculations(job);
+            document.querySelectorAll('.admin-only').forEach(el => { el.style.display = currentUserRole === 'admin' ? '' : 'none'; });
+            addDynamicEventListeners(job);
+        }
+        
+        function updateCalculations(job) {
+            const teamTotalCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
+            const otherExpensesTotal = job.expenses.reduce((total, expense) => total + expense.amount, 0);
+            document.getElementById('summary-team-cost').textContent = `${teamTotalCost.toLocaleString()} บาท`;
+            document.getElementById('summary-other-expenses').textContent = `${otherExpensesTotal.toLocaleString()} บาท`;
+            const whtPercent = parseFloat(document.getElementById('wht-percent').value) || 0;
+            const subtotal = teamTotalCost + otherExpensesTotal;
+            const whtAmount = document.getElementById('wht-toggle').checked ? (job.income * whtPercent / 100) : 0;
+            const vatAmount = document.getElementById('vat-toggle').checked ? (subtotal * 0.07) : 0;
+            const totalCost = subtotal + vatAmount;
+            const profitLoss = job.income - totalCost - whtAmount;
+            document.getElementById('summary-wht').textContent = `${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
+            document.getElementById('summary-vat').textContent = `${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
+            document.getElementById('summary-total-cost').textContent = `${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
+            const profitLossEl = document.getElementById('summary-profit-loss');
+            profitLossEl.textContent = `${profitLoss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
+            profitLossEl.className = `text-5xl font-bold mt-2 ${profitLoss >= 0 ? 'profit-text' : 'loss-text'}`;
+            document.getElementById('profit-loss-label').textContent = profitLoss >= 0 ? 'กำไร' : 'ขาดทุน';
         }
 
-        // --- Financial Calculation ---
-        function calculateFinancials(revenue = 0) {
-            let totalTeamCost = 0;
-            document.querySelectorAll('#queue-body tr').forEach(row => {
-                const userId = row.dataset.userId;
-                row.querySelectorAll('.presence-check:checked').forEach(checkbox => {
-                    const day = checkbox.dataset.day;
-                    const payInput = row.querySelector(`.daily-pay-input[data-day="${day}"]`);
-                    if (payInput) {
-                        totalTeamCost += Number(payInput.value) || 0;
-                    }
+        function addDynamicEventListeners(job) {
+            ['wht-toggle', 'wht-percent', 'vat-toggle'].forEach(id => { document.getElementById(id).oninput = () => updateCalculations(job); });
+            document.querySelectorAll('.schedule-checkbox').forEach(box => {
+                box.onclick = async (e) => {
+                    const button = e.currentTarget;
+                    button.classList.toggle('checked');
+                    const isChecked = button.classList.contains('checked');
+                    const { userid, day } = button.dataset;
+                    const teamMember = currentJobData.team.find(m => m.userId === userid);
+                    if (isChecked) { if (!teamMember.workdays.includes(day)) teamMember.workdays.push(day); } 
+                    else { teamMember.workdays = teamMember.workdays.filter(d => d !== day); }
+                    await updateDoc(doc(db, "jobs", currentJobId), { team: currentJobData.team });
+                };
+            });
+            document.querySelectorAll('.edit-member-btn').forEach(btn => btn.onclick = (e) => showEditMemberModal(job.team.find(m => m.userId === e.currentTarget.dataset.userid)));
+            document.querySelectorAll('.remove-member-btn').forEach(btn => btn.onclick = (e) => showConfirmModal('ยืนยันการลบ', 'คุณต้องการลบสมาชิกคนนี้ออกจาก Job หรือไม่?', async () => await updateDoc(doc(db, "jobs", currentJobId), { team: arrayRemove(job.team.find(m => m.userId === e.currentTarget.dataset.userid)) })));
+            document.querySelectorAll('.remove-expense-btn').forEach(btn => btn.onclick = (e) => showConfirmModal('ยืนยันการลบ', 'คุณต้องการลบค่าใช้จ่ายรายการนี้หรือไม่?', async () => {
+                currentJobData.expenses.splice(parseInt(e.currentTarget.dataset.index), 1);
+                await updateDoc(doc(db, "jobs", currentJobId), { expenses: currentJobData.expenses });
+            }));
+            document.querySelectorAll('.delete-day-btn').forEach(btn => btn.onclick = (e) => {
+                const dayToDelete = e.currentTarget.dataset.day;
+                showConfirmModal('ยืนยันการลบวัน', `คุณต้องการลบวันที่ ${formatShortDate(dayToDelete)} หรือไม่?`, async () => {
+                    currentJobData.workdays = currentJobData.workdays.filter(d => d !== dayToDelete);
+                    currentJobData.team.forEach(member => {
+                        member.workdays = member.workdays.filter(d => d !== dayToDelete);
+                        if (member.dailyOverrides) delete member.dailyOverrides[dayToDelete];
+                    });
+                    await updateDoc(doc(db, "jobs", currentJobId), { workdays: currentJobData.workdays, team: currentJobData.team });
                 });
             });
-            document.getElementById('total-team-cost').textContent = totalTeamCost.toLocaleString();
+            document.querySelectorAll('.edit-daily-rate-btn').forEach(btn => btn.onclick = (e) => showEditDailyRateModal(e.currentTarget.dataset.userid, e.currentTarget.dataset.day));
+            document.querySelectorAll('.edit-day-btn').forEach(btn => btn.onclick = (e) => showEditWorkdayModal(e.currentTarget.dataset.day));
+        }
+        
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('click', () => {
+                switch(id) {
+                    case 'add-job-button': showJobModal(); break;
+                    case 'add-member-button': showAddMemberModal(); break;
+                    case 'add-day-button': showAddDayModal(); break;
+                    case 'add-expense-button': showExpenseModal(); break;
+                    case 'edit-budget-btn': showEditBudgetModal(currentJobData.income); break;
+                    case 'edit-job-details-btn': showEditJobDetailsModal(currentJobData); break;
+                    case 'manage-profile-button': showManageProfileModal(); break;
+                }
+            });
+        });
 
-            const totalOtherExpense = Array.from(document.querySelectorAll('#expense-list li'))
-                .reduce((sum, li) => {
-                    const amountText = li.children[1].textContent.trim().replace(/,/g, '');
-                    return sum + (parseFloat(amountText) || 0);
-                }, 0);
-            
-            const subTotal = totalTeamCost + totalOtherExpense;
-            document.getElementById('sub-total').textContent = subTotal.toLocaleString();
-
-            const whtPercent = document.getElementById('wht-percent').value / 100;
-            const whtEnabled = document.getElementById('wht-checkbox').checked;
-            const whtAmount = whtEnabled ? subTotal * whtPercent : 0;
-            document.getElementById('wht-amount').textContent = `-${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-
-            const vatEnabled = document.getElementById('vat-checkbox').checked;
-            const vatAmount = vatEnabled ? (subTotal - whtAmount) * 0.07 : 0;
-            document.getElementById('vat-amount').textContent = `+${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            
-            const grandTotal = subTotal - whtAmount + vatAmount;
-            document.getElementById('grand-total').textContent = grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-            const profit = revenue - grandTotal;
-            const profitBox = document.getElementById('profit-loss-container');
-            if (profit >= 0) {
-                profitBox.innerHTML = `กำไร: ${profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                profitBox.className = 'profit-loss-box profit';
-            } else {
-                profitBox.innerHTML = `ขาดทุน: ${Math.abs(profit).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                profitBox.className = 'profit-loss-box loss';
+        function calculateTeamCostForMember(member, workdays) {
+            return member.workdays.reduce((total, day) => {
+                if (workdays.includes(day)) {
+                    const rate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
+                    return total + rate;
+                }
+                return total;
+            }, 0);
+        }
+        function formatDateRange(start, end) {
+            if (!start || !end) return 'N/A';
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            return `${new Date(start).toLocaleDateString('th-TH', options)} - ${new Date(end).toLocaleDateString('th-TH', options)}`;
+        }
+        function formatShortDate(dateString) { return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); }
+        
+        function showModal(title, contentHTML, onSave, showSaveButton = true) {
+            const modalId = `modal-${Date.now()}`;
+            document.getElementById('modals-container').innerHTML = `<div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop"><div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 m-4 modal-content"><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold">${title}</h3><button class="text-gray-400 hover:text-gray-600 text-2xl close-modal-btn">&times;</button></div><form class="modal-form space-y-4">${contentHTML}<div class="flex justify-end space-x-3 pt-4"><button type="button" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 close-modal-btn">ยกเลิก</button>${showSaveButton ? '<button type="submit" class="px-4 py-2 text-white gradient-bg rounded-lg hover:opacity-90">บันทึก</button>' : ''}</div></form></div></div>`;
+            const modal = document.getElementById(modalId);
+            if (showSaveButton) {
+                modal.querySelector('.modal-form').onsubmit = (e) => { e.preventDefault(); onSave(new FormData(e.target), modal.querySelector('button[type="submit"]')); modal.remove(); };
             }
-            
-            // Re-apply admin visibility after calculation updates
-            if (currentUser) {
-                 document.querySelectorAll('.admin-only').forEach(el => {
-                    el.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
-                });
+            modal.querySelectorAll('.close-modal-btn').forEach(btn => btn.onclick = () => modal.remove());
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            const modalId = `confirm-modal-${Date.now()}`;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = `<div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop"><div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 m-4 modal-content text-center"><h3 class="text-xl font-semibold">${title}</h3><p class="text-gray-600 mt-2">${message}</p><div class="flex justify-center space-x-4 pt-4 mt-4"><button type="button" class="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 close-confirm-btn">ยกเลิก</button><button type="button" class="px-6 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 confirm-btn">ยืนยัน</button></div></div></div>`;
+            const modal = tempDiv.firstElementChild;
+            document.getElementById('modals-container').appendChild(modal);
+            const closeModal = () => modal.remove();
+            modal.querySelector('.confirm-btn').onclick = () => { onConfirm(); closeModal(); };
+            modal.querySelector('.close-confirm-btn').onclick = closeModal;
+        }
+
+        async function uploadToCloudinary(file) {
+            if (!file) return null;
+            if (CLOUDINARY_CLOUD_NAME === "YOUR_CLOUD_NAME" || CLOUDINARY_UPLOAD_PRESET === "YOUR_UNSIGNED_UPLOAD_PRESET") {
+                alert("กรุณาตั้งค่า Cloudinary Cloud Name และ Upload Preset ในโค้ดก่อน");
+                return null;
+            }
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            try {
+                const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.secure_url) return data.secure_url;
+                else throw new Error('Cloudinary upload failed');
+            } catch (error) {
+                console.error('Cloudinary upload error:', error);
+                alert("การอัปโหลดรูปภาพล้มเหลว");
+                return null;
             }
         }
 
-        // --- Event Listeners ---
-        function addDynamicEventListeners() {
-            // Financial calculation triggers
-            document.querySelectorAll('.presence-check, #wht-checkbox, #vat-checkbox, .daily-pay-input, #wht-percent').forEach(el => {
-                el.addEventListener('change', () => calculateFinancials(parseFloat(document.getElementById('job-revenue').textContent.replace(/,/g, ''))));
-            });
-
-            // Admin: Add new expense
-            document.getElementById('add-expense-btn').addEventListener('click', () => {
-                const desc = document.getElementById('expense-desc').value;
-                const amount = parseFloat(document.getElementById('expense-amount').value);
-                if (desc && amount > 0) {
-                    const newExpense = { desc, amount };
-                    db.collection('jobs').doc(currentJobId).update({
-                        expenses: firebase.firestore.FieldValue.arrayUnion(newExpense)
-                    });
-                    document.getElementById('expense-desc').value = '';
-                    document.getElementById('expense-amount').value = '';
-                }
-            });
-
-            // Admin: Delete expense
-            document.querySelectorAll('.delete-expense-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const indexToRemove = parseInt(e.currentTarget.dataset.index);
-                    const jobDoc = await db.collection('jobs').doc(currentJobId).get();
-                    const expenses = jobDoc.data().expenses;
-                    expenses.splice(indexToRemove, 1);
-                    db.collection('jobs').doc(currentJobId).update({ expenses });
-                });
-            });
-            
-            // Admin: Add new day
-            document.getElementById('add-day-btn').addEventListener('click', () => {
-                const newDay = prompt("กรุณาใส่วันที่ใหม่ (เช่น 2 ส.ค. 2568):");
-                if (newDay) {
-                    db.collection('jobs').doc(currentJobId).update({
-                        workDays: firebase.firestore.FieldValue.arrayUnion(newDay)
-                    });
-                }
-            });
-            
-            // Admin: Delete member
-            document.querySelectorAll('.delete-member-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userIdToRemove = e.currentTarget.dataset.userId;
-                    if (confirm('คุณต้องการลบสมาชิกคนนี้ออกจากคิวใช่หรือไม่?')) {
-                         db.collection('jobs').doc(currentJobId).update({
-                            team: firebase.firestore.FieldValue.arrayRemove(userIdToRemove)
-                        });
-                    }
-                });
-            });
-            
-            // Admin: Open Add Member Modal
-            document.getElementById('add-member-btn').addEventListener('click', async () => {
-                const userSelectionList = document.getElementById('user-selection-list');
-                userSelectionList.innerHTML = 'กำลังโหลด...';
-                
-                const jobDoc = await db.collection('jobs').doc(currentJobId).get();
-                const currentTeamIds = jobDoc.data().team;
-
-                const usersSnapshot = await db.collection('users').get();
-                userSelectionList.innerHTML = '';
-                usersSnapshot.forEach(doc => {
-                    // Only show users who are not already in the team
-                    if (!currentTeamIds.includes(doc.id)) {
-                        const userData = doc.data();
-                        userSelectionList.innerHTML += `
-                            <label>
-                                <input type="checkbox" name="user-to-add" value="${doc.id}">
-                                ${userData.displayName} (${userData.username})
-                            </label>
-                        `;
-                    }
-                });
-                addMemberModal.style.display = 'flex';
-            });
-            
-            // Admin: Confirm Add Member
-            document.getElementById('confirm-add-member-btn').addEventListener('click', () => {
-                const selectedUsers = [];
-                document.querySelectorAll('input[name="user-to-add"]:checked').forEach(checkbox => {
-                    selectedUsers.push(checkbox.value);
-                });
-                
-                if (selectedUsers.length > 0) {
-                    db.collection('jobs').doc(currentJobId).update({
-                        team: firebase.firestore.FieldValue.arrayUnion(...selectedUsers)
-                    });
-                }
-                addMemberModal.style.display = 'none';
-            });
-            
-            // Close Modal
-            document.getElementById('close-member-modal').addEventListener('click', () => {
-                addMemberModal.style.display = 'none';
-            });
-            
-            // Update daily pay data in Firestore (for admins)
-            document.querySelectorAll('.daily-pay-input, .presence-check').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    if (currentUser.role !== 'admin') return;
-                    
-                    const row = e.currentTarget.closest('tr');
-                    const userId = row.dataset.userId;
-                    const day = e.currentTarget.dataset.day;
-                    
-                    const isPresent = row.querySelector(`.presence-check[data-day="${day}"]`).checked;
-                    const pay = Number(row.querySelector(`.daily-pay-input[data-day="${day}"]`).value);
-
-                    const updatePath = `dailyPay.${userId}.${day}`;
-                    db.collection('jobs').doc(currentJobId).update({
-                        [updatePath]: { present: isPresent, pay: pay }
-                    }).catch(error => console.error("Error updating daily pay:", error));
-                });
+        function showJobModal() {
+            const content = `<input type="text" name="name" placeholder="ชื่อ Job" required class="w-full p-2 border rounded"><input type="text" name="location" placeholder="สถานที่" required class="w-full p-2 border rounded"><input type="number" name="income" placeholder="งบประมาณ" required class="w-full p-2 border rounded"><label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded"><label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded">`;
+            showModal('สร้าง Job ใหม่', content, async (formData) => {
+                const startDate = formData.get('startDate'), endDate = formData.get('endDate');
+                let workdays = [];
+                for (let d = new Date(startDate); d <= new Date(endDate); d.setDate(d.getDate() + 1)) { workdays.push(new Date(d).toISOString().split('T')[0]); }
+                await addDoc(collection(db, "jobs"), { name: formData.get('name'), location: formData.get('location'), income: Number(formData.get('income')), startDate, endDate, workdays, team: [], expenses: [] });
             });
         }
         
-        // Close modal if clicked outside
-        window.onclick = function(event) {
-            if (event.target == addMemberModal) {
-                addMemberModal.style.display = "none";
-            }
+        function showAddMemberModal() {
+            const userOptions = allUsers.map(u => `<option value="${u.id}">${u.nickname || u.name} (${u.email})</option>`).join('');
+            const content = `<select name="userId" required class="w-full p-2 border rounded">${userOptions}</select><input type="text" name="position" placeholder="ตำแหน่ง" required class="w-full p-2 border rounded"><input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded">`;
+            showModal('เพิ่มสมาชิกในทีม', content, async (formData) => await updateDoc(doc(db, "jobs", currentJobId), { team: arrayUnion({ userId: formData.get('userId'), position: formData.get('position'), dailyRate: Number(formData.get('dailyRate')), workdays: [], dailyOverrides: {} })}));
         }
         
-        
-        // =================================================================================
-        // ONE-TIME SETUP FUNCTIONS (Run from browser console)
-        // ฟังก์ชันสำหรับตั้งค่าครั้งเดียว (รันผ่าน Console ของเบราว์เซอร์)
-        // =================================================================================
-
-        // 1. To create the first admin user
-        function createAdminUser() {
-            const username = "admin";
-            const email = "admin@ldb.com"; // This email is used for Firebase Auth behind the scenes
-            const password = "defaultpassword"; // Change this!
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(cred => {
-                    return db.collection('users').doc(cred.user.uid).set({
-                        username: username,
-                        email: email,
-                        displayName: 'แอดมินใหญ่',
-                        role: 'admin',
-                        mustChangePassword: true,
-                        profileImageUrl: ''
-                    });
-                })
-                .then(() => console.log('Admin user created successfully! Username: "admin"'))
-                .catch(err => console.error('Error creating admin user:', err));
-        }
-
-        // 2. To add sample data to Firestore
-        function setupSampleData() {
-            // Sample Users
-            const users = [
-                { id: 'user01', data: { username: 'god', displayName: 'ก๊อต', email: 'god@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/E8A2A2/FFFFFF?text=G' } },
-                { id: 'user02', data: { username: 'bix', displayName: 'บิ๊กซ์', email: 'bix@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/A2D0E8/FFFFFF?text=B' } },
-                { id: 'user03', data: { username: 'tar', displayName: 'ต้า', email: 'tar@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/A2E8B9/FFFFFF?text=T' } },
-                { id: 'user04', data: { username: 'frame', displayName: 'เฟรม', email: 'frame@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/E8D0A2/FFFFFF?text=F' } }
-            ];
-            
-            const batch = db.batch();
-            users.forEach(user => {
-                const userRef = db.collection('users').doc(user.id);
-                batch.set(userRef, user.data);
+        function showEditMemberModal(member) {
+            const content = `<input type="text" name="position" required class="w-full p-2 border rounded" value="${member.position}"><input type="number" name="dailyRate" required class="w-full p-2 border rounded" value="${member.dailyRate}">`;
+            showModal('แก้ไขข้อมูลสมาชิก', content, async (formData) => {
+                const teamMember = currentJobData.team.find(m => m.userId === member.userId);
+                if (teamMember) { teamMember.position = formData.get('position'); teamMember.dailyRate = Number(formData.get('dailyRate')); }
+                await updateDoc(doc(db, "jobs", currentJobId), { team: currentJobData.team });
             });
-            
-            // Sample Job
-            const jobRef = db.collection('jobs').doc('job01');
-            batch.set(jobRef, {
-                name: 'OB Laos',
-                startDate: '29 ก.ค. 2568',
-                endDate: '1 ส.ค. 2568',
-                revenue: 60000,
-                team: ['user01', 'user02', 'user03', 'user04'],
-                workDays: ['29 ก.ค. 2568', '30 ก.ค. 2568', '1 ส.ค. 2568'],
-                expenses: [
-                    { desc: 'ค่าอาหาร', amount: 2000 },
-                    { desc: 'ค่า Vmix', amount: 3500 }
-                ],
-                dailyPay: {
-                    'user01': {
-                        '29 ก.ค. 2568': { present: true, pay: 7000 },
-                        '30 ก.ค. 2568': { present: true, pay: 7000 },
-                        '1 ส.ค. 2568': { present: true, pay: 7000 }
-                    },
-                    'user02': {
-                        '29 ก.ค. 2568': { present: true, pay: 6000 },
-                        '30 ก.ค. 2568': { present: true, pay: 6000 },
-                        '1 ส.ค. 2568': { present: false, pay: 6000 }
-                    },
-                    'user03': {
-                        '29 ก.ค. 2568': { present: true, pay: 7000 },
-                        '30 ก.ค. 2568': { present: false, pay: 7000 },
-                        '1 ส.ค. 2568': { present: true, pay: 7000 }
-                    },
-                    'user04': {
-                        '29 ก.ค. 2568': { present: true, pay: 6500 },
-                        '30 ก.ค. 2568': { present: true, pay: 6500 },
-                        '1 ส.ค. 2568': { present: true, pay: 6500 }
+        }
+        
+        function showEditBudgetModal(currentBudget) {
+            showModal('แก้ไขงบประมาณ', `<input type="number" name="budget" required class="w-full p-2 border rounded" value="${currentBudget}">`, async (formData) => await updateDoc(doc(db, "jobs", currentJobId), { income: Number(formData.get('budget')) }));
+        }
+        
+        function showAddDayModal() {
+            showModal('เพิ่มวันทำงาน', `<label>เลือกวันที่ต้องการเพิ่ม</label><input type="date" name="newDay" required class="w-full p-2 border rounded">`, async (formData) => {
+                const newDay = formData.get('newDay');
+                currentJobData.workdays.push(newDay);
+                currentJobData.workdays.sort((a, b) => new Date(a) - new Date(b));
+                await updateDoc(doc(db, "jobs", currentJobId), { workdays: currentJobData.workdays });
+            });
+        }
+
+        function showExpenseModal() {
+            const content = `<input type="text" name="name" placeholder="ชื่อรายการ" required class="w-full p-2 border rounded"><input type="number" name="amount" placeholder="จำนวนเงิน" required class="w-full p-2 border rounded">`;
+            showModal('เพิ่มค่าใช้จ่าย', content, async (formData) => await updateDoc(doc(db, "jobs", currentJobId), { expenses: arrayUnion({ name: formData.get('name'), amount: Number(formData.get('amount')) })}));
+        }
+
+        function showEditDailyRateModal(userId, day) {
+            const member = currentJobData.team.find(m => m.userId === userId);
+            const currentRate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
+            const content = `<label>ค่าแรงสำหรับวันที่ ${formatShortDate(day)}</label><input type="number" name="rate" required class="w-full p-2 border rounded" value="${currentRate}">`;
+            showModal('แก้ไขค่าแรงรายวัน', content, async (formData) => {
+                const newRate = Number(formData.get('rate'));
+                if (!member.dailyOverrides) member.dailyOverrides = {};
+                member.dailyOverrides[day] = newRate;
+                await updateDoc(doc(db, "jobs", currentJobId), { team: currentJobData.team });
+            });
+        }
+
+        function showEditJobDetailsModal(job) {
+            const content = `<label>ชื่องาน</label><input type="text" name="name" required class="w-full p-2 border rounded" value="${job.name}"><label>สถานที่</label><input type="text" name="location" required class="w-full p-2 border rounded" value="${job.location}"><label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded" value="${job.startDate}"><label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded" value="${job.endDate}">`;
+            showModal('แก้ไขข้อมูล Job', content, async (formData) => await updateDoc(doc(db, "jobs", currentJobId), { name: formData.get('name'), location: formData.get('location'), startDate: formData.get('startDate'), endDate: formData.get('endDate') }));
+        }
+        
+        function showEditWorkdayModal(oldDay) {
+            const content = `<label>แก้ไขวันที่จาก ${formatShortDate(oldDay)} เป็น</label><input type="date" name="newDay" required class="w-full p-2 border rounded" value="${oldDay}">`;
+            showModal('แก้ไขวันทำงาน', content, async (formData) => {
+                const newDay = formData.get('newDay');
+                const dayIndex = currentJobData.workdays.indexOf(oldDay);
+                if (dayIndex > -1) currentJobData.workdays[dayIndex] = newDay;
+                currentJobData.workdays.sort((a, b) => new Date(a) - new Date(b));
+                currentJobData.team.forEach(member => {
+                    const memberDayIndex = member.workdays.indexOf(oldDay);
+                    if (memberDayIndex > -1) member.workdays[memberDayIndex] = newDay;
+                    if (member.dailyOverrides && member.dailyOverrides[oldDay] !== undefined) {
+                        member.dailyOverrides[newDay] = member.dailyOverrides[oldDay];
+                        delete member.dailyOverrides[oldDay];
                     }
-                }
+                });
+                await updateDoc(doc(db, "jobs", currentJobId), { workdays: currentJobData.workdays, team: currentJobData.team });
             });
+        }
 
-            batch.commit()
-                .then(() => console.log('Sample data and users created!'))
-                .catch(err => console.error('Error setting up data:', err));
+        function renderUserManagementSection() {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+            allUsers.forEach(user => {
+                const displayName = user.nickname || user.name;
+                const userCard = `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4"><div><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p></div></div><div class="flex items-center space-x-2"><button class="edit-user-btn p-2 text-blue-500 hover:bg-blue-100 rounded-full" data-userid="${user.id}"><i class="ph ph-pencil-simple"></i></button><button class="delete-user-btn p-2 text-red-500 hover:bg-red-100 rounded-full" data-userid="${user.id}"><i class="ph ph-trash"></i></button></div></div>`;
+                userList.innerHTML += userCard;
+            });
+            document.querySelectorAll('.edit-user-btn').forEach(btn => btn.onclick = (e) => showAdminEditUserModal(allUsers.find(u => u.id === e.currentTarget.dataset.userid)));
+            document.querySelectorAll('.delete-user-btn').forEach(btn => btn.onclick = (e) => {
+                const userIdToDelete = e.currentTarget.dataset.userid;
+                if (userIdToDelete === currentUser.uid) { alert("ไม่สามารถลบตัวเองได้"); return; }
+                showConfirmModal('ยืนยันการลบผู้ใช้', 'คุณต้องการลบข้อมูลผู้ใช้นี้ใช่หรือไม่? (การกระทำนี้จะลบข้อมูลจากฐานข้อมูล แต่จะไม่ลบบัญชีล็อกอิน)', async () => await deleteDoc(doc(db, "users", userIdToDelete)));
+            });
+        }
+
+        function showManageProfileModal() {
+            const content = `<label>ชื่อจริง</label><input type="text" name="name" required class="w-full p-2 border rounded" value="${currentUserData.name}"><label>ชื่อเล่น</label><input type="text" name="nickname" class="w-full p-2 border rounded" value="${currentUserData.nickname || ''}"><label>รูปโปรไฟล์</label><input type="file" name="profilePicFile" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/><hr><button type="button" id="change-password-from-profile-btn" class="w-full text-left text-blue-600 hover:underline">เปลี่ยนรหัสผ่าน</button>`;
+            showModal('จัดการโปรไฟล์', content, async (formData, submitButton) => {
+                submitButton.textContent = 'กำลังบันทึก...';
+                submitButton.disabled = true;
+                const profilePicFile = formData.get('profilePicFile');
+                let newProfilePicUrl = currentUserData.profilePic;
+                if (profilePicFile && profilePicFile.size > 0) {
+                    newProfilePicUrl = await uploadToCloudinary(profilePicFile);
+                }
+                const updatedData = {
+                    name: formData.get('name'),
+                    nickname: formData.get('nickname'),
+                    profilePic: newProfilePicUrl
+                };
+                await updateDoc(doc(db, "users", currentUser.uid), updatedData);
+                currentUserData = {...currentUserData, ...updatedData};
+                document.getElementById('user-name-display').textContent = currentUserData.nickname || currentUserData.name;
+            }, true);
+            document.getElementById('change-password-from-profile-btn').onclick = () => { document.querySelector('.close-modal-btn').click(); showChangePasswordForCurrentUserModal(); };
+        }
+        
+        function showChangePasswordForCurrentUserModal() {
+             const content = `<label>รหัสผ่านใหม่</label><input type="password" name="newPassword" required class="w-full p-2 border rounded">`;
+             showModal('เปลี่ยนรหัสผ่าน', content, async (formData) => {
+                const newPassword = formData.get('newPassword');
+                if (newPassword.length < 6) { alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"); return; }
+                try { await updatePassword(currentUser, newPassword); alert("เปลี่ยนรหัสผ่านสำเร็จแล้ว"); } 
+                catch(error) { alert("การเปลี่ยนรหัสผ่านล้มเหลว: " + error.message); }
+             });
+        }
+
+        function showAdminEditUserModal(user) {
+            // EDIT 1: Make email readonly and add tooltip
+            const content = `
+                <label>อีเมล (ไม่สามารถแก้ไขได้)</label>
+                <div class="flex items-center">
+                    <input type="email" readonly class="w-full p-2 border rounded bg-gray-100" value="${user.email}">
+                    <div class="tooltip ml-2">
+                        <i class="ph-fill ph-info-in-motion text-gray-500"></i>
+                        <span class="tooltiptext">การเปลี่ยนอีเมลล็อกอินต้องทำใน Firebase Console โดยตรงเพื่อความปลอดภัย</span>
+                    </div>
+                </div>
+                <label>ชื่อจริง</label><input type="text" name="name" required class="w-full p-2 border rounded" value="${user.name}">
+                <label>ชื่อเล่น</label><input type="text" name="nickname" class="w-full p-2 border rounded" value="${user.nickname || ''}">
+                <label>รูปโปรไฟล์</label><input type="file" name="profilePicFile" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                <label>บทบาท (Role)</label>
+                <select name="role" class="w-full p-2 border rounded">
+                    <option value="member" ${user.role === 'member' ? 'selected' : ''}>Member</option>
+                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>`;
+            showModal(`แก้ไขผู้ใช้: ${user.email}`, content, async (formData, submitButton) => {
+                submitButton.textContent = 'กำลังบันทึก...';
+                submitButton.disabled = true;
+                const profilePicFile = formData.get('profilePicFile');
+                let newProfilePicUrl = user.profilePic;
+                if (profilePicFile && profilePicFile.size > 0) {
+                    newProfilePicUrl = await uploadToCloudinary(profilePicFile);
+                }
+                await updateDoc(doc(db, "users", user.id), {
+                    name: formData.get('name'),
+                    nickname: formData.get('nickname'),
+                    profilePic: newProfilePicUrl,
+                    role: formData.get('role')
+                });
+            });
         }
 
     </script>
