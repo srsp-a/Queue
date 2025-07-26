@@ -483,9 +483,10 @@
     <!-- Login Screen -->
     <div id="login-container">
         <h2>LDB QUEUE LOGIN</h2>
+        <!-- MODIFIED: Login with Username -->
         <div class="input-group">
-            <i class="fas fa-envelope"></i>
-            <input type="email" id="login-email" placeholder="อีเมล">
+            <i class="fas fa-user"></i>
+            <input type="text" id="login-username" placeholder="ชื่อผู้ใช้">
         </div>
         <div class="input-group">
             <i class="fas fa-lock"></i>
@@ -631,7 +632,7 @@
         apiKey: "AIzaSyC6AnEE8aRM_9gw0CIi4Skl_zTPU_CG_CQ",
         authDomain: "ldb-queue-app.firebaseapp.com",
         projectId: "ldb-queue-app",
-        storageBucket: "ldb-queue-app.firebasestorage.app",
+        storageBucket: "ldb-queue-app.appspot.com",
         messagingSenderId: "626818286678",
         appId: "1:626818286678:web:db8080230e818dc1f7e7f7"
     };
@@ -680,20 +681,43 @@
             }
         });
 
+        // MODIFIED: Login with Username logic
         loginBtn.addEventListener('click', () => {
-            const email = document.getElementById('login-email').value;
+            const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
-            loginError.textContent = '\u00A0'; // Clear previous error
+            loginError.textContent = '\u00A0';
 
+            if (!username || !password) {
+                loginError.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+                return;
+            }
             if (firebaseConfig.apiKey === "YOUR_API_KEY") {
                 loginError.textContent = 'กรุณาตั้งค่า Firebase Config ในโค้ดก่อน';
                 return;
             }
 
-            auth.signInWithEmailAndPassword(email, password)
+            // 1. Find user document by username
+            db.collection('users').where('username', '==', username).get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+                        return;
+                    }
+                    
+                    // 2. Get the email from the found document
+                    const userDoc = snapshot.docs[0];
+                    const email = userDoc.data().email;
+                    
+                    // 3. Sign in with the retrieved email and user-provided password
+                    auth.signInWithEmailAndPassword(email, password)
+                        .catch(error => {
+                            console.error("Login failed:", error);
+                            loginError.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+                        });
+                })
                 .catch(error => {
-                    console.error("Login failed:", error);
-                    loginError.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+                    console.error("Error fetching user by username:", error);
+                    loginError.textContent = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
                 });
         });
 
@@ -979,7 +1003,7 @@
                         userSelectionList.innerHTML += `
                             <label>
                                 <input type="checkbox" name="user-to-add" value="${doc.id}">
-                                ${userData.displayName} (${userData.email})
+                                ${userData.displayName} (${userData.username})
                             </label>
                         `;
                     }
@@ -1042,11 +1066,13 @@
 
         // 1. To create the first admin user
         function createAdminUser() {
-            const email = "admin@ldb.com";
+            const username = "admin";
+            const email = "admin@ldb.com"; // This email is used for Firebase Auth behind the scenes
             const password = "defaultpassword"; // Change this!
             auth.createUserWithEmailAndPassword(email, password)
                 .then(cred => {
                     return db.collection('users').doc(cred.user.uid).set({
+                        username: username,
                         email: email,
                         displayName: 'แอดมินใหญ่',
                         role: 'admin',
@@ -1054,7 +1080,7 @@
                         profileImageUrl: ''
                     });
                 })
-                .then(() => console.log('Admin user created successfully!'))
+                .then(() => console.log('Admin user created successfully! Username: "admin"'))
                 .catch(err => console.error('Error creating admin user:', err));
         }
 
@@ -1062,10 +1088,10 @@
         function setupSampleData() {
             // Sample Users
             const users = [
-                { id: 'user01', data: { displayName: 'ก๊อต', email: 'god@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/E8A2A2/FFFFFF?text=G' } },
-                { id: 'user02', data: { displayName: 'บิ๊กซ์', email: 'bix@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/A2D0E8/FFFFFF?text=B' } },
-                { id: 'user03', data: { displayName: 'ต้า', email: 'tar@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/A2E8B9/FFFFFF?text=T' } },
-                { id: 'user04', data: { displayName: 'เฟรม', email: 'frame@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/E8D0A2/FFFFFF?text=F' } }
+                { id: 'user01', data: { username: 'god', displayName: 'ก๊อต', email: 'god@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/E8A2A2/FFFFFF?text=G' } },
+                { id: 'user02', data: { username: 'bix', displayName: 'บิ๊กซ์', email: 'bix@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/A2D0E8/FFFFFF?text=B' } },
+                { id: 'user03', data: { username: 'tar', displayName: 'ต้า', email: 'tar@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/A2E8B9/FFFFFF?text=T' } },
+                { id: 'user04', data: { username: 'frame', displayName: 'เฟรม', email: 'frame@example.com', role: 'member', profileImageUrl: 'https://placehold.co/100x100/E8D0A2/FFFFFF?text=F' } }
             ];
             
             const batch = db.batch();
