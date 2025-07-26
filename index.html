@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDB QUEUE - Redesigned</title>
+    <title>LDB QUEUE - Firebase</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -127,6 +127,8 @@
         #toast-notification.error {
             background-color: #e74c3c;
         }
+        .admin-only { display: none; }
+        .is-admin .admin-only { display: revert; }
     </style>
 </head>
 <body class="p-4 sm:p-6 md:p-10">
@@ -137,7 +139,7 @@
             <div id="login-view">
                 <h2 class="text-2xl font-bold text-center mb-6">เข้าสู่ระบบ</h2>
                 <div class="space-y-4">
-                    <input id="login-user" type="text" placeholder="ชื่อผู้ใช้" class="w-full p-3 border rounded-lg">
+                    <input id="login-email" type="email" placeholder="อีเมล" class="w-full p-3 border rounded-lg">
                     <input id="login-pass" type="password" placeholder="รหัสผ่าน" class="w-full p-3 border rounded-lg">
                     <button id="login-btn" class="w-full p-3 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700">เข้าสู่ระบบ</button>
                     <p class="text-center text-sm">ยังไม่มีบัญชี? <a href="#" id="show-register-view" class="text-violet-600 hover:underline">สมัครสมาชิก</a></p>
@@ -146,8 +148,8 @@
             <div id="register-view" class="hidden">
                 <h2 class="text-2xl font-bold text-center mb-6">สมัครสมาชิก</h2>
                 <div class="space-y-4">
-                    <input id="register-user" type="text" placeholder="ชื่อผู้ใช้ (สำหรับ Login)" class="w-full p-3 border rounded-lg">
                     <input id="register-nickname" type="text" placeholder="ชื่อเล่น (สำหรับแสดงผล)" class="w-full p-3 border rounded-lg">
+                    <input id="register-email" type="email" placeholder="อีเมล (สำหรับ Login)" class="w-full p-3 border rounded-lg">
                     <input id="register-pass" type="password" placeholder="รหัสผ่าน" class="w-full p-3 border rounded-lg">
                     <input id="register-phone" type="tel" placeholder="เบอร์โทร (10 หลัก)" class="w-full p-3 border rounded-lg" maxlength="10">
                     <button id="register-btn" class="w-full p-3 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700">สมัครสมาชิก</button>
@@ -169,11 +171,18 @@
             <div class="flex items-center space-x-4">
                  <span id="sync-status" class="text-sm text-gray-400 flex items-center space-x-2">
                     <i class="fa-solid fa-cloud"></i>
-                    <span>บันทึกแล้ว</span>
+                    <span>Real-time</span>
                 </span>
-                <button id="logout-btn" class="pink-gradient-btn flex items-center space-x-2">
-                    <i class="fa-solid fa-sign-out-alt"></i>
+                <button id="manage-users-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 admin-only">
+                    <i class="fa-solid fa-users-cog"></i>
+                    จัดการสมาชิก
+                </button>
+                <button id="profile-btn" class="pink-gradient-btn flex items-center space-x-2">
+                    <i class="fa-solid fa-user"></i>
                     <span id="current-user-display"></span>
+                </button>
+                <button id="logout-btn" class="bg-gray-200 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-300">
+                    <i class="fa-solid fa-sign-out-alt"></i>
                 </button>
             </div>
         </header>
@@ -337,21 +346,21 @@
             <h3 class="text-xl font-bold mb-4">ข้อมูลส่วนตัว</h3>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้ (Username)</label>
-                    <input type="text" id="profile-user" class="mt-1 block w-full p-2 bg-gray-100 border border-gray-300 rounded-md" disabled>
+                    <label class="block text-sm font-medium text-gray-700">อีเมล (สำหรับ Login)</label>
+                    <input type="text" id="profile-email" class="mt-1 block w-full p-2 bg-gray-100 border border-gray-300 rounded-md" disabled>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">ชื่อเล่น</label>
                     <input type="text" id="profile-nickname" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                 </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
+                    <input type="tel" id="profile-phone" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" maxlength="10">
+                </div>
                 <hr>
                 <h4 class="font-semibold">เปลี่ยนรหัสผ่าน</h4>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">รหัสผ่านเดิม</label>
-                    <input type="password" id="profile-old-pass" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">รหัสผ่านใหม่</label>
+                    <label class="block text-sm font-medium text-gray-700">รหัสผ่านใหม่ (กรอกเพื่อเปลี่ยน)</label>
                     <input type="password" id="profile-new-pass" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                 </div>
                  <hr>
@@ -386,27 +395,112 @@
         </div>
     </div>
 
+    <div id="manage-users-modal" class="fixed inset-0 modal-backdrop items-center justify-center flex z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl modal-content">
+            <h3 class="text-xl font-bold mb-4">จัดการสมาชิก</h3>
+            <div id="modal-users-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="close-manage-users" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="fixed inset-0 modal-backdrop items-center justify-center flex z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md modal-content">
+            <h3 class="text-xl font-bold mb-4">แก้ไขข้อมูลสมาชิก</h3>
+            <div class="space-y-4">
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700">อีเมล (Email)</label>
+                    <input type="text" id="edit-user-email" class="mt-1 block w-full p-2 bg-gray-100 border border-gray-300 rounded-md" disabled>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">ชื่อเล่น</label>
+                    <input type="text" id="edit-user-nickname" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
+                    <input type="tel" id="edit-user-phone" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" maxlength="10">
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700">บทบาท</label>
+                    <select id="edit-user-role" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <hr>
+                <h4 class="font-semibold">ตั้งรหัสผ่านใหม่ (กรอกหากต้องการเปลี่ยน)</h4>
+                <div>
+                    <input type="password" id="edit-user-new-pass" placeholder="รหัสผ่านใหม่" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="cancel-edit-user" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">ยกเลิก</button>
+                <button id="confirm-edit-user" class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Toast Notification -->
     <div id="toast-notification" class="fixed top-5 right-5 text-white py-3 px-5 rounded-lg shadow-lg z-50">
         <span id="toast-message"></span>
     </div>
 
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- CONFIG & STATE ---
-        const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbL9M-vJen0URX_4hk21IgSPCcpFpZAMfBQT_L9TGh7VAPYBPa9m1J7gQXSTkpnAmKMw/exec';
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged,
+            signOut,
+            updatePassword 
+        } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc,
+            collection,
+            onSnapshot,
+            writeBatch,
+            query,
+            getDocs,
+            deleteDoc
+        } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // =======================================================================
+        // !!! สำคัญ: กรุณานำ Firebase config ของคุณมาใส่ที่นี่ !!!
+        // =======================================================================
+        const firebaseConfig = {
+  apiKey: "AIzaSyC6AnEE8aRM_9gw0CIi4Skl_zTPU_CG_CQ",
+  authDomain: "ldb-queue-app.firebaseapp.com",
+  projectId: "ldb-queue-app",
+  storageBucket: "ldb-queue-app.firebasestorage.app",
+  messagingSenderId: "626818286678",
+  appId: "1:626818286678:web:db8080230e818dc1f7e7f7"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         let appState = {
             jobs: [],
             currentJobId: null,
             users: [],
-            loggedInUser: null
+            currentUser: null, // Will hold { uid, email, nickname, role, ... }
+            unsubscribeJobs: null, // To stop listening for job updates
+            unsubscribeUsers: null, // To stop listening for user updates
         };
 
         function createNewJob(name) {
             return {
-                id: Date.now(),
+                id: Date.now().toString(),
                 name: name,
                 dateRange: '(dd mmm - dd mmm)',
                 location: 'ระบุสถานที่',
@@ -445,71 +539,8 @@
         const vatToggle = document.getElementById('vat-toggle');
         const syncStatusEl = document.getElementById('sync-status');
         const userProfileModal = document.getElementById('user-profile-modal');
-
-        // --- DATA PERSISTENCE & SYNC ---
-        async function syncWithSheet(action, payload = {}) {
-            if (GOOGLE_APP_SCRIPT_URL === 'YOUR_NEW_GOOGLE_APP_SCRIPT_URL_HERE') {
-                showNotification('กรุณาตั้งค่า Google App Script URL ก่อน', 'error');
-                return { status: 'error', message: 'URL not configured' };
-            }
-
-            try {
-                const response = await fetch(GOOGLE_APP_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action, payload }),
-                    headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, // Use text/plain to avoid CORS preflight
-                    mode: 'cors'
-                });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                console.error(`Action [${action}] failed:`, error);
-                showNotification(`การเชื่อมต่อกับ Sheet ผิดพลาด`, 'error');
-                return { status: 'error', message: error.toString() };
-            }
-        }
-
-        async function saveAllData() {
-            syncStatusEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึก...</span>`;
-            const payload = { users: appState.users, jobs: appState.jobs, currentJobId: appState.currentJobId };
-            const result = await syncWithSheet('saveAllData', payload);
-            if (result.status === 'success') {
-                syncStatusEl.innerHTML = `<i class="fa-solid fa-cloud"></i> <span>บันทึกแล้ว</span>`;
-            } else {
-                syncStatusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>ผิดพลาด</span>`;
-            }
-        }
-        
-        async function loadAllData() {
-            if (GOOGLE_APP_SCRIPT_URL === 'YOUR_NEW_GOOGLE_APP_SCRIPT_URL_HERE') {
-                showNotification('กรุณาตั้งค่า Google App Script URL ในโค้ด', 'error');
-                const defaultJob = createNewJob('ตัวอย่างงาน (ยังไม่ได้เชื่อมต่อ Sheet)');
-                appState.jobs.push(defaultJob);
-                appState.currentJobId = defaultJob.id;
-                return;
-            }
-
-            const result = await syncWithSheet('loadAllData');
-            if (result.status === 'success' && result.data) {
-                appState.users = result.data.users || [];
-                appState.jobs = result.data.jobs || [];
-                appState.currentJobId = result.data.currentJobId || null;
-
-                if (appState.jobs.length === 0) {
-                    const defaultJob = createNewJob('ตัวอย่างงาน');
-                    appState.jobs.push(defaultJob);
-                    appState.currentJobId = defaultJob.id;
-                }
-                 if (!appState.currentJobId && appState.jobs.length > 0) {
-                    appState.currentJobId = appState.jobs[0].id;
-                }
-            } else {
-                 const defaultJob = createNewJob('ตัวอย่าง (โหลดไม่สำเร็จ)');
-                 appState.jobs.push(defaultJob);
-                 appState.currentJobId = defaultJob.id;
-            }
-        }
-
+        const manageUsersModal = document.getElementById('manage-users-modal');
+        const editUserModal = document.getElementById('edit-user-modal');
 
         // --- HELPER FUNCTIONS ---
         function getCurrentJob() {
@@ -518,12 +549,11 @@
 
         // --- RENDER FUNCTIONS ---
         function renderJobTabs() {
-            const currentUser = appState.users.find(u => u.user === appState.loggedInUser);
             let jobsToDisplay = appState.jobs;
 
-            if (currentUser && currentUser.role !== 'Admin') {
+            if (appState.currentUser && appState.currentUser.role !== 'Admin') {
                 jobsToDisplay = appState.jobs.filter(job => 
-                    job.team.some(member => member.user === appState.loggedInUser)
+                    job.team.some(member => member.uid === appState.currentUser.uid)
                 );
             }
 
@@ -569,19 +599,19 @@
             if (!job) return;
 
             teamList.innerHTML = job.team.map(member => {
-                const nickname = member.nickname || member.user; // Fallback to username
+                const nickname = member.nickname || member.email; // Fallback to username
                 const avatarChar = nickname ? nickname.charAt(0).toUpperCase() : '?';
                 const dateCells = job.dates.map(date => `
                     <td class="py-2 text-center">
                         <div class="flex flex-col items-center">
                             ${(member.dailyPay[date] || 0) > 0 ? '<i class="check-icon fa-solid fa-circle-check"></i>' : '<i class="cross-icon fa-solid fa-circle-xmark"></i>'}
-                            <input type="number" class="daily-rate-input" value="${member.dailyPay[date] || 0}" data-date="${date}" data-member-id="${member.user}">
+                            <input type="number" class="daily-rate-input" value="${member.dailyPay[date] || 0}" data-date="${date}" data-member-id="${member.uid}">
                         </div>
                     </td>
                 `).join('');
 
                 return `
-                    <tr data-id="${member.user}">
+                    <tr data-id="${member.uid}">
                         <td class="py-2">
                             <div class="flex items-center space-x-3">
                                 <img src="https://placehold.co/60x60/E2E8F0/4A5568?text=${avatarChar}" alt="${nickname}" class="w-10 h-10 rounded-full">
@@ -590,13 +620,13 @@
                                         ${nickname}
                                         ${member.isLeader ? '<i class="fas fa-crown text-yellow-500 ml-2"></i>' : ''}
                                     </div>
-                                    <div class="team-member-role text-sm text-gray-500" contenteditable="true" data-member-id="${member.user}">${member.role}</div>
+                                    <div class="team-member-role text-sm text-gray-500" contenteditable="true" data-member-id="${member.uid}">${member.role}</div>
                                 </div>
                             </div>
                         </td>
                         ${dateCells}
                         <td class="py-2 text-center admin-only">
-                            <button class="remove-member-btn text-gray-400 hover:text-red-500" data-id="${member.user}">
+                            <button class="remove-member-btn text-gray-400 hover:text-red-500" data-id="${member.uid}">
                                 <i class="fa-solid fa-trash-alt"></i>
                             </button>
                         </td>
@@ -619,8 +649,7 @@
         }
         
         function renderUIByRole() {
-            const currentUser = appState.users.find(u => u.user === appState.loggedInUser);
-            if (currentUser && currentUser.role === 'Admin') {
+            if (appState.currentUser && appState.currentUser.role === 'Admin') {
                 appContainer.classList.add('is-admin');
             } else {
                 appContainer.classList.remove('is-admin');
@@ -710,7 +739,7 @@
             else modal.classList.remove('visible');
         }
 
-        function handleDateHeaderChange(e) {
+        async function handleDateHeaderChange(e) {
             const job = getCurrentJob();
             if (!job) return;
 
@@ -731,14 +760,13 @@
                         delete member.dailyPay[oldDate];
                     }
                 });
-                renderTeam();
-                saveAllData();
+                await setDoc(doc(db, "jobs", job.id), job);
             } else {
                 e.target.textContent = oldDate;
             }
         }
 
-        function handleAddDate() {
+        async function handleAddDate() {
             const job = getCurrentJob();
             if (!job) return;
             const newDateStr = newDateInput.value;
@@ -754,14 +782,14 @@
                 });
                 newDateInput.value = '';
                 toggleModal(addDateModal, false);
-                renderAll();
+                await setDoc(doc(db, "jobs", job.id), job);
             }
         }
 
-        function handleRemoveMember(memberId) {
+        async function handleRemoveMember(memberId) {
             const job = getCurrentJob();
             if (!job) return;
-            const memberIndex = job.team.findIndex(m => m.user === memberId);
+            const memberIndex = job.team.findIndex(m => m.uid === memberId);
             if (memberIndex > -1) {
                 const wasLeader = job.team[memberIndex].isLeader;
                 job.team.splice(memberIndex, 1);
@@ -769,32 +797,32 @@
                 if (wasLeader && job.team.length > 0) {
                     job.team[0].isLeader = true;
                 }
-                renderAll();
+                await setDoc(doc(db, "jobs", job.id), job);
             }
         }
 
-        function handleBudgetChange(e) {
+        async function handleBudgetChange(e) {
             const job = getCurrentJob();
             if (job) {
                 job.budget = parseFloat(e.target.value) || 0;
                 calculateAndRenderSummary();
-                saveAllData();
+                await setDoc(doc(db, "jobs", job.id), job, { merge: true });
             }
         }
         
-        function handleRoleChange(e) {
+        async function handleRoleChange(e) {
             const job = getCurrentJob();
             if (!job) return;
             const memberId = e.target.dataset.memberId;
             const newRole = e.target.textContent;
-            const member = job.team.find(m => m.user === memberId);
+            const member = job.team.find(m => m.uid === memberId);
             if (member) {
                 member.role = newRole;
-                saveAllData();
+                await setDoc(doc(db, "jobs", job.id), job);
             }
         }
 
-        function handleDailyRateChange(e) {
+        async function handleDailyRateChange(e) {
             const job = getCurrentJob();
             if (!job) return;
             const inputElement = e.target;
@@ -802,8 +830,9 @@
             const date = inputElement.dataset.date;
             const newPay = parseFloat(inputElement.value) || 0;
             
-            const member = job.team.find(m => m.user === memberId);
+            const member = job.team.find(m => m.uid === memberId);
             if (member) {
+                if(!member.dailyPay) member.dailyPay = {};
                 member.dailyPay[date] = newPay;
                 
                 const iconElement = inputElement.parentElement.querySelector('i');
@@ -814,63 +843,63 @@
                 }
                 
                 calculateAndRenderSummary();
-                saveAllData();
+                await setDoc(doc(db, "jobs", job.id), job);
             }
         }
         
-        function handleCostChange(e) {
+        async function handleCostChange(e) {
             const job = getCurrentJob();
             if (!job) return;
             const index = parseInt(e.target.closest('[data-index]').dataset.index);
             if (e.target.classList.contains('cost-position-input')) job.otherCosts[index].position = e.target.value;
             if (e.target.classList.contains('cost-amount-input')) job.otherCosts[index].cost = parseFloat(e.target.value) || 0;
             calculateAndRenderSummary();
-            saveAllData();
+            await setDoc(doc(db, "jobs", job.id), job);
         }
 
-        function handleRemoveCost(e) {
+        async function handleRemoveCost(e) {
             const job = getCurrentJob();
             if (!job) return;
             const index = parseInt(e.target.closest('[data-index]').dataset.index);
             job.otherCosts.splice(index, 1);
-            renderAll();
+            await setDoc(doc(db, "jobs", job.id), job);
         }
 
-        function handleAddExpense() {
+        async function handleAddExpense() {
             const job = getCurrentJob();
             if (job) {
                 job.otherCosts.push({ position: 'รายการใหม่', cost: 0 });
-                renderAll();
+                await setDoc(doc(db, "jobs", job.id), job);
             }
         }
 
         function openAddPersonModal() {
             const job = getCurrentJob();
             if (!job) return;
-            const teamUsernames = job.team.map(m => m.user);
-            const availableUsers = appState.users.filter(u => !teamUsernames.includes(u.user));
+            const teamUserIds = job.team.map(m => m.uid);
+            const availableUsers = appState.users.filter(u => !teamUserIds.includes(u.uid));
             
             modalMemberList.innerHTML = availableUsers.map(user => {
-                const nickname = user.nickname || user.user;
+                const nickname = user.nickname || user.email;
                 const avatarChar = nickname ? nickname.charAt(0).toUpperCase() : '?';
                 return `
-                <div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100 cursor-pointer" data-id="${user.user}">
-                    <div class="flex items-center space-x-3"><img src="https://placehold.co/60x60/E2E8F0/4A5568?text=${avatarChar}" class="w-10 h-10 rounded-full"><div><p class="font-semibold">${nickname}</p><p class="text-sm text-gray-500">${user.user}</p></div></div>
+                <div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100 cursor-pointer" data-id="${user.uid}">
+                    <div class="flex items-center space-x-3"><img src="https://placehold.co/60x60/E2E8F0/4A5568?text=${avatarChar}" class="w-10 h-10 rounded-full"><div><p class="font-semibold">${nickname}</p><p class="text-sm text-gray-500">${user.email}</p></div></div>
                     <button class="add-member-action bg-blue-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-600">เพิ่ม</button>
                 </div>`
             }).join('');
             toggleModal(addPersonModal, true);
         }
 
-        function handleAddMember(e) {
+        async function handleAddMember(e) {
             const job = getCurrentJob();
             if (!job) return;
-            const username = e.target.closest('[data-id]').dataset.id;
-            const userToAdd = appState.users.find(u => u.user === username);
+            const userId = e.target.closest('[data-id]').dataset.id;
+            const userToAdd = appState.users.find(u => u.uid === userId);
             
             if (userToAdd) {
                 const newMember = {
-                    user: userToAdd.user,
+                    uid: userToAdd.uid,
                     nickname: userToAdd.nickname,
                     role: "ทีมงาน",
                     dailyPay: {}
@@ -883,30 +912,29 @@
                 job.dates.forEach(d => newMember.dailyPay[d] = 0);
                 job.team.push(newMember);
                 toggleModal(addPersonModal, false);
-                renderAll();
+                await setDoc(doc(db, "jobs", job.id), job);
             }
         }
         
-        function handleJobDetailsChange(e) {
+        async function handleJobDetailsChange(e) {
             const job = getCurrentJob();
             if (job) {
                 job.name = jobNameEl.textContent;
                 job.dateRange = jobDateRangeEl.textContent;
                 job.location = jobLocationEl.textContent;
                 renderJobTabs();
-                saveAllData();
+                await setDoc(doc(db, "jobs", job.id), job, { merge: true });
             }
         }
 
-        function handleAddNewJob() {
+        async function handleAddNewJob() {
             const name = newJobNameInput.value.trim();
             if (name) {
                 const newJob = createNewJob(name);
-                appState.jobs.push(newJob);
+                await setDoc(doc(db, "jobs", newJob.id), newJob);
                 appState.currentJobId = newJob.id;
                 newJobNameInput.value = '';
                 toggleModal(addJobModal, false);
-                renderAll();
             }
         }
 
@@ -917,95 +945,104 @@
 
         // --- AUTH FUNCTIONS ---
         async function handleRegister() {
-            const user = document.getElementById('register-user').value.trim();
+            const email = document.getElementById('register-email').value.trim();
             const nickname = document.getElementById('register-nickname').value.trim();
             const pass = document.getElementById('register-pass').value.trim();
             const phone = document.getElementById('register-phone').value.trim();
 
-            if (!user || !pass || !phone || !nickname) {
+            if (!email || !pass || !phone || !nickname) {
                 showNotification('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
                 return;
             }
 
-            if (appState.users.find(u => u.user === user)) {
-                showNotification('ชื่อผู้ใช้นี้มีอยู่แล้ว', 'error');
-                return;
-            }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
 
-            const role = appState.users.length === 0 ? 'Admin' : 'User';
-            appState.users.push({ user, pass, phone, nickname, role, bankName: '', accountName: '', accountNumber: '' });
-            await saveAllData();
-            showNotification('สมัครสมาชิกสำเร็จ!', 'success');
-            registerView.classList.add('hidden');
-            loginView.classList.remove('hidden');
+                const docSnap = await getDocs(collection(db, "users"));
+                const isFirstUser = docSnap.empty;
+                
+                const newUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    nickname: nickname,
+                    phone: phone,
+                    role: isFirstUser ? 'Admin' : 'User',
+                    bankName: '',
+                    accountName: '',
+                    accountNumber: ''
+                };
+                
+                await setDoc(doc(db, "users", user.uid), newUser);
+                showNotification('สมัครสมาชิกสำเร็จ!', 'success');
+                registerView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Registration failed:", error);
+                showNotification('สมัครสมาชิกล้มเหลว: ' + error.message, 'error');
+            }
         }
 
         async function handleLogin() {
-            const user = document.getElementById('login-user').value.trim();
+            const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
 
-            const foundUser = appState.users.find(u => u.user === user && u.pass === pass);
-            if (foundUser) {
-                appState.loggedInUser = user;
-                sessionStorage.setItem('ldbQueueUser', user);
-                
-                authScreen.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                document.getElementById('current-user-display').textContent = foundUser.nickname || user;
-
-                renderAll();
-            } else {
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                // onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error("Login failed:", error);
                 showNotification('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
             }
         }
 
         function handleLogout() {
-            appState.loggedInUser = null;
-            sessionStorage.removeItem('ldbQueueUser');
-            authScreen.classList.remove('hidden');
-            appContainer.classList.add('hidden');
+            signOut(auth);
         }
 
         function openUserProfile() {
-            const user = appState.users.find(u => u.user === appState.loggedInUser);
+            const user = appState.currentUser;
             if (!user) return;
 
-            document.getElementById('profile-user').value = user.user;
+            document.getElementById('profile-email').value = user.email;
             document.getElementById('profile-nickname').value = user.nickname;
+            document.getElementById('profile-phone').value = user.phone;
             document.getElementById('profile-bank-name').value = user.bankName || '';
             document.getElementById('profile-account-name').value = user.accountName || '';
             document.getElementById('profile-account-number').value = user.accountNumber || '';
-            document.getElementById('profile-old-pass').value = '';
             document.getElementById('profile-new-pass').value = '';
 
             toggleModal(userProfileModal, true);
         }
 
         async function handleUpdateProfile() {
-            const user = appState.users.find(u => u.user === appState.loggedInUser);
+            const user = appState.currentUser;
             if (!user) return;
 
             const newNickname = document.getElementById('profile-nickname').value.trim();
-            const oldPass = document.getElementById('profile-old-pass').value;
+            const newPhone = document.getElementById('profile-phone').value.trim();
             const newPass = document.getElementById('profile-new-pass').value;
             
-            user.nickname = newNickname;
-            user.bankName = document.getElementById('profile-bank-name').value;
-            user.accountName = document.getElementById('profile-account-name').value.trim();
-            user.accountNumber = document.getElementById('profile-account-number').value.trim();
+            const updatedData = {
+                nickname: newNickname,
+                phone: newPhone,
+                bankName: document.getElementById('profile-bank-name').value,
+                accountName: document.getElementById('profile-account-name').value.trim(),
+                accountNumber: document.getElementById('profile-account-number').value.trim()
+            };
 
-            if (oldPass && newPass) {
-                if (oldPass !== user.pass) {
-                    showNotification('รหัสผ่านเดิมไม่ถูกต้อง', 'error');
-                    return;
+            try {
+                if (newPass) {
+                    await updatePassword(auth.currentUser, newPass);
                 }
-                user.pass = newPass;
+                await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
+                showNotification('บันทึกข้อมูลส่วนตัวสำเร็จ', 'success');
+                toggleModal(userProfileModal, false);
+            } catch (error) {
+                console.error("Profile update failed:", error);
+                showNotification('อัปเดตข้อมูลล้มเหลว: ' + error.message, 'error');
             }
-
-            await saveAllData();
-            showNotification('บันทึกข้อมูลส่วนตัวสำเร็จ', 'success');
-            toggleModal(userProfileModal, false);
-            document.getElementById('current-user-display').textContent = newNickname || user.user;
         }
 
         // --- EVENT LISTENERS ---
@@ -1046,7 +1083,7 @@
             const removeMemberBtn = target.closest('.remove-member-btn');
             const deleteJobBtn = target.closest('#delete-job-btn');
 
-            if (jobTab) handleSwitchJob(parseInt(jobTab.dataset.jobId));
+            if (jobTab) handleSwitchJob(jobTab.dataset.jobId);
             else if (addJobBtn) toggleModal(addJobModal, true);
             else if (confirmAddJobBtn) handleAddNewJob();
             else if (cancelAddJobBtn) toggleModal(addJobModal, false);
@@ -1074,8 +1111,7 @@
                 if (job) {
                     job.whtEnabled = whtToggle.checked;
                     job.vatEnabled = vatToggle.checked;
-                    calculateAndRenderSummary();
-                    saveAllData();
+                    setDoc(doc(db, "jobs", job.id), job, { merge: true });
                 }
             }
         });
@@ -1086,24 +1122,46 @@
         });
 
         // --- INITIALIZATION ---
-        async function init() {
-            const loggedInUser = sessionStorage.getItem('ldbQueueUser');
-            await loadAllData(); 
-            
-            if (loggedInUser && appState.users.some(u => u.user === loggedInUser)) {
-                appState.loggedInUser = loggedInUser;
-                authScreen.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-                const user = appState.users.find(u => u.user === loggedInUser);
-                document.getElementById('current-user-display').textContent = user.nickname || user.user;
-                renderAll();
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    appState.currentUser = { uid: user.uid, ...userDocSnap.data() };
+                    document.getElementById('current-user-display').textContent = appState.currentUser.nickname || appState.currentUser.email;
+
+                    authScreen.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+
+                    // Listen for real-time updates
+                    if (appState.unsubscribeUsers) appState.unsubscribeUsers();
+                    appState.unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+                        appState.users = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+                    });
+
+                    if (appState.unsubscribeJobs) appState.unsubscribeJobs();
+                    appState.unsubscribeJobs = onSnapshot(collection(db, "jobs"), (snapshot) => {
+                        appState.jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        if (!appState.currentJobId && appState.jobs.length > 0) {
+                            appState.currentJobId = appState.jobs[0].id;
+                        }
+                        renderAll();
+                    });
+                } else {
+                    // This case is unlikely if registration is handled correctly
+                    signOut(auth);
+                }
             } else {
+                // User is signed out
+                if (appState.unsubscribeJobs) appState.unsubscribeJobs();
+                if (appState.unsubscribeUsers) appState.unsubscribeUsers();
+                appState.currentUser = null;
                 authScreen.classList.remove('hidden');
                 appContainer.classList.add('hidden');
             }
-        }
-
-        init();
+        });
     });
     </script>
 </body>
