@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDB QUEUE - Job Management (v2)</title>
+    <title>LDB QUEUE - Job Management (v3)</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -149,7 +149,7 @@
                         </div>
                     </div>
                     <p id="login-error" class="text-sm text-red-500 hidden"></p>
-                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300">
+                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 disabled:opacity-75">
                         ลงชื่อเข้าใช้
                     </button>
                 </form>
@@ -182,7 +182,7 @@
                         <input type="password" id="signup-confirm-password" name="confirmPassword" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
                     </div>
                     <p id="signup-error" class="text-sm text-red-500 hidden"></p>
-                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">สมัครสมาชิก</button>
+                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 disabled:opacity-75">สมัครสมาชิก</button>
                 </form>
                  <p class="text-center text-sm text-gray-600 mt-4">
                     มีบัญชีอยู่แล้ว? <a href="#" id="show-login-modal-btn" class="font-medium text-purple-600 hover:text-purple-500">กลับไปล็อกอิน</a>
@@ -265,8 +265,8 @@
                                 <p id="job-dates" class="text-gray-500"></p>
                                 <p id="job-location" class="flex items-center mt-1 text-gray-500"><i class="ph ph-map-pin mr-2"></i><span id="job-location-text"></span></p>
                             </div>
-                            <div class="text-right mt-4 sm:mt-0 admin-only">
-                                <p class="text-gray-500">งบประมาณ</p>
+                            <div class="text-right mt-4 sm:mt-0">
+                                <p id="budget-label" class="text-gray-500">งบประมาณ</p>
                                 <div class="flex items-center justify-end">
                                     <p id="job-income" class="text-3xl font-bold text-purple-600"></p>
                                     <button id="edit-budget-btn" class="ml-2 text-gray-400 hover:text-purple-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
@@ -382,6 +382,10 @@
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'กำลังเข้าสู่ระบบ...';
+
             const identifier = e.target.loginIdentifier.value;
             const password = e.target.password.value;
             const loginError = document.getElementById('login-error');
@@ -394,6 +398,8 @@
                 if (querySnapshot.empty) {
                     loginError.textContent = "Username นี้ไม่มีอยู่ในระบบ";
                     loginError.classList.remove('hidden');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'ลงชื่อเข้าใช้';
                     return;
                 }
                 emailToLogin = querySnapshot.docs[0].data().email;
@@ -403,11 +409,17 @@
                 .catch(error => {
                     loginError.textContent = "ข้อมูลเข้าระบบไม่ถูกต้อง";
                     loginError.classList.remove('hidden');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'ลงชื่อเข้าใช้';
                 });
         });
         
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'กรุณารอสักครู่...';
+
             const signupError = document.getElementById('signup-error');
             signupError.classList.add('hidden');
 
@@ -416,14 +428,21 @@
             const password = e.target.password.value;
             const confirmPassword = e.target.confirmPassword.value;
 
+            const resetSubmitButton = () => {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'สมัครสมาชิก';
+            };
+
             if (password !== confirmPassword) {
                 signupError.textContent = "รหัสผ่านและการยืนยันไม่ตรงกัน";
                 signupError.classList.remove('hidden');
+                resetSubmitButton();
                 return;
             }
             if (password.length < 6) {
                 signupError.textContent = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
                 signupError.classList.remove('hidden');
+                resetSubmitButton();
                 return;
             }
 
@@ -432,6 +451,7 @@
             if (!querySnapshot.empty) {
                 signupError.textContent = "Username นี้ถูกใช้งานแล้ว";
                 signupError.classList.remove('hidden');
+                resetSubmitButton();
                 return;
             }
 
@@ -447,6 +467,7 @@
                     signupError.textContent = "เกิดข้อผิดพลาดในการสมัคร: " + error.message;
                 }
                 signupError.classList.remove('hidden');
+                resetSubmitButton();
             }
         });
 
@@ -623,12 +644,28 @@
             document.getElementById('job-title').textContent = job.name;
             document.getElementById('job-dates').textContent = `${formatDateRange(job.startDate, job.endDate)} (${job.workdays.length} วัน)`;
             document.getElementById('job-location-text').textContent = job.location;
-            document.getElementById('job-income').textContent = `${job.income.toLocaleString()} บาท`;
+            
+            const budgetLabel = document.getElementById('budget-label');
+            const jobIncomeEl = document.getElementById('job-income');
+
+            if (currentUserRole === 'member') {
+                budgetLabel.textContent = 'BG';
+                const myTeamData = job.team.find(m => m.userId === currentUser.uid);
+                let myTotalWage = 0;
+                if (myTeamData) {
+                    myTotalWage = calculateTeamCostForMember(myTeamData, job.workdays);
+                }
+                jobIncomeEl.textContent = `${myTotalWage.toLocaleString()} บาท`;
+            } else { // admin
+                budgetLabel.textContent = 'งบประมาณ';
+                jobIncomeEl.textContent = `${job.income.toLocaleString()} บาท`;
+            }
+
             let headHTML = '<tr><th class="py-2 px-3 border-b text-left">ชื่อ</th>';
             job.workdays.forEach(day => {
                 headHTML += `<th class="py-2 px-3 border-b text-center relative date-header">${formatShortDate(day)}<div class="absolute top-0 right-0 flex date-action-btn opacity-0 transition-opacity admin-only"><button class="edit-day-btn text-blue-500 hover:text-blue-700" data-day="${day}"><i class="ph-bold ph-pencil-simple text-xs"></i></button><button class="delete-day-btn text-red-500 hover:text-red-700" data-day="${day}"><i class="ph-bold ph-x-circle text-xs"></i></button></div></th>`;
             });
-            headHTML += '<th class="py-2 px-3 border-b text-center admin-only">จัดการ</th></tr>';
+            headHTML += '<th class="py-2 px-3 border-b text-center">ยอดรวม</th><th class="py-2 px-3 border-b text-center admin-only">จัดการ</th></tr>';
             document.getElementById('schedule-head').innerHTML = headHTML;
             const scheduleBody = document.getElementById('schedule-body');
             scheduleBody.innerHTML = '';
@@ -642,10 +679,15 @@
                     const isWorking = member.workdays.includes(day);
                     const dailyRate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
                     
-                    const canEditRate = (currentUserRole === 'admin');
-                    let rateDisplayHTML = `<span class="text-xs text-gray-500">${dailyRate.toLocaleString()}</span>`;
-                    if (canEditRate) {
-                        rateDisplayHTML = `<span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
+                    const canViewRate = (currentUserRole === 'admin' || currentUser.uid === member.userId || (job.teamLeaderId && currentUser.uid === job.teamLeaderId));
+                    let rateDisplayHTML = `<span class="text-xs text-gray-400">-</span>`; 
+                    if (canViewRate) {
+                        const canEditRate = (currentUserRole === 'admin');
+                        if(canEditRate) {
+                            rateDisplayHTML = `<span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
+                        } else {
+                            rateDisplayHTML = `<span class="text-xs text-gray-500">${dailyRate.toLocaleString()}</span>`;
+                        }
                     }
 
                     const isDisabled = (currentUserRole !== 'admin');
@@ -653,6 +695,8 @@
                     const disabledAttr = isDisabled ? 'disabled' : '';
                     rowHTML += `<td class="py-2 px-3 border-b text-center"><div class="flex flex-col items-center justify-center space-y-1"><button class="custom-checkbox schedule-checkbox ${isWorking ? 'checked' : ''} ${disabledClass}" data-userid="${member.userId}" data-day="${day}" ${disabledAttr}><i class="ph-bold ph-check text-lg"></i></button>${rateDisplayHTML}</div></td>`;
                 });
+                const memberTotal = calculateTeamCostForMember(member, job.workdays);
+                rowHTML += `<td class="py-2 px-3 border-b text-center"><div class="border-2 border-dashed rounded-md p-1 text-sm font-semibold">${memberTotal.toLocaleString()}</div></td>`;
                 rowHTML += `<td class="py-2 px-3 border-b text-center admin-only"><button class="text-blue-500 hover:text-blue-700 mr-2 edit-member-btn" data-userid="${member.userId}"><i class="ph ph-pencil-simple"></i></button><button class="text-red-500 hover:text-red-700 remove-member-btn" data-userid="${member.userId}"><i class="ph ph-trash"></i></button></td></tr>`;
                 scheduleBody.innerHTML += rowHTML;
             });
