@@ -306,7 +306,7 @@
                             </div>
                             <div class="flex flex-col items-center justify-center p-6 rounded-2xl bg-gray-50">
                                 <p id="profit-loss-label" class="text-2xl font-semibold">กำไร</p>
-                                <p id="summary-profit-loss" class="text-5xl font-bold mt-2">0.00 บาท</p>
+                                <p id="summary-profit-loss" class="font-bold mt-2">0.00 บาท</p>
                                 <button id="complete-job-btn" class="mt-4 px-6 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors admin-only">
                                     <i class="ph ph-check-circle mr-1"></i> เสร็จงานแล้ว
                                 </button>
@@ -636,14 +636,18 @@
                 const memberData = allUsers.find(u => u.id === member.userId);
                 if (!memberData) return;
                 const displayName = memberData.nickname || memberData.name;
-                let rowHTML = `<tr class="hover:bg-gray-50"><td class="py-2 px-3 border-b"><div class="flex items-center"><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3"><div><p class="font-medium">${displayName} ${index === 0 ? '<i class="ph-fill ph-crown text-yellow-500"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
+                const isTeamLeader = job.teamLeaderId === member.userId;
+                let rowHTML = `<tr class="hover:bg-gray-50"><td class="py-2 px-3 border-b"><div class="flex items-center"><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3"><div><p class="font-medium flex items-center">${displayName} ${isTeamLeader ? '<i class="ph-fill ph-crown text-yellow-500 ml-1"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
                 job.workdays.forEach(day => {
                     const isWorking = member.workdays.includes(day);
                     const dailyRate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
-                    let rateDisplayHTML = `<span class="text-xs text-gray-400">-</span>`; // Default for non-authorized
-                    if (currentUserRole === 'admin' || currentUser.uid === member.userId) {
+                    
+                    const canEditRate = (currentUserRole === 'admin');
+                    let rateDisplayHTML = `<span class="text-xs text-gray-500">${dailyRate.toLocaleString()}</span>`;
+                    if (canEditRate) {
                         rateDisplayHTML = `<span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
                     }
+
                     const isDisabled = (currentUserRole !== 'admin');
                     const disabledClass = isDisabled ? 'opacity-50 cursor-not-allowed' : '';
                     const disabledAttr = isDisabled ? 'disabled' : '';
@@ -678,7 +682,7 @@
             document.getElementById('summary-total-cost').textContent = `${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
             const profitLossEl = document.getElementById('summary-profit-loss');
             profitLossEl.textContent = `${profitLoss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
-            profitLossEl.className = `text-5xl font-bold mt-2 ${profitLoss >= 0 ? 'profit-text' : 'loss-text'}`;
+            profitLossEl.className = `font-bold mt-2 ${profitLoss >= 0 ? 'text-5xl profit-text' : 'text-4xl loss-text'}`;
             document.getElementById('profit-loss-label').textContent = profitLoss >= 0 ? 'กำไร' : 'ขาดทุน';
         }
 
@@ -837,7 +841,7 @@
                 const startDate = formData.get('startDate'), endDate = formData.get('endDate');
                 let workdays = [];
                 for (let d = new Date(startDate); d <= new Date(endDate); d.setDate(d.getDate() + 1)) { workdays.push(new Date(d).toISOString().split('T')[0]); }
-                await addDoc(collection(db, "jobs"), { name: formData.get('name'), location: formData.get('location'), income: Number(formData.get('income')), startDate, endDate, workdays, team: [], expenses: [], status: 'active' });
+                await addDoc(collection(db, "jobs"), { name: formData.get('name'), location: formData.get('location'), income: Number(formData.get('income')), startDate, endDate, workdays, team: [], expenses: [], status: 'active', teamLeaderId: '' });
                 modal.remove();
             });
         }
@@ -870,21 +874,37 @@
         function showEditMemberModal(member) {
             const memberData = allUsers.find(u => u.id === member.userId);
             let userOptions = allUsers.map(u => `<option value="${u.id}" data-pic="${u.profilePic || ''}" ${u.id === member.userId ? 'selected' : ''}>${u.nickname || u.name}</option>`).join('');
+            const isLeader = currentJobData.teamLeaderId === member.userId;
             const content = `
                 <div class="flex items-center space-x-4">
                     <img id="edit-member-pic-preview" src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=รูป'}" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
                     <select id="edit-member-select" name="userId" required class="w-full p-2 border rounded flex-grow">${userOptions}</select>
                 </div>
                 <input type="text" name="position" placeholder="ตำแหน่ง" required class="w-full p-2 border rounded" value="${member.position}">
-                <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded" value="${member.dailyRate}">`;
+                <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded" value="${member.dailyRate}">
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="is-leader-checkbox" name="isLeader" ${isLeader ? 'checked' : ''}>
+                    <label for="is-leader-checkbox">กำหนดเป็นหัวหน้าทีม</label>
+                </div>`;
             showModal('แก้ไขข้อมูลทีมงาน', content, async (formData, submitButton, modal) => {
+                const newUserId = formData.get('userId');
+                const isLeaderCheckbox = formData.get('isLeader');
                 const teamMemberIndex = currentJobData.team.findIndex(m => m.userId === member.userId);
+
                 if (teamMemberIndex > -1) { 
-                    currentJobData.team[teamMemberIndex].userId = formData.get('userId');
+                    currentJobData.team[teamMemberIndex].userId = newUserId;
                     currentJobData.team[teamMemberIndex].position = formData.get('position'); 
                     currentJobData.team[teamMemberIndex].dailyRate = Number(formData.get('dailyRate')); 
                 }
-                await updateDoc(doc(db, "jobs", currentJobId), { team: currentJobData.team });
+                
+                let newLeaderId = currentJobData.teamLeaderId;
+                if(isLeaderCheckbox) {
+                    newLeaderId = newUserId;
+                } else if (currentJobData.teamLeaderId === member.userId) {
+                    newLeaderId = '';
+                }
+
+                await updateDoc(doc(db, "jobs", currentJobId), { team: currentJobData.team, teamLeaderId: newLeaderId });
                 modal.remove();
             }, true, (modal) => {
                 const selectEl = modal.querySelector('#edit-member-select');
