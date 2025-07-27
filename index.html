@@ -101,6 +101,13 @@
             visibility: visible;
             opacity: 1;
         }
+        .dragging {
+            opacity: 0.5;
+            background: #fef9c3; /* yellow-100 */
+        }
+        .drag-over {
+            border-top: 2px solid #ef4444;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -272,9 +279,9 @@
                                 <p id="job-location" class="flex items-center mt-1 text-gray-500"><i class="ph ph-map-pin mr-2"></i><span id="job-location-text"></span></p>
                             </div>
                             <div class="text-right mt-4 sm:mt-0">
-                                <p id="budget-label" class="text-gray-500">งบประมาณ</p>
+                                <p id="budget-label" class="text-gray-500 font-bold text-lg">งบประมาณ</p>
                                 <div class="flex items-center justify-end">
-                                    <p id="job-income" class="text-3xl font-bold text-red-600"></p>
+                                    <p id="job-income" class="text-3xl font-bold text-blue-600"></p>
                                     <button id="edit-budget-btn" class="ml-2 text-gray-400 hover:text-red-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
                                 </div>
                             </div>
@@ -647,7 +654,7 @@
             document.getElementById('job-details-section').classList.remove('hidden');
             document.querySelectorAll('#job-list .job-card').forEach(card => {
                 card.classList.toggle('gradient-bg', card.dataset.id === jobId);
-                card.classList.toggle('text-white', card.dataset.id === jobId);
+                card.querySelector('h5').classList.toggle('text-white', card.dataset.id === jobId);
                 card.classList.toggle('bg-white', card.dataset.id !== jobId);
             });
             if (jobUnsubscribe) jobUnsubscribe();
@@ -700,10 +707,15 @@
                     const isWorking = member.workdays.includes(day);
                     const dailyRate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
                     
-                    const canEditRate = (currentUserRole === 'admin');
-                    let rateDisplayHTML = `<span class="text-xs text-gray-500">${dailyRate.toLocaleString()}</span>`;
-                    if (canEditRate) {
-                        rateDisplayHTML = `<span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
+                    const canViewRate = (currentUserRole === 'admin' || currentUser.uid === member.userId || (job.teamLeaderId && currentUser.uid === job.teamLeaderId));
+                    let rateDisplayHTML = `<span class="text-xs text-gray-400">-</span>`; 
+                    if (canViewRate) {
+                        const canEditRate = (currentUserRole === 'admin');
+                        if(canEditRate) {
+                            rateDisplayHTML = `<span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
+                        } else {
+                            rateDisplayHTML = `<span class="text-xs text-gray-500">${dailyRate.toLocaleString()}</span>`;
+                        }
                     }
 
                     const isDisabled = (currentUserRole !== 'admin');
@@ -1064,16 +1076,11 @@
             allUsers.forEach(user => {
                 const displayName = user.nickname || user.name;
                 const bankInfo = user.bankAccount;
-                userListHTML += `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4"><div><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p><div class="text-xs text-gray-400 mt-1"><i class="ph ph-bank"></i> ${bankInfo?.bank || 'N/A'}: ${bankInfo?.number || 'N/A'}</div></div></div><div class="flex items-center space-x-2"><button class="modal-switch-view-btn p-2 text-green-500 hover:bg-green-100 rounded-full" data-userid="${user.id}"><i class="ph ph-eye"></i></button><button class="modal-edit-user-btn p-2 text-blue-500 hover:bg-blue-100 rounded-full" data-userid="${user.id}"><i class="ph ph-pencil-simple"></i></button><button class="modal-delete-user-btn p-2 text-red-500 hover:bg-red-100 rounded-full" data-userid="${user.id}"><i class="ph ph-trash"></i></button></div></div>`;
+                userListHTML += `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4"><div><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p><div class="text-xs text-gray-400 mt-1"><i class="ph ph-bank"></i> ${bankInfo?.bank || 'N/A'}: ${bankInfo?.number || 'N/A'}</div></div></div><div class="flex items-center space-x-2"><button class="modal-switch-view-btn p-2 text-green-500 hover:bg-green-100 rounded-full" data-userid="${user.id}"><i class="ph ph-eye"></i></button><button class="modal-delete-user-btn p-2 text-red-500 hover:bg-red-100 rounded-full" data-userid="${user.id}"><i class="ph ph-trash"></i></button></div></div>`;
             });
-            userListHTML += `</div><hr><button id="show-add-user-info-btn" class="w-full mt-4 px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors">เพิ่มทีมงานใหม่</button>`;
+            userListHTML += `</div>`;
 
             showModal('การจัดการทีมงานทั้งหมด', userListHTML, null, false, (modal) => {
-                modal.querySelector('#show-add-user-info-btn').onclick = () => showConfirmModal('ขั้นตอนการเพิ่มทีมงานใหม่', '1. ไปที่ Firebase Console > Authentication > Users<br>2. กด Add user แล้วกรอกอีเมลและรหัสผ่าน<br>3. กลับมาที่หน้านี้แล้วรีเฟรช ทีมงานใหม่จะปรากฏในรายการให้แก้ไขข้อมูลได้', () => {});
-                modal.querySelectorAll('.modal-edit-user-btn').forEach(btn => btn.onclick = (e) => {
-                    const userToEdit = allUsers.find(u => u.id === e.currentTarget.dataset.userid);
-                    showAdminEditUserModal(userToEdit);
-                });
                 modal.querySelectorAll('.modal-delete-user-btn').forEach(btn => btn.onclick = (e) => {
                     const userIdToDelete = e.currentTarget.dataset.userid;
                     if (userIdToDelete === currentUser.uid) { alert("ไม่สามารถลบตัวเองได้"); return; }
