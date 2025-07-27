@@ -25,10 +25,10 @@
             background-color: #f0f2f5;
         }
         .gradient-bg {
-            background: linear-gradient(135deg, #6B73FF 0%, #A855F7 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
         }
         .main-gradient-text {
-            background: linear-gradient(90deg, #f97316, #ec4899);
+            background: linear-gradient(90deg, #ef4444, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -105,6 +105,12 @@
 </head>
 <body class="antialiased text-gray-800">
 
+    <!-- Impersonation Banner -->
+    <div id="impersonation-banner" class="hidden fixed top-0 left-0 right-0 bg-yellow-400 text-black p-2 text-center z-50 shadow-lg">
+        กำลังดูในฐานะ: <span id="impersonated-user-name" class="font-bold"></span>
+        <button id="return-to-admin-btn" class="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-sm">กลับสู่มุมมองแอดมิน</button>
+    </div>
+
     <!-- Main Container -->
     <div id="app-container" class="min-h-screen">
 
@@ -139,22 +145,22 @@
                 <form id="login-form" class="space-y-6">
                     <div>
                         <label for="login-identifier" class="text-sm font-medium text-gray-700">อีเมล หรือ Username</label>
-                        <input id="login-identifier" name="loginIdentifier" type="text" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="อีเมล หรือ username">
+                        <input id="login-identifier" name="loginIdentifier" type="text" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="อีเมล หรือ username">
                     </div>
                     <div>
                         <label for="password" class="text-sm font-medium text-gray-700">รหัสผ่าน</label>
                         <div class="relative mt-1">
-                            <input id="password" name="password" type="password" required class="w-full px-4 py-2 pr-28 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="••••••••">
-                            <a href="#" id="forgot-password-btn" class="absolute inset-y-0 right-0 flex items-center pr-3 text-sm font-medium text-purple-600 hover:text-purple-500">ลืมรหัสผ่าน?</a>
+                            <input id="password" name="password" type="password" required class="w-full px-4 py-2 pr-28 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="••••••••">
+                            <a href="#" id="forgot-password-btn" class="absolute inset-y-0 right-0 flex items-center pr-3 text-sm font-medium text-red-600 hover:text-red-500">ลืมรหัสผ่าน?</a>
                         </div>
                     </div>
                     <p id="login-error" class="text-sm text-red-500 hidden"></p>
-                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 disabled:opacity-75">
+                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-300 disabled:opacity-75">
                         ลงชื่อเข้าใช้
                     </button>
                 </form>
                 <p class="text-center text-sm text-gray-600">
-                    ยังไม่มีบัญชี? <a href="#" id="show-signup-modal-btn" class="font-medium text-purple-600 hover:text-purple-500">สมัครสมาชิกที่นี่</a>
+                    ยังไม่มีบัญชี? <a href="#" id="show-signup-modal-btn" class="font-medium text-red-600 hover:text-red-500">สมัครสมาชิกที่นี่</a>
                 </p>
                  <button id="close-login-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
@@ -167,25 +173,25 @@
                 <form id="signup-form" class="mt-6 space-y-4">
                     <div>
                         <label for="signup-username" class="text-sm font-medium text-gray-700">Username (สำหรับล็อกอิน, ไม่สามารถเปลี่ยนได้)</label>
-                        <input type="text" id="signup-username" name="username" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <input type="text" id="signup-username" name="username" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
                     </div>
                     <div>
                         <label for="signup-email" class="text-sm font-medium text-gray-700">อีเมล</label>
-                        <input type="email" id="signup-email" name="email" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <input type="email" id="signup-email" name="email" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
                     </div>
                     <div>
                         <label for="signup-password" class="text-sm font-medium text-gray-700">รหัสผ่าน</label>
-                        <input type="password" id="signup-password" name="password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <input type="password" id="signup-password" name="password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
                     </div>
                     <div>
                         <label for="signup-confirm-password" class="text-sm font-medium text-gray-700">ยืนยันรหัสผ่าน</label>
-                        <input type="password" id="signup-confirm-password" name="confirmPassword" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <input type="password" id="signup-confirm-password" name="confirmPassword" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
                     </div>
                     <p id="signup-error" class="text-sm text-red-500 hidden"></p>
                     <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 disabled:opacity-75">สมัครสมาชิก</button>
                 </form>
                  <p class="text-center text-sm text-gray-600 mt-4">
-                    มีบัญชีอยู่แล้ว? <a href="#" id="show-login-modal-btn" class="font-medium text-purple-600 hover:text-purple-500">กลับไปล็อกอิน</a>
+                    มีบัญชีอยู่แล้ว? <a href="#" id="show-login-modal-btn" class="font-medium text-red-600 hover:text-red-500">กลับไปล็อกอิน</a>
                 </p>
                  <button id="close-signup-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
@@ -199,7 +205,7 @@
                 <form id="change-password-form" class="mt-6 space-y-4">
                     <div>
                         <label for="new-password" class="text-sm font-medium text-gray-700">รหัสผ่านใหม่</label>
-                        <input type="password" id="new-password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+                        <input type="password" id="new-password" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
                     </div>
                     <p id="password-error" class="text-sm text-red-500 hidden"></p>
                     <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
@@ -235,7 +241,7 @@
                 <div class="flex flex-wrap items-center justify-between mb-4">
                     <h2 class="text-2xl font-semibold">รายการคิวงาน</h2>
                     <div class="flex items-center space-x-2 mt-2 md:mt-0">
-                        <button id="add-job-button" class="px-4 py-2 font-semibold text-white bg-purple-500 rounded-lg hover:bg-purple-600 transition-colors admin-only">
+                        <button id="add-job-button" class="px-4 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 admin-only">
                             <i class="ph ph-plus-circle mr-1"></i> สร้าง Job ใหม่
                         </button>
                         <div id="filter-container" class="admin-only flex items-center space-x-2">
@@ -260,7 +266,7 @@
                             <div>
                                 <div class="flex items-center">
                                     <h3 id="job-title" class="text-3xl font-bold text-gray-800"></h3>
-                                    <button id="edit-job-details-btn" class="ml-3 text-gray-400 hover:text-purple-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
+                                    <button id="edit-job-details-btn" class="ml-3 text-gray-400 hover:text-red-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
                                 </div>
                                 <p id="job-dates" class="text-gray-500"></p>
                                 <p id="job-location" class="flex items-center mt-1 text-gray-500"><i class="ph ph-map-pin mr-2"></i><span id="job-location-text"></span></p>
@@ -268,8 +274,8 @@
                             <div class="text-right mt-4 sm:mt-0">
                                 <p id="budget-label" class="text-gray-500">งบประมาณ</p>
                                 <div class="flex items-center justify-end">
-                                    <p id="job-income" class="text-3xl font-bold text-purple-600"></p>
-                                    <button id="edit-budget-btn" class="ml-2 text-gray-400 hover:text-purple-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
+                                    <p id="job-income" class="text-3xl font-bold text-red-600"></p>
+                                    <button id="edit-budget-btn" class="ml-2 text-gray-400 hover:text-red-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -298,8 +304,8 @@
                                     <div class="flex justify-between items-center"><p>ค่าทีมงานรวม</p><p id="summary-team-cost" class="font-semibold">0 บาท</p></div>
                                     <div class="flex justify-between items-center"><p>ค่าใช้จ่ายอื่นๆ รวม</p><p id="summary-other-expenses" class="font-semibold">0 บาท</p></div>
                                     <hr>
-                                    <div class="flex justify-between items-center"><div class="flex items-center"><input type="checkbox" id="wht-toggle" class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"><label for="wht-toggle" class="ml-2">หัก ณ ที่จ่าย (<input type="number" id="wht-percent" value="3" class="w-12 text-center bg-gray-100 rounded">%)</label></div><p id="summary-wht" class="font-semibold">0 บาท</p></div>
-                                    <div class="flex justify-between items-center"><div class="flex items-center"><input type="checkbox" id="vat-toggle" class="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"><label for="vat-toggle" class="ml-2">VAT (7%)</label></div><p id="summary-vat" class="font-semibold">0 บาท</p></div>
+                                    <div class="flex justify-between items-center"><div class="flex items-center"><input type="checkbox" id="wht-toggle" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"><label for="wht-toggle" class="ml-2">หัก ณ ที่จ่าย (<input type="number" id="wht-percent" value="3" class="w-12 text-center bg-gray-100 rounded">%)</label></div><p id="summary-wht" class="font-semibold">0 บาท</p></div>
+                                    <div class="flex justify-between items-center"><div class="flex items-center"><input type="checkbox" id="vat-toggle" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"><label for="vat-toggle" class="ml-2">VAT (7%)</label></div><p id="summary-vat" class="font-semibold">0 บาท</p></div>
                                     <hr>
                                     <div class="flex justify-between items-center text-lg font-bold"><p>รวมค่าใช้จ่ายทั้งหมด</p><p id="summary-total-cost" class="text-red-500">0 บาท</p></div>
                                 </div>
@@ -349,6 +355,7 @@
         let jobUnsubscribe = null, usersUnsubscribe = null;
         let allUsers = [];
         let allActiveJobs = []; // For filtering
+        let originalAdminData = null;
 
         const publicView = document.getElementById('public-view');
         const mainApp = document.getElementById('main-app');
@@ -356,7 +363,7 @@
         const signupModal = document.getElementById('signup-modal');
         
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
+            if (user && !originalAdminData) { // Only run if not in impersonation mode
                 currentUser = user;
                 const userDocRef = doc(db, "users", user.uid);
                 const userDocSnap = await getDoc(userDocRef);
@@ -374,8 +381,9 @@
                         await initializeAppUI();
                     } catch (error) { showLoginScreen("เกิดข้อผิดพลาดในการตั้งค่าบัญชีผู้ใช้"); }
                 }
-            } else {
+            } else if (!user) {
                 currentUser = null; currentUserData = null; currentUserRole = null;
+                originalAdminData = null; // Clear impersonation on logout
                 showPublicUI();
             }
         });
@@ -515,6 +523,7 @@
             e.preventDefault();
             showForgotPasswordModal();
         });
+        document.getElementById('return-to-admin-btn').addEventListener('click', returnToAdminView);
 
 
         function showLoginScreen(errorMsg = null, showChangePassword = false) {
@@ -543,6 +552,17 @@
             loginModal.classList.add('hidden');
             signupModal.classList.add('hidden');
             mainApp.classList.remove('hidden');
+
+            const banner = document.getElementById('impersonation-banner');
+            if (originalAdminData) {
+                banner.classList.remove('hidden');
+                document.getElementById('impersonated-user-name').textContent = currentUserData.nickname || currentUserData.name;
+                mainApp.style.paddingTop = '3rem';
+            } else {
+                banner.classList.add('hidden');
+                mainApp.style.paddingTop = '';
+            }
+
             document.getElementById('user-name-display').textContent = currentUserData.nickname || currentUserData.name;
             document.getElementById('user-role').textContent = currentUserRole;
             document.getElementById('user-id-display').textContent = currentUser.uid;
@@ -679,15 +699,10 @@
                     const isWorking = member.workdays.includes(day);
                     const dailyRate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
                     
-                    const canViewRate = (currentUserRole === 'admin' || currentUser.uid === member.userId || (job.teamLeaderId && currentUser.uid === job.teamLeaderId));
-                    let rateDisplayHTML = `<span class="text-xs text-gray-400">-</span>`; 
-                    if (canViewRate) {
-                        const canEditRate = (currentUserRole === 'admin');
-                        if(canEditRate) {
-                            rateDisplayHTML = `<span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
-                        } else {
-                            rateDisplayHTML = `<span class="text-xs text-gray-500">${dailyRate.toLocaleString()}</span>`;
-                        }
+                    const canEditRate = (currentUserRole === 'admin');
+                    let rateDisplayHTML = `<span class="text-xs text-gray-500">${dailyRate.toLocaleString()}</span>`;
+                    if (canEditRate) {
+                        rateDisplayHTML = `<span class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer edit-daily-rate-btn" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
                     }
 
                     const isDisabled = (currentUserRole !== 'admin');
@@ -1048,7 +1063,7 @@
             allUsers.forEach(user => {
                 const displayName = user.nickname || user.name;
                 const bankInfo = user.bankAccount;
-                userListHTML += `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4"><div><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p><div class="text-xs text-gray-400 mt-1"><i class="ph ph-bank"></i> ${bankInfo?.bank || 'N/A'}: ${bankInfo?.number || 'N/A'}</div></div></div><div class="flex items-center space-x-2"><button class="modal-edit-user-btn p-2 text-blue-500 hover:bg-blue-100 rounded-full" data-userid="${user.id}"><i class="ph ph-pencil-simple"></i></button><button class="modal-delete-user-btn p-2 text-red-500 hover:bg-red-100 rounded-full" data-userid="${user.id}"><i class="ph ph-trash"></i></button></div></div>`;
+                userListHTML += `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4"><div><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p><div class="text-xs text-gray-400 mt-1"><i class="ph ph-bank"></i> ${bankInfo?.bank || 'N/A'}: ${bankInfo?.number || 'N/A'}</div></div></div><div class="flex items-center space-x-2"><button class="modal-switch-view-btn p-2 text-green-500 hover:bg-green-100 rounded-full" data-userid="${user.id}"><i class="ph ph-eye"></i></button><button class="modal-edit-user-btn p-2 text-blue-500 hover:bg-blue-100 rounded-full" data-userid="${user.id}"><i class="ph ph-pencil-simple"></i></button><button class="modal-delete-user-btn p-2 text-red-500 hover:bg-red-100 rounded-full" data-userid="${user.id}"><i class="ph ph-trash"></i></button></div></div>`;
             });
             userListHTML += `</div><hr><button id="show-add-user-info-btn" class="w-full mt-4 px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors">เพิ่มทีมงานใหม่</button>`;
 
@@ -1062,6 +1077,11 @@
                     const userIdToDelete = e.currentTarget.dataset.userid;
                     if (userIdToDelete === currentUser.uid) { alert("ไม่สามารถลบตัวเองได้"); return; }
                     showConfirmModal('ยืนยันการลบทีมงาน', 'คุณต้องการลบข้อมูลทีมงานนี้ใช่หรือไม่? (การกระทำนี้จะลบข้อมูลจากฐานข้อมูล แต่จะไม่ลบบัญชีล็อกอิน)', async () => await deleteDoc(doc(db, "users", userIdToDelete)));
+                });
+                modal.querySelectorAll('.modal-switch-view-btn').forEach(btn => btn.onclick = (e) => {
+                    const userIdToImpersonate = e.currentTarget.dataset.userid;
+                    switchToUserView(userIdToImpersonate);
+                    modal.remove();
                 });
             });
         }
@@ -1248,6 +1268,32 @@
                     alert('เกิดข้อผิดพลาด: ไม่สามารถส่งอีเมลรีเซ็ตรหัสผ่านได้ อาจเป็นเพราะไม่มีอีเมลนี้ในระบบ');
                 }
             });
+        }
+
+        function switchToUserView(userIdToImpersonate) {
+            if (currentUserRole !== 'admin' || originalAdminData) return; // Prevent non-admins or nested impersonation
+
+            const targetUser = allUsers.find(u => u.id === userIdToImpersonate);
+            if (targetUser) {
+                originalAdminData = { user: currentUser, data: currentUserData, role: currentUserRole };
+                
+                currentUser = { uid: targetUser.id, email: targetUser.email };
+                currentUserData = targetUser;
+                currentUserRole = targetUser.role;
+
+                initializeAppUI();
+            }
+        }
+
+        function returnToAdminView() {
+            if (!originalAdminData) return;
+            
+            currentUser = originalAdminData.user;
+            currentUserData = originalAdminData.data;
+            currentUserRole = originalAdminData.role;
+
+            originalAdminData = null;
+            initializeAppUI();
         }
 
     </script>
