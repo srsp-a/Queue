@@ -578,7 +578,8 @@
             onSnapshot(q, (snapshot) => {
                 allActiveJobs = snapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(job => job.status !== "completed");
+                    .filter(job => job.status !== "completed")
+                    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
                 
                 if (currentUser) {
                     applyFiltersAndRenderJobs();
