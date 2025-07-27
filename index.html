@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDB QUEUE - Job Management</title>
+    <title>LDB QUEUE - Job Management (v2)</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -139,7 +139,7 @@
                 <form id="login-form" class="space-y-6">
                     <div>
                         <label for="login-identifier" class="text-sm font-medium text-gray-700">อีเมล หรือ Username</label>
-                        <input id="login-identifier" name="loginIdentifier" type="text" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="your@email.com หรือ username">
+                        <input id="login-identifier" name="loginIdentifier" type="text" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500" placeholder="อีเมล หรือ username">
                     </div>
                     <div>
                         <label for="password" class="text-sm font-medium text-gray-700">รหัสผ่าน</label>
@@ -659,7 +659,7 @@
             const expenseList = document.getElementById('expense-list');
             expenseList.innerHTML = '';
             job.expenses.forEach((expense, index) => {
-                expenseList.innerHTML += `<div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100"><div><p>${expense.name}</p></div><div class="flex items-center space-x-3"><p class="font-semibold">${expense.amount.toLocaleString()}</p><button class="text-red-500 hover:text-red-700 remove-expense-btn admin-only" data-index="${index}"><i class="ph ph-x-circle"></i></button></div></div>`;
+                expenseList.innerHTML += `<div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100"><div><p>${expense.name}</p></div><div class="flex items-center space-x-3"><p class="font-semibold">${expense.amount.toLocaleString()}</p><button class="text-blue-500 hover:text-blue-700 edit-expense-btn admin-only" data-index="${index}"><i class="ph ph-pencil-simple"></i></button><button class="text-red-500 hover:text-red-700 remove-expense-btn admin-only" data-index="${index}"><i class="ph ph-x-circle"></i></button></div></div>`;
             });
             updateCalculations(job);
             document.querySelectorAll('.admin-only').forEach(el => { el.style.display = currentUserRole === 'admin' ? '' : 'none'; });
@@ -714,6 +714,10 @@
                 currentJobData.expenses.splice(parseInt(e.currentTarget.dataset.index), 1);
                 await updateDoc(doc(db, "jobs", currentJobId), { expenses: currentJobData.expenses });
             }));
+            document.querySelectorAll('.edit-expense-btn').forEach(btn => btn.onclick = (e) => {
+                const index = parseInt(e.currentTarget.dataset.index);
+                showEditExpenseModal(currentJobData.expenses[index], index);
+            });
             document.querySelectorAll('.delete-day-btn').forEach(btn => btn.onclick = (e) => {
                 const dayToDelete = e.currentTarget.dataset.day;
                 showConfirmModal('ยืนยันการลบวัน', `คุณต้องการลบวันที่ ${formatShortDate(dayToDelete)} หรือไม่?`, async () => {
@@ -939,6 +943,19 @@
             const content = `<input type="text" name="name" placeholder="ชื่อรายการ" required class="w-full p-2 border rounded"><input type="number" name="amount" placeholder="จำนวนเงิน" required class="w-full p-2 border rounded">`;
             showModal('เพิ่มค่าใช้จ่าย', content, async (formData, submitButton, modal) => {
                 await updateDoc(doc(db, "jobs", currentJobId), { expenses: arrayUnion({ name: formData.get('name'), amount: Number(formData.get('amount')) })});
+                modal.remove();
+            });
+        }
+        
+        function showEditExpenseModal(expense, index) {
+            const content = `<input type="text" name="name" placeholder="ชื่อรายการ" required class="w-full p-2 border rounded" value="${expense.name}"><input type="number" name="amount" placeholder="จำนวนเงิน" required class="w-full p-2 border rounded" value="${expense.amount}">`;
+            showModal('แก้ไขค่าใช้จ่าย', content, async (formData, submitButton, modal) => {
+                const updatedExpense = {
+                    name: formData.get('name'),
+                    amount: Number(formData.get('amount'))
+                };
+                currentJobData.expenses[index] = updatedExpense;
+                await updateDoc(doc(db, "jobs", currentJobId), { expenses: currentJobData.expenses });
                 modal.remove();
             });
         }
