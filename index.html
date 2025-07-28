@@ -19,6 +19,9 @@
     <!-- html2canvas for image capture -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         body {
             font-family: 'Kanit', sans-serif;
@@ -126,7 +129,7 @@
             <header class="flex flex-wrap items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
                     <h1 class="text-4xl font-bold main-gradient-text">LDB QUEUE</h1>
-                    <p class="mt-1 text-gray-500">ภาพรวมคิวงานทั้งหมด</p>
+                    <p class="mt-1 text-gray-500">คิวงานทั้งหมด</p>
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
                     <p class="text-sm text-gray-500">คลิกที่คิวงานเพื่อดูรายละเอียดและลงชื่อเข้าใช้</p>
@@ -231,6 +234,10 @@
                     <p class="text-xs text-gray-400">User ID: <span id="user-id-display"></span></p>
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
+                    <button id="notifications-button" class="relative p-2 text-gray-600 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
+                        <i class="ph ph-bell text-xl"></i>
+                        <span id="notification-badge" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 hidden"></span>
+                    </button>
                     <button id="manage-all-users-button" class="px-4 py-2 font-semibold text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors admin-only">
                         <i class="ph ph-users-three mr-1"></i> จัดการทีมงาน
                     </button>
@@ -252,15 +259,11 @@
                     <h2 class="text-2xl font-semibold">รายการคิวงาน</h2>
                     <div class="flex items-center space-x-2 mt-2 md:mt-0">
                         <button id="add-job-button" class="px-4 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 admin-only">
-                            <i class="ph ph-plus-circle mr-1"></i> สร้าง Job ใหม่
+                            <i class="ph ph-plus-circle mr-1"></i> เพิ่มคิวงานใหม่
                         </button>
-                        <div id="filter-container" class="admin-only flex items-center space-x-2">
-                            <input type="date" id="search-date-input" class="p-2 border rounded-lg hidden">
-                            <select id="job-filter-select" class="p-2 border rounded-lg bg-white">
-                                <option value="all">แสดงทั้งหมด</option>
-                                <option value="my_jobs">คิวงานของฉัน</option>
-                                <option value="by_date">ค้นหาจากวันที่</option>
-                            </select>
+                        <div id="member-job-filters" class="hidden items-center space-x-2">
+                            <button id="filter-my-jobs" class="px-4 py-2 text-sm font-semibold rounded-lg">คิวงานของฉัน</button>
+                            <button id="filter-all-jobs" class="px-4 py-2 text-sm font-semibold rounded-lg">คิวงานทั้งหมด</button>
                         </div>
                     </div>
                 </div>
@@ -301,8 +304,8 @@
                                         <label for="admin-notes-textarea" class="block text-xl font-semibold mb-2">หมายเหตุ (แอดมิน):</label>
                                         <textarea id="admin-notes-textarea" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="หมายเหตุสำหรับแอดมินเท่านั้น..."></textarea>
                                     </div>
-                                    <div>
-                                        <label for="team-notes-textarea" class="block text-xl font-semibold mb-2">โน้ต (สำหรับทีมงาน):</label>
+                                    <div id="team-notes-container">
+                                        <label for="team-notes-textarea" class="block text-xl font-semibold mb-2">โน้ต:</label>
                                         <textarea id="team-notes-textarea" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="โน้ตสำหรับทีมงานทุกคน..."></textarea>
                                     </div>
                                 </div>
@@ -382,6 +385,31 @@
 
             <!-- Admin Summary -->
             <div id="admin-summary-container" class="hidden space-y-8">
+                 <!-- Charts and Stats -->
+                <section>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <h2 class="text-2xl font-semibold mb-4">สรุปภาพรวม 3 เดือนล่าสุด</h2>
+                            <div class="p-4 bg-white rounded-2xl shadow-lg">
+                                <canvas id="financial-chart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-semibold mb-4">สถิติ (ตามช่วงวันที่เลือก)</h2>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-white rounded-2xl shadow-lg">
+                                    <h3 class="font-semibold mb-2">ค่าแรงทีมงาน</h3>
+                                    <p>จ่ายแล้ว: <span id="stat-paid-wages" class="font-bold profit-text">0</span> บาท</p>
+                                    <p>ยังไม่จ่าย: <span id="stat-unpaid-wages" class="font-bold loss-text">0</span> บาท</p>
+                                </div>
+                                <div class="p-4 bg-white rounded-2xl shadow-lg">
+                                    <h3 class="font-semibold mb-2">ทีมงานที่ได้รับค่าแรงสูงสุด</h3>
+                                    <div id="stat-top-earners"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 <!-- Income/Expense Summary -->
                 <section>
                     <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ-รายจ่าย (เฉพาะงานที่เสร็จสิ้น)</h2>
@@ -468,7 +496,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAedyGR43aEAO_BFufGmplJVuGkmIEYgG0",
@@ -489,11 +517,14 @@
 
         let currentUser = null, currentUserData = null, currentUserRole = null;
         let currentJobId = null, currentJobData = null;
-        let jobUnsubscribe = null, usersUnsubscribe = null;
+        let jobUnsubscribe = null, usersUnsubscribe = null, notificationsUnsubscribe = null;
         let allUsers = [];
         let allActiveJobs = []; // For filtering
         let allCompletedJobs = []; // For financial summary
+        let allNotifications = [];
         let originalAdminData = null;
+        let memberJobFilter = 'my_jobs'; // 'my_jobs' or 'all'
+        let financialChart = null;
 
         const publicView = document.getElementById('public-view');
         const mainApp = document.getElementById('main-app');
@@ -640,6 +671,7 @@
         document.getElementById('logout-button').addEventListener('click', () => {
             if (jobUnsubscribe) jobUnsubscribe();
             if (usersUnsubscribe) usersUnsubscribe();
+            if (notificationsUnsubscribe) notificationsUnsubscribe();
             signOut(auth);
         });
 
@@ -709,8 +741,10 @@
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.style.display = currentUserRole === 'admin' ? '' : 'none';
             });
+            document.getElementById('member-job-filters').style.display = currentUserRole === 'member' ? 'flex' : 'none';
             listenForJobs();
             listenForUsers();
+            listenForNotifications();
         }
 
         function listenForJobs() {
@@ -750,34 +784,53 @@
         }
 
         function applyFiltersAndRenderJobs() {
-            const filterType = document.getElementById('job-filter-select').value;
-            const dateValue = document.getElementById('search-date-input').value;
             let filteredJobs = allActiveJobs;
 
             if (currentUserRole === 'member') {
-                document.getElementById('filter-container').style.display = 'none';
-                filteredJobs = allActiveJobs.filter(job => 
-                    job.team.some(member => member.userId === currentUser.uid)
-                );
-            } else { // Admin filters
-                document.getElementById('filter-container').style.display = 'flex';
-                if (filterType === 'my_jobs') {
+                document.getElementById('member-job-filters').style.display = 'flex';
+                document.getElementById('filter-my-jobs').classList.toggle('gradient-bg', memberJobFilter === 'my_jobs');
+                document.getElementById('filter-my-jobs').classList.toggle('text-white', memberJobFilter === 'my_jobs');
+                document.getElementById('filter-all-jobs').classList.toggle('gradient-bg', memberJobFilter === 'all');
+                document.getElementById('filter-all-jobs').classList.toggle('text-white', memberJobFilter === 'all');
+                if (memberJobFilter === 'my_jobs') {
                     filteredJobs = allActiveJobs.filter(job => 
                         job.team.some(member => member.userId === currentUser.uid)
                     );
-                } else if (filterType === 'by_date' && dateValue) {
-                    filteredJobs = allActiveJobs.filter(job => {
-                        return job.workdays.includes(dateValue);
-                    });
                 }
+            } else { // Admin filters
+                document.getElementById('member-job-filters').style.display = 'none';
             }
 
             const jobList = document.getElementById('job-list');
             jobList.innerHTML = '';
             filteredJobs.forEach(job => {
-                jobList.innerHTML += `<div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white" data-id="${job.id}"><div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2"><i class="ph-fill ph-video-camera text-3xl text-gray-500"></i></div><h5 class="font-semibold truncate">${job.name}</h5><p class="text-xs text-gray-500">${formatDateRange(job.startDate, job.endDate)}</p></div>`;
+                const isMyJob = job.team.some(m => m.userId === currentUser.uid);
+                const iconColorClass = isMyJob ? 'main-gradient-text' : 'text-gray-500';
+                const cardHTML = `
+                    <div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white relative" data-id="${job.id}" data-name="${job.name}">
+                        <div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2">
+                            <i class="ph-fill ph-video-camera text-3xl ${iconColorClass}"></i>
+                        </div>
+                        <h5 class="font-semibold truncate">${job.name}</h5>
+                        <p class="text-xs text-gray-500">${formatDateRange(job.startDate, job.endDate)}</p>
+                    </div>`;
+                jobList.innerHTML += cardHTML;
             });
-            document.querySelectorAll('#job-list .job-card').forEach(card => card.addEventListener('click', () => selectJob(card.dataset.id)));
+            
+            document.querySelectorAll('#job-list .job-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const jobId = card.dataset.id;
+                    const jobName = card.dataset.name;
+                    const job = allActiveJobs.find(j => j.id === jobId);
+                    const isMyJob = job.team.some(m => m.userId === currentUser.uid);
+
+                    if (currentUserRole === 'admin' || isMyJob) {
+                        selectJob(jobId);
+                    } else {
+                        showRequestToJoinModal(jobId, jobName);
+                    }
+                });
+            });
         }
         
         function listenForUsers() {
@@ -872,7 +925,8 @@
                         rateDisplayHTML = `<span class="text-xs text-gray-500 ${canEditRate ? 'hover:text-blue-600 cursor-pointer edit-daily-rate-btn' : ''}" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
                     }
                     const isDisabled = (currentUserRole !== 'admin');
-                    rowHTML += `<td class="py-2 px-3 border-b text-center"><div class="flex flex-col items-center justify-center space-y-1"><button class="custom-checkbox schedule-checkbox ${isWorking ? 'checked' : ''} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}" data-userid="${member.userId}" data-day="${day}" ${isDisabled ? 'disabled' : ''}><i class="ph-bold ph-check text-lg"></i></button>${rateDisplayHTML}</div></td>`;
+                    const disabledClass = isDisabled ? 'cursor-not-allowed' + (isWorking ? '' : ' opacity-50') : '';
+                    rowHTML += `<td class="py-2 px-3 border-b text-center"><div class="flex flex-col items-center justify-center space-y-1"><button class="custom-checkbox schedule-checkbox ${isWorking ? 'checked' : ''} ${disabledClass}" data-userid="${member.userId}" data-day="${day}" ${isDisabled ? 'disabled' : ''}><i class="ph-bold ph-check text-lg"></i></button>${rateDisplayHTML}</div></td>`;
                 });
 
                 // Total wage column
@@ -883,10 +937,12 @@
                             </td>`;
 
                 // Management column
+                const payButtonIcon = member.isPaid ? 'ph-arrow-counter-clockwise' : 'ph-currency-dollar';
+                const payButtonColor = member.isPaid ? 'text-orange-500 hover:text-orange-700' : 'text-green-500 hover:text-green-700';
                 rowHTML += `<td class="py-2 px-3 border-b text-center admin-only">
                                 <button class="text-blue-500 hover:text-blue-700 mr-2 edit-member-btn" data-userid="${member.userId}"><i class="ph ph-pencil-simple"></i></button>
                                 <button class="text-red-500 hover:text-red-700 mr-2 remove-member-btn" data-userid="${member.userId}"><i class="ph ph-trash"></i></button>
-                                <button class="pay-member-btn text-green-500 hover:text-green-700 disabled:text-gray-300 disabled:cursor-not-allowed" data-userid="${member.userId}" ${member.isPaid ? 'disabled' : ''}><i class="ph ph-currency-dollar"></i></button>
+                                <button class="pay-member-btn ${payButtonColor}" data-userid="${member.userId}"><i class="ph ${payButtonIcon}"></i></button>
                             </td></tr>`;
                 scheduleBody.innerHTML += rowHTML;
             });
@@ -903,12 +959,19 @@
             
             document.getElementById('admin-notes-textarea').value = job.notes || '';
             
+            const teamNotesContainer = document.getElementById('team-notes-container');
             const teamNotesTextarea = document.getElementById('team-notes-textarea');
             teamNotesTextarea.value = job.teamNotes || '';
             const isTeamLeader = job.teamLeaderId === currentUser.uid;
             const canEditTeamNotes = currentUserRole === 'admin' || isTeamLeader;
             teamNotesTextarea.disabled = !canEditTeamNotes;
             teamNotesTextarea.classList.toggle('bg-gray-100', !canEditTeamNotes);
+            
+            if (!job.teamNotes && !canEditTeamNotes) {
+                teamNotesContainer.classList.add('hidden');
+            } else {
+                teamNotesContainer.classList.remove('hidden');
+            }
 
 
             updateCalculations(job);
@@ -930,6 +993,11 @@
 
             const payAllBtn = document.getElementById('pay-all-btn');
             payAllBtn.disabled = unpaidMembers.length === 0;
+            
+            const completeJobBtn = document.getElementById('complete-job-btn');
+            completeJobBtn.disabled = unpaidMembers.length > 0;
+            completeJobBtn.classList.toggle('opacity-50', unpaidMembers.length > 0);
+            completeJobBtn.classList.toggle('cursor-not-allowed', unpaidMembers.length > 0);
         }
         
         function updateCalculations(job) {
@@ -1012,12 +1080,20 @@
             });
             
             document.querySelectorAll('.pay-member-btn').forEach(btn => btn.onclick = (e) => {
-                const userIdToPay = e.currentTarget.dataset.userid;
-                const member = allUsers.find(u => u.id === userIdToPay);
-                const memberName = member.nickname || member.name;
-                showConfirmModal('ยืนยันการจ่ายค่าแรง', `คุณต้องการบันทึกว่าจ่ายค่าแรงให้ ${memberName} แล้วใช่หรือไม่?`, async () => {
+                const userIdToToggle = e.currentTarget.dataset.userid;
+                const memberInfo = currentJobData.team.find(m => m.userId === userIdToToggle);
+                const memberUser = allUsers.find(u => u.id === userIdToToggle);
+                const memberName = memberUser.nickname || memberUser.name;
+                const isPaid = memberInfo.isPaid;
+
+                const title = isPaid ? 'ยืนยันการยกเลิกจ่ายค่าแรง' : 'ยืนยันการจ่ายค่าแรง';
+                const message = isPaid ? `คุณต้องการยกเลิกสถานะ "ได้รับเงินแล้ว" ของ ${memberName} ใช่หรือไม่?` : `คุณต้องการบันทึกว่าจ่ายค่าแรงให้ ${memberName} แล้วใช่หรือไม่?`;
+
+                showConfirmModal(title, message, async () => {
                     const updatedTeam = currentJobData.team.map(m => {
-                        if (m.userId === userIdToPay) return { ...m, isPaid: true };
+                        if (m.userId === userIdToToggle) {
+                            return { ...m, isPaid: !isPaid };
+                        }
                         return m;
                     });
                     await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
@@ -1036,7 +1112,7 @@
                 const userIdToRemove = e.currentTarget.dataset.userid;
                 const memberToRemove = currentJobData.team.find(m => m.userId === userIdToRemove);
                 if (memberToRemove) {
-                    showConfirmModal('ยืนยันการลบ', 'คุณต้องการลบทีมงานคนนี้ออกจาก Job หรือไม่?', async () => {
+                    showConfirmModal('ยืนยันการลบ', 'คุณต้องการลบทีมงานคนนี้ออกจากคิวงานนี้หรือไม่?', async () => {
                         await updateDoc(doc(db, "jobs", currentJobId), { team: arrayRemove(memberToRemove) });
                     });
                 }
@@ -1064,14 +1140,13 @@
             document.querySelectorAll('.edit-day-btn').forEach(btn => btn.onclick = (e) => showEditWorkdayModal(e.currentTarget.dataset.day));
         }
         
-        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'complete-job-btn', 'job-filter-select', 'search-date-input', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'summary-search-button'].forEach(id => {
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'complete-job-btn', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'summary-search-button', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                if (id === 'job-filter-select' || id === 'search-date-input') {
-                    el.onchange = () => {
-                        document.getElementById('search-date-input').classList.toggle('hidden', document.getElementById('job-filter-select').value !== 'by_date');
-                        applyFiltersAndRenderJobs();
-                    };
+                if (id === 'filter-my-jobs') {
+                    el.addEventListener('click', () => { memberJobFilter = 'my_jobs'; applyFiltersAndRenderJobs(); });
+                } else if (id === 'filter-all-jobs') {
+                    el.addEventListener('click', () => { memberJobFilter = 'all'; applyFiltersAndRenderJobs(); });
                 } else if (id === 'financial-summary-button') {
                     el.addEventListener('click', showFinancialSummaryView);
                 } else if (id === 'back-to-main-app-btn') {
@@ -1093,6 +1168,9 @@
                             case 'manage-profile-button': showManageProfileModal(); break;
                             case 'manage-all-users-button': showUserManagementModal(); break;
                             case 'complete-job-btn': showConfirmModal('ยืนยันการจบงาน', 'คุณต้องการย้ายงานนี้ออกจากคิวงานปัจจุบันใช่หรือไม่?', async () => {
+                                for (const member of currentJobData.team) {
+                                    await createNotification(member.userId, `คิวงาน <b>${currentJobData.name}</b> เสร็จสิ้นแล้ว`, currentJobId, currentJobData.name);
+                                }
                                 await updateDoc(doc(db, "jobs", currentJobId), { status: "completed" });
                                 document.getElementById('job-details-section').classList.add('hidden');
                             }); break;
@@ -1106,6 +1184,9 @@
                                         link.click();
                                     });
                                 }
+                                break;
+                            case 'notifications-button':
+                                showNotificationsModal();
                                 break;
                         }
                     });
@@ -1176,7 +1257,7 @@
                 totalProfit += profit;
 
                 jobSummaryBody.innerHTML += `
-                    <tr>
+                    <tr class="cursor-pointer hover:bg-gray-100 job-summary-row" data-id="${job.id}">
                         <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">${job.income.toLocaleString()}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-red-500">${jobTotalExpenses.toLocaleString()}</td>
@@ -1187,6 +1268,15 @@
                 job.team.forEach(member => {
                     const wage = calculateTeamCostForMember(member, job.workdays);
                     userWages[member.userId] = (userWages[member.userId] || 0) + wage;
+                });
+            });
+            
+            document.querySelectorAll('.job-summary-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    const jobId = row.dataset.id;
+                    document.getElementById('financial-summary-view').classList.add('hidden');
+                    mainApp.classList.remove('hidden');
+                    selectJob(jobId);
                 });
             });
 
@@ -1304,8 +1394,8 @@
         }
 
         function showJobModal() {
-            const content = `<input type="text" name="name" placeholder="ชื่อ Job" required class="w-full p-2 border rounded"><input type="text" name="location" placeholder="สถานที่" required class="w-full p-2 border rounded"><input type="number" name="income" placeholder="งบประมาณ" required class="w-full p-2 border rounded"><label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded"><label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded">`;
-            showModal('สร้าง Job ใหม่', content, async (formData, submitButton, modal) => {
+            const content = `<input type="text" name="name" placeholder="ชื่อคิวงาน" required class="w-full p-2 border rounded"><input type="text" name="location" placeholder="สถานที่" required class="w-full p-2 border rounded"><input type="number" name="income" placeholder="งบประมาณ" required class="w-full p-2 border rounded"><label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded"><label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded">`;
+            showModal('เพิ่มคิวงานใหม่', content, async (formData, submitButton, modal) => {
                 const startDate = formData.get('startDate'), endDate = formData.get('endDate');
                 let workdays = [];
                 for (let d = new Date(startDate); d <= new Date(endDate); d.setDate(d.getDate() + 1)) { workdays.push(new Date(d).toISOString().split('T')[0]); }
@@ -1340,7 +1430,9 @@
                 <input type="text" name="position" placeholder="ตำแหน่ง" required class="w-full p-2 border rounded">
                 <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded">`;
             showModal('เพิ่มสมาชิกในทีม', content, async (formData, submitButton, modal) => {
-                await updateDoc(doc(db, "jobs", currentJobId), { team: arrayUnion({ userId: formData.get('userId'), position: formData.get('position'), dailyRate: Number(formData.get('dailyRate')), workdays: [], dailyOverrides: {}, isPaid: false })})
+                const userId = formData.get('userId');
+                await updateDoc(doc(db, "jobs", currentJobId), { team: arrayUnion({ userId: userId, position: formData.get('position'), dailyRate: Number(formData.get('dailyRate')), workdays: [], dailyOverrides: {}, isPaid: false })})
+                await createNotification(userId, `คุณถูกเพิ่มเข้าคิวงาน: <b>${currentJobData.name}</b>`, currentJobId, currentJobData.name);
                 modal.remove();
             }, true, (modal) => {
                 const selectEl = modal.querySelector('#add-member-select');
@@ -1358,7 +1450,6 @@
         function showEditMemberModal(member) {
             const memberData = allUsers.find(u => u.id === member.userId);
             let userOptions = allUsers.map(u => `<option value="${u.id}" data-pic="${u.profilePic || ''}" ${u.id === member.userId ? 'selected' : ''}>${u.nickname || u.name}</option>`).join('');
-            const isLeader = currentJobData.teamLeaderId === member.userId;
             const content = `
                 <div class="flex items-center space-x-4">
                     <img id="edit-member-pic-preview" src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=รูป'}" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
@@ -1367,7 +1458,7 @@
                 <input type="text" name="position" placeholder="ตำแหน่ง" required class="w-full p-2 border rounded" value="${member.position}">
                 <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded" value="${member.dailyRate}">
                 <div class="flex items-center space-x-2">
-                    <input type="checkbox" id="is-leader-checkbox" name="isLeader" ${isLeader ? 'checked' : ''}>
+                    <input type="checkbox" id="is-leader-checkbox" name="isLeader" ${currentJobData.teamLeaderId === member.userId ? 'checked' : ''}>
                     <label for="is-leader-checkbox">กำหนดเป็นหัวหน้าทีม</label>
                 </div>`;
             showModal('แก้ไขข้อมูลทีมงาน', content, async (formData, submitButton, modal) => {
@@ -1404,7 +1495,7 @@
         
         function showEditBudgetModal(currentBudget) {
             showModal('แก้ไขงบประมาณ', `<input type="number" name="budget" required class="w-full p-2 border rounded" value="${currentBudget}">`, async (formData, submitButton, modal) => {
-                await updateDoc(doc(db, "jobs", currentJobId), { income: Number(formData.get('budget')) });
+                await updateDoc(doc(db, "jobs", currentJobId), { income: Number(formData.get('income')) });
                 modal.remove();
             });
         }
@@ -1667,6 +1758,217 @@
 
             originalAdminData = null;
             initializeAppUI();
+        }
+
+        // --- NOTIFICATION FUNCTIONS ---
+        async function createNotification(recipientId, message, jobId = '', jobName = '') {
+            if (!recipientId) return;
+            // To avoid notifying the action-taker
+            const finalRecipients = (Array.isArray(recipientId) ? recipientId : [recipientId]).filter(id => id !== currentUser.uid);
+            if (finalRecipients.length === 0) return;
+
+            await addDoc(collection(db, "notifications"), {
+                senderId: currentUser.uid,
+                senderName: "ระบบ", // Or currentUserData.name
+                recipientIds: finalRecipients,
+                jobId: jobId,
+                jobName: jobName,
+                type: 'system_update',
+                status: 'info',
+                message: message,
+                isRead: false,
+                createdAt: serverTimestamp()
+            });
+        }
+
+        function listenForNotifications() {
+            if (notificationsUnsubscribe) notificationsUnsubscribe();
+            if (!currentUser) return;
+
+            const q = query(collection(db, "notifications"), where("recipientIds", "array-contains", currentUser.uid));
+            
+            notificationsUnsubscribe = onSnapshot(q, (snapshot) => {
+                allNotifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const unreadCount = allNotifications.filter(n => !n.isRead).length;
+                
+                const badge = document.getElementById('notification-badge');
+                if (unreadCount > 0) {
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+
+        async function showRequestToJoinModal(jobId, jobName) {
+            const job = allActiveJobs.find(j => j.id === jobId);
+            if (!job) return;
+
+            showConfirmModal(
+                `ขอลงคิวงาน "${jobName}"?`,
+                'คำขอของคุณรอการอนุมัติ หากอนุมัติหรือไม่อนุมัติจะมีแจ้งเตือนอีกครั้ง',
+                async () => {
+                    const admins = allUsers.filter(u => u.role === 'admin');
+                    let recipientIds = admins.map(a => a.id);
+                    if (job.teamLeaderId && !recipientIds.includes(job.teamLeaderId)) {
+                        recipientIds.push(job.teamLeaderId);
+                    }
+
+                    if (job.team.some(m => m.userId === currentUser.uid)) {
+                        alert("คุณอยู่ในคิวงานนี้แล้ว");
+                        return;
+                    }
+
+                    const existingRequestQuery = query(collection(db, "notifications"), 
+                        where("senderId", "==", currentUser.uid),
+                        where("jobId", "==", jobId),
+                        where("type", "==", "join_request"),
+                        where("status", "==", "pending")
+                    );
+                    const existingRequestSnapshot = await getDocs(existingRequestQuery);
+                    if (!existingRequestSnapshot.empty) {
+                        alert("คุณได้ส่งคำขอสำหรับคิวงานนี้ไปแล้ว");
+                        return;
+                    }
+
+                    await addDoc(collection(db, "notifications"), {
+                        senderId: currentUser.uid,
+                        senderName: currentUserData.nickname || currentUserData.name,
+                        recipientIds: recipientIds,
+                        jobId: jobId,
+                        jobName: jobName,
+                        type: 'join_request',
+                        status: 'pending', // pending, approved, denied
+                        isRead: false,
+                        createdAt: serverTimestamp()
+                    });
+                    alert('ส่งคำขอเรียบร้อยแล้ว');
+                }
+            );
+        }
+
+        async function showNotificationsModal() {
+            if (allNotifications.length === 0) {
+                alert("ยังไม่มีการแจ้งเตือน");
+                return;
+            }
+
+            let notificationsHTML = '<div class="space-y-3">';
+            allNotifications.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0)); // Sort newest first
+
+            for (const notification of allNotifications) {
+                let actionButtons = '';
+                const isJoinRequest = notification.type === 'join_request' && notification.status === 'pending';
+                const jobForNotif = allActiveJobs.find(j => j.id === notification.jobId);
+                const canApprove = currentUserRole === 'admin' || (jobForNotif && currentUser.uid === jobForNotif.teamLeaderId);
+
+                if (isJoinRequest && canApprove) {
+                    actionButtons = `
+                        <div class="flex space-x-2 mt-2">
+                            <button class="approve-request-btn px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600" data-id="${notification.id}">อนุมัติ</button>
+                            <button class="deny-request-btn px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600" data-id="${notification.id}">ปฏิเสธ</button>
+                        </div>`;
+                }
+                
+                let statusText = '';
+                switch(notification.status) {
+                    case 'approved': statusText = `<span class="font-semibold text-green-600"> (อนุมัติแล้ว)</span>`; break;
+                    case 'denied': statusText = `<span class="font-semibold text-red-600"> (ถูกปฏิเสธ)</span>`; break;
+                }
+                
+                const message = notification.message || `<b>${notification.senderName}</b> ได้ส่งคำขอเข้าร่วมคิวงาน <b>${notification.jobName}</b>`;
+
+                notificationsHTML += `
+                    <div class="p-3 rounded-lg ${notification.isRead ? 'bg-gray-50' : 'bg-blue-50 border-l-4 border-blue-500'}">
+                        <p class="text-sm text-gray-800">
+                            ${message}${statusText}
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">${notification.createdAt ? notification.createdAt.toDate().toLocaleString('th-TH') : ''}</p>
+                        ${actionButtons}
+                    </div>
+                `;
+            }
+            notificationsHTML += '</div>';
+
+            showModal('การแจ้งเตือน', notificationsHTML, null, false, (modal) => {
+                modal.querySelectorAll('.approve-request-btn').forEach(btn => btn.onclick = (e) => {
+                    const notificationId = e.currentTarget.dataset.id;
+                    const notification = allNotifications.find(n => n.id === notificationId);
+                    approveRequest(notification);
+                    modal.remove();
+                });
+                modal.querySelectorAll('.deny-request-btn').forEach(btn => btn.onclick = (e) => {
+                    const notificationId = e.currentTarget.dataset.id;
+                    const notification = allNotifications.find(n => n.id === notificationId);
+                    denyRequest(notification);
+                    modal.remove();
+                });
+            });
+
+            const unreadNotifications = allNotifications.filter(n => !n.isRead);
+            for (const notification of unreadNotifications) {
+                await updateDoc(doc(db, "notifications", notification.id), { isRead: true });
+            }
+        }
+
+        async function approveRequest(notification) {
+            const content = `
+                <p>กำหนดตำแหน่งและค่าแรงสำหรับ <b>${notification.senderName}</b> ในคิวงาน <b>${notification.jobName}</b></p>
+                <input type="text" name="position" placeholder="ตำแหน่ง" required class="w-full p-2 border rounded">
+                <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded">`;
+            
+            showModal('อนุมัติคำขอ', content, async (formData, submitBtn, modal) => {
+                const position = formData.get('position');
+                const dailyRate = Number(formData.get('dailyRate'));
+
+                await updateDoc(doc(db, "jobs", notification.jobId), { 
+                    team: arrayUnion({ 
+                        userId: notification.senderId, 
+                        position: position, 
+                        dailyRate: dailyRate, 
+                        workdays: [], 
+                        dailyOverrides: {}, 
+                        isPaid: false 
+                    })
+                });
+
+                await updateDoc(doc(db, "notifications", notification.id), { status: 'approved' });
+
+                await addDoc(collection(db, "notifications"), {
+                    senderId: currentUser.uid,
+                    senderName: "ระบบ",
+                    recipientIds: [notification.senderId],
+                    jobId: notification.jobId,
+                    jobName: notification.jobName,
+                    type: 'request_response',
+                    status: 'approved',
+                    message: `คำขอเข้าร่วมคิวงาน <b>${notification.jobName}</b> ของคุณได้รับการอนุมัติแล้ว`,
+                    isRead: false,
+                    createdAt: serverTimestamp()
+                });
+                
+                alert('อนุมัติคำขอเรียบร้อยแล้ว');
+                modal.remove();
+            });
+        }
+
+        async function denyRequest(notification) {
+            await updateDoc(doc(db, "notifications", notification.id), { status: 'denied' });
+
+            await addDoc(collection(db, "notifications"), {
+                senderId: currentUser.uid,
+                senderName: "ระบบ",
+                recipientIds: [notification.senderId],
+                jobId: notification.jobId,
+                jobName: notification.jobName,
+                type: 'request_response',
+                status: 'denied',
+                message: `คำขอเข้าร่วมคิวงาน <b>${notification.jobName}</b> ของคุณถูกปฏิเสธ`,
+                isRead: false,
+                createdAt: serverTimestamp()
+            });
+
+            alert('ปฏิเสธคำขอเรียบร้อยแล้ว');
         }
 
     </script>
