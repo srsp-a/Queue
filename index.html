@@ -111,6 +111,10 @@
         .drag-over {
             border-top: 2px solid #ef4444;
         }
+        #financial-filter-buttons .active {
+            background-color: #ec4899;
+            color: white;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -289,7 +293,7 @@
                                 <div class="flex items-center justify-end">
                                     <div id="member-wage-container" class="text-right">
                                         <p id="job-income" class="text-3xl font-bold"></p>
-                                        <p id="member-paid-status" class="text-sm text-green-600 font-medium hidden">ได้รับเงินแล้ว</p>
+                                        <p id="member-paid-status" class="text-sm text-green-600 font-medium hidden"></p>
                                     </div>
                                     <button id="edit-budget-btn" class="ml-2 text-gray-400 hover:text-red-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
                                 </div>
@@ -369,17 +373,18 @@
             <!-- Date Filter -->
             <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
                 <div class="flex flex-wrap items-center gap-4">
-                    <div>
-                        <label for="summary-start-date" class="text-sm font-medium text-gray-700">วันที่เริ่มต้น</label>
-                        <input type="date" id="summary-start-date" class="w-full p-2 mt-1 border rounded-lg">
+                    <div id="financial-filter-buttons" class="flex items-center p-1 bg-gray-200 rounded-lg">
+                        <button data-period="1m" class="px-4 py-1 text-sm font-semibold rounded-md">เดือนนี้</button>
+                        <button data-period="2m" class="px-4 py-1 text-sm font-semibold rounded-md">2 เดือน</button>
+                        <button data-period="3m" class="px-4 py-1 text-sm font-semibold rounded-md">3 เดือน</button>
+                        <button data-period="6m" class="px-4 py-1 text-sm font-semibold rounded-md">6 เดือน</button>
+                        <button data-period="1y" class="px-4 py-1 text-sm font-semibold rounded-md">1 ปี</button>
+                        <button data-period="all" class="px-4 py-1 text-sm font-semibold rounded-md">ทั้งหมด</button>
                     </div>
-                    <div>
-                        <label for="summary-end-date" class="text-sm font-medium text-gray-700">วันที่สิ้นสุด</label>
-                        <input type="date" id="summary-end-date" class="w-full p-2 mt-1 border rounded-lg">
+                    <div id="month-year-selector" class="flex items-center gap-2">
+                        <select id="summary-month" class="p-2 border rounded-lg"></select>
+                        <select id="summary-year" class="p-2 border rounded-lg"></select>
                     </div>
-                    <button id="summary-search-button" class="self-end px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
-                        ค้นหา
-                    </button>
                 </div>
             </section>
 
@@ -389,13 +394,13 @@
                 <section>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
-                            <h2 class="text-2xl font-semibold mb-4">สรุปภาพรวม 3 เดือนล่าสุด</h2>
+                            <h2 class="text-2xl font-semibold mb-4">สรุปภาพรวม</h2>
                             <div class="p-4 bg-white rounded-2xl shadow-lg">
                                 <canvas id="financial-chart"></canvas>
                             </div>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-semibold mb-4">สถิติ (ตามช่วงวันที่เลือก)</h2>
+                            <h2 class="text-2xl font-semibold mb-4">สถิติ</h2>
                             <div class="space-y-4">
                                 <div class="p-4 bg-white rounded-2xl shadow-lg">
                                     <h3 class="font-semibold mb-2">ค่าแรงทีมงาน</h3>
@@ -403,8 +408,8 @@
                                     <p>ยังไม่จ่าย: <span id="stat-unpaid-wages" class="font-bold loss-text">0</span> บาท</p>
                                 </div>
                                 <div class="p-4 bg-white rounded-2xl shadow-lg">
-                                    <h3 class="font-semibold mb-2">ทีมงานที่ได้รับค่าแรงสูงสุด</h3>
-                                    <div id="stat-top-earners"></div>
+                                    <h3 class="font-semibold mb-2">ทีมงานที่ได้รับเงินสูงสุด</h3>
+                                    <div id="stat-top-earners" class="space-y-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -412,7 +417,7 @@
                 </section>
                 <!-- Income/Expense Summary -->
                 <section>
-                    <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ-รายจ่าย (เฉพาะงานที่เสร็จสิ้น)</h2>
+                    <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ-รายจ่าย</h2>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
                         <table class="min-w-full">
                             <thead class="bg-gray-50">
@@ -439,13 +444,14 @@
 
                 <!-- Team Wage Summary -->
                 <section>
-                    <h2 class="text-2xl font-semibold mb-4">สรุปค่าแรงทีมงาน (เฉพาะงานที่เสร็จสิ้น)</h2>
+                    <h2 class="text-2xl font-semibold mb-4">สรุปค่าแรงทีมงาน</h2>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
                         <table class="min-w-full">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อทีมงาน</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ค่าแรงรวม</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ยังไม่ได้รับเงิน</th>
                                 </tr>
                             </thead>
                             <tbody id="team-wage-summary-table-body" class="bg-white divide-y divide-gray-200">
@@ -454,6 +460,7 @@
                                 <tr>
                                     <td class="px-6 py-4 text-left">รวมทั้งหมด</td>
                                     <td id="total-wage-summary" class="px-6 py-4 text-right">0</td>
+                                    <td id="total-unpaid-wage-summary" class="px-6 py-4 text-right">0</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -464,7 +471,7 @@
             <!-- Member Summary -->
             <div id="member-summary-container" class="hidden">
                 <section>
-                    <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ (เฉพาะงานที่เสร็จสิ้น)</h2>
+                    <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ</h2>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
                         <table class="min-w-full">
                             <thead class="bg-gray-50">
@@ -496,7 +503,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc, query, where, getDocs, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAedyGR43aEAO_BFufGmplJVuGkmIEYgG0",
@@ -519,12 +526,14 @@
         let currentJobId = null, currentJobData = null;
         let jobUnsubscribe = null, usersUnsubscribe = null, notificationsUnsubscribe = null;
         let allUsers = [];
+        let allJobs = [];
         let allActiveJobs = []; // For filtering
         let allCompletedJobs = []; // For financial summary
         let allNotifications = [];
         let originalAdminData = null;
         let memberJobFilter = 'my_jobs'; // 'my_jobs' or 'all'
         let financialChart = null;
+        let financialFilter = '1m'; // '1m', '2m', '3m', '6m', '1y', 'all'
 
         const publicView = document.getElementById('public-view');
         const mainApp = document.getElementById('main-app');
@@ -750,7 +759,7 @@
         function listenForJobs() {
             const q = collection(db, "jobs");
             onSnapshot(q, (snapshot) => {
-                const allJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 allActiveJobs = allJobs
                     .filter(job => job.status !== "completed")
@@ -821,7 +830,7 @@
                 card.addEventListener('click', () => {
                     const jobId = card.dataset.id;
                     const jobName = card.dataset.name;
-                    const job = allActiveJobs.find(j => j.id === jobId);
+                    const job = allJobs.find(j => j.id === jobId);
                     const isMyJob = job.team.some(m => m.userId === currentUser.uid);
 
                     if (currentUserRole === 'admin' || isMyJob) {
@@ -842,6 +851,29 @@
         
         function selectJob(jobId) {
             currentJobId = jobId;
+            
+            // Always unsubscribe from the previous listener
+            if (jobUnsubscribe) jobUnsubscribe();
+
+            // Handle deselection
+            if (!jobId) {
+                document.getElementById('job-details-section').classList.add('hidden');
+                currentJobData = null;
+                // Untoggle all cards
+                document.querySelectorAll('#job-list .job-card').forEach(card => {
+                    card.classList.remove('gradient-bg');
+                    card.classList.add('bg-white');
+                    card.querySelector('h5').classList.remove('text-white');
+                    const dateP = card.querySelector('p');
+                    if(dateP) {
+                        dateP.classList.remove('text-white');
+                        dateP.classList.add('text-gray-500');
+                    }
+                });
+                return; // Stop execution here
+            }
+
+            // Handle selection
             document.getElementById('job-details-section').classList.remove('hidden');
             document.querySelectorAll('#job-list .job-card').forEach(card => {
                 const isSelected = card.dataset.id === jobId;
@@ -854,14 +886,21 @@
                     dateP.classList.toggle('text-gray-500', !isSelected);
                 }
             });
-            if (jobUnsubscribe) jobUnsubscribe();
+            
+            // Set up the new listener
             jobUnsubscribe = onSnapshot(doc(db, "jobs", jobId), (docSnap) => {
                 if (docSnap.exists()) {
                     currentJobData = docSnap.data();
                     renderJobDetails(currentJobData);
                 } else {
+                    // This case handles if the job is deleted while being viewed
                     document.getElementById('job-details-section').classList.add('hidden');
+                    currentJobId = null;
+                    currentJobData = null;
                 }
+            }, (error) => {
+                console.error("Error fetching job details:", error);
+                document.getElementById('job-details-section').classList.add('hidden');
             });
         }
 
@@ -884,8 +923,10 @@
                     myTotalWage = calculateTeamCostForMember(myTeamData, job.workdays);
                     if (myTeamData.isPaid) {
                         jobIncomeEl.classList.add('profit-text');
+                        memberPaidStatusEl.textContent = `ได้รับเงินแล้ว (${formatShortDate(myTeamData.paymentDate)})`;
                     } else {
                         jobIncomeEl.classList.add('text-blue-600');
+                        memberPaidStatusEl.textContent = 'ยังไม่ได้รับเงิน';
                     }
                     memberPaidStatusEl.classList.toggle('hidden', !myTeamData.isPaid);
                 } else {
@@ -933,7 +974,7 @@
                 const totalWage = calculateTeamCostForMember(member, job.workdays);
                 rowHTML += `<td class="py-2 px-3 border-b text-center admin-only">
                                 <div class="${member.isPaid ? 'profit-text' : ''} font-semibold">${totalWage.toLocaleString()}</div>
-                                ${member.isPaid ? '<div class="text-xs text-gray-500">ได้รับเงินแล้ว</div>' : ''}
+                                ${member.isPaid ? `<div class="text-xs text-gray-500">จ่ายเมื่อ ${formatShortDate(member.paymentDate)}</div>` : ''}
                             </td>`;
 
                 // Management column
@@ -973,9 +1014,20 @@
                 teamNotesContainer.classList.remove('hidden');
             }
 
-
             updateCalculations(job);
             renderPaymentSummary(job);
+            
+            const completeJobBtn = document.getElementById('complete-job-btn');
+            if (job.status === 'completed') {
+                completeJobBtn.innerHTML = `<i class="ph ph-arrow-u-left-up mr-1"></i> ย้อนคืนคิวงาน`;
+                completeJobBtn.className = 'mt-4 px-6 py-2 font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors admin-only';
+                completeJobBtn.onclick = () => revertJobStatus(currentJobId);
+            } else {
+                completeJobBtn.innerHTML = `<i class="ph ph-check-circle mr-1"></i> เสร็จงานแล้ว`;
+                completeJobBtn.className = 'mt-4 px-6 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors admin-only';
+                completeJobBtn.onclick = () => completeJob(currentJobId);
+            }
+
             document.querySelectorAll('.admin-only').forEach(el => { el.style.display = currentUserRole === 'admin' ? '' : 'none'; });
             addDynamicEventListeners(job);
         }
@@ -995,9 +1047,14 @@
             payAllBtn.disabled = unpaidMembers.length === 0;
             
             const completeJobBtn = document.getElementById('complete-job-btn');
-            completeJobBtn.disabled = unpaidMembers.length > 0;
-            completeJobBtn.classList.toggle('opacity-50', unpaidMembers.length > 0);
-            completeJobBtn.classList.toggle('cursor-not-allowed', unpaidMembers.length > 0);
+            if (job.status !== 'completed') {
+                completeJobBtn.disabled = unpaidMembers.length > 0;
+                completeJobBtn.classList.toggle('opacity-50', unpaidMembers.length > 0);
+                completeJobBtn.classList.toggle('cursor-not-allowed', unpaidMembers.length > 0);
+            } else {
+                 completeJobBtn.disabled = false;
+                 completeJobBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
         
         function updateCalculations(job) {
@@ -1084,25 +1141,39 @@
                 const memberInfo = currentJobData.team.find(m => m.userId === userIdToToggle);
                 const memberUser = allUsers.find(u => u.id === userIdToToggle);
                 const memberName = memberUser.nickname || memberUser.name;
-                const isPaid = memberInfo.isPaid;
-
-                const title = isPaid ? 'ยืนยันการยกเลิกจ่ายค่าแรง' : 'ยืนยันการจ่ายค่าแรง';
-                const message = isPaid ? `คุณต้องการยกเลิกสถานะ "ได้รับเงินแล้ว" ของ ${memberName} ใช่หรือไม่?` : `คุณต้องการบันทึกว่าจ่ายค่าแรงให้ ${memberName} แล้วใช่หรือไม่?`;
-
-                showConfirmModal(title, message, async () => {
-                    const updatedTeam = currentJobData.team.map(m => {
-                        if (m.userId === userIdToToggle) {
-                            return { ...m, isPaid: !isPaid };
-                        }
-                        return m;
+                
+                if (memberInfo.isPaid) {
+                    showConfirmModal('ยืนยันการยกเลิกจ่ายค่าแรง', `คุณต้องการยกเลิกสถานะ "ได้รับเงินแล้ว" ของ ${memberName} ใช่หรือไม่?`, async () => {
+                        const updatedTeam = currentJobData.team.map(m => {
+                            if (m.userId === userIdToToggle) {
+                                const { paymentDate, ...rest } = m;
+                                return { ...rest, isPaid: false };
+                            }
+                            return m;
+                        });
+                        await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
                     });
-                    await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
-                });
+                } else {
+                    showPaymentConfirmModal(memberName, async (paymentDate) => {
+                        const updatedTeam = currentJobData.team.map(m => {
+                            if (m.userId === userIdToToggle) {
+                                return { ...m, isPaid: true, paymentDate: paymentDate };
+                            }
+                            return m;
+                        });
+                        await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
+                    });
+                }
             });
 
             document.getElementById('pay-all-btn').onclick = () => {
-                showConfirmModal('ยืนยันการจ่ายค่าแรงทั้งหมด', 'คุณต้องการจ่ายค่าแรงให้ทีมงานที่เหลือทั้งหมดในครั้งเดียวใช่หรือไม่?', async () => {
-                    const updatedTeam = currentJobData.team.map(m => ({ ...m, isPaid: true }));
+                 showPaymentConfirmModal('ทีมงานที่เหลือทั้งหมด', async (paymentDate) => {
+                    const updatedTeam = currentJobData.team.map(m => {
+                        if (!m.isPaid) {
+                            return { ...m, isPaid: true, paymentDate: paymentDate };
+                        }
+                        return m;
+                    });
                     await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
                 });
             };
@@ -1140,7 +1211,7 @@
             document.querySelectorAll('.edit-day-btn').forEach(btn => btn.onclick = (e) => showEditWorkdayModal(e.currentTarget.dataset.day));
         }
         
-        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'complete-job-btn', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'summary-search-button', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs'].forEach(id => {
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (id === 'filter-my-jobs') {
@@ -1154,9 +1225,7 @@
                         mainApp.classList.remove('hidden');
                         document.getElementById('financial-summary-view').classList.add('hidden');
                     });
-                } else if (id === 'summary-search-button') {
-                    el.addEventListener('click', generateFinancialReport);
-                } else if (id !== 'pay-all-btn') {
+                } else {
                      el.addEventListener('click', () => {
                         switch(id) {
                             case 'add-job-button': showJobModal(); break;
@@ -1167,13 +1236,6 @@
                             case 'edit-job-details-btn': showEditJobDetailsModal(currentJobData); break;
                             case 'manage-profile-button': showManageProfileModal(); break;
                             case 'manage-all-users-button': showUserManagementModal(); break;
-                            case 'complete-job-btn': showConfirmModal('ยืนยันการจบงาน', 'คุณต้องการย้ายงานนี้ออกจากคิวงานปัจจุบันใช่หรือไม่?', async () => {
-                                for (const member of currentJobData.team) {
-                                    await createNotification(member.userId, `คิวงาน <b>${currentJobData.name}</b> เสร็จสิ้นแล้ว`, currentJobId, currentJobData.name);
-                                }
-                                await updateDoc(doc(db, "jobs", currentJobId), { status: "completed" });
-                                document.getElementById('job-details-section').classList.add('hidden');
-                            }); break;
                             case 'save-image-btn': 
                                 const captureArea = document.getElementById('capture-area');
                                 if (captureArea) {
@@ -1194,6 +1256,24 @@
             }
         });
 
+        function completeJob(jobId) {
+            showConfirmModal('ยืนยันการจบงาน', 'คุณต้องการย้ายงานนี้ออกจากคิวงานปัจจุบันใช่หรือไม่?', async () => {
+                for (const member of currentJobData.team) {
+                    await createNotification(member.userId, `คิวงาน <b>${currentJobData.name}</b> เสร็จสิ้นแล้ว`, jobId, currentJobData.name);
+                }
+                await updateDoc(doc(db, "jobs", jobId), { status: "completed" });
+                document.getElementById('job-details-section').classList.add('hidden');
+                selectJob(null); // Deselect job
+            });
+        }
+
+        function revertJobStatus(jobId) {
+            showConfirmModal('ยืนยันการย้อนคืนคิวงาน', 'คุณต้องการย้ายงานนี้กลับไปที่คิวงานปัจจุบันใช่หรือไม่?', async () => {
+                await updateDoc(doc(db, "jobs", jobId), { status: "active" });
+                await createNotification(currentJobData.team.map(m => m.userId), `คิวงาน <b>${currentJobData.name}</b> ถูกย้ายกลับมายังคิวงานปัจจุบัน`, jobId, currentJobData.name);
+            });
+        }
+
         function showFinancialSummaryView() {
             mainApp.classList.add('hidden');
             document.getElementById('financial-summary-view').classList.remove('hidden');
@@ -1201,49 +1281,119 @@
             if (currentUserRole === 'admin') {
                 document.getElementById('admin-summary-container').classList.remove('hidden');
                 document.getElementById('member-summary-container').classList.add('hidden');
+                setupFinancialFilters();
+                generateFinancialReport();
             } else {
                 document.getElementById('admin-summary-container').classList.add('hidden');
                 document.getElementById('member-summary-container').classList.remove('hidden');
+                setupFinancialFilters(); // Also setup for members
+                generateFinancialReport();
             }
-            const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
-            document.getElementById('summary-start-date').value = firstDay;
-            document.getElementById('summary-end-date').value = lastDay;
+        }
+        
+        function setupFinancialFilters() {
+            const monthSelect = document.getElementById('summary-month');
+            const yearSelect = document.getElementById('summary-year');
+            const filterButtons = document.getElementById('financial-filter-buttons');
             
-            generateFinancialReport();
+            // Populate Months
+            monthSelect.innerHTML = '';
+            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+
+            // Populate Years
+            yearSelect.innerHTML = '';
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= currentYear - 5; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + 543; // Display in B.E.
+                yearSelect.appendChild(option);
+            }
+
+            // Set default to current month and year
+            const today = new Date();
+            monthSelect.value = today.getMonth();
+            yearSelect.value = today.getFullYear();
+
+            // Add event listeners
+            filterButtons.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    financialFilter = e.target.dataset.period;
+                    generateFinancialReport();
+                });
+            });
+            monthSelect.addEventListener('change', generateFinancialReport);
+            yearSelect.addEventListener('change', generateFinancialReport);
         }
 
         function generateFinancialReport() {
-            const startDate = document.getElementById('summary-start-date').value;
-            const endDate = document.getElementById('summary-end-date').value;
+            const monthYearSelector = document.getElementById('month-year-selector');
+            const filterButtons = document.getElementById('financial-filter-buttons');
 
-            if (!startDate || !endDate) {
-                alert('กรุณาเลือกช่วงวันที่');
-                return;
+            // Update active button style
+            filterButtons.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === financialFilter);
+            });
+
+            monthYearSelector.style.display = financialFilter === '1m' ? 'flex' : 'none';
+
+            let startDate, endDate = new Date();
+            const today = new Date();
+            
+            switch (financialFilter) {
+                case '1m':
+                    const selectedYear = parseInt(document.getElementById('summary-year').value);
+                    const selectedMonth = parseInt(document.getElementById('summary-month').value);
+                    startDate = new Date(selectedYear, selectedMonth, 1);
+                    endDate = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59);
+                    break;
+                case '2m':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    break;
+                case '3m':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+                    break;
+                case '6m':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 5, 1);
+                    break;
+                case '1y':
+                    startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+                    break;
+                case 'all':
+                    startDate = new Date(2000, 0, 1); // A long time ago
+                    break;
             }
 
-            const filteredJobs = allCompletedJobs.filter(job => {
-                const jobEndDate = new Date(job.endDate);
-                return jobEndDate >= new Date(startDate) && jobEndDate <= new Date(endDate);
+            const filteredJobs = allJobs.filter(job => {
+                const jobStart = new Date(job.startDate);
+                const jobEnd = new Date(job.endDate);
+                // Check if job period overlaps with the filter period
+                return jobStart <= endDate && jobEnd >= startDate;
             });
 
             if (currentUserRole === 'admin') {
-                generateAdminReport(filteredJobs);
+                generateAdminReport(filteredJobs, startDate, endDate);
             } else {
                 generateMemberReport(filteredJobs);
             }
         }
 
-        function generateAdminReport(jobs) {
+        function generateAdminReport(jobs, reportStartDate, reportEndDate) {
             const jobSummaryBody = document.getElementById('job-summary-table-body');
             const teamWageBody = document.getElementById('team-wage-summary-table-body');
+            const statTopEarners = document.getElementById('stat-top-earners');
             jobSummaryBody.innerHTML = '';
             teamWageBody.innerHTML = '';
+            statTopEarners.innerHTML = '';
 
-            let totalIncome = 0;
-            let totalExpenses = 0;
-            let totalProfit = 0;
+            let totalIncome = 0, totalExpenses = 0, totalProfit = 0;
+            let totalPaidWages = 0, totalUnpaidWages = 0;
             const userWages = {};
 
             jobs.forEach(job => {
@@ -1251,6 +1401,8 @@
                 const otherExpenses = job.expenses.reduce((total, expense) => total + expense.amount, 0);
                 const jobTotalExpenses = teamCost + otherExpenses;
                 const profit = job.income - jobTotalExpenses;
+                const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
+                const statusHTML = job.status === 'completed' ? `<i class="text-xs text-green-500"> (เสร็จงานแล้ว)</i>` : '';
 
                 totalIncome += job.income;
                 totalExpenses += jobTotalExpenses;
@@ -1258,7 +1410,9 @@
 
                 jobSummaryBody.innerHTML += `
                     <tr class="cursor-pointer hover:bg-gray-100 job-summary-row" data-id="${job.id}">
-                        <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${job.name} <span class="text-xs text-gray-400">(${jobMonth})</span>${statusHTML}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">${job.income.toLocaleString()}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-red-500">${jobTotalExpenses.toLocaleString()}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right ${profit >= 0 ? 'profit-text' : 'loss-text'}">${profit.toLocaleString()}</td>
@@ -1267,7 +1421,17 @@
 
                 job.team.forEach(member => {
                     const wage = calculateTeamCostForMember(member, job.workdays);
-                    userWages[member.userId] = (userWages[member.userId] || 0) + wage;
+                    if (!userWages[member.userId]) {
+                        userWages[member.userId] = { total: 0, unpaid: 0 };
+                    }
+                    userWages[member.userId].total += wage;
+
+                    if (!member.isPaid) {
+                        userWages[member.userId].unpaid += wage;
+                        totalUnpaidWages += wage;
+                    } else {
+                        totalPaidWages += wage;
+                    }
                 });
             });
             
@@ -1286,22 +1450,100 @@
             document.getElementById('total-profit-summary').className = `px-6 py-4 text-right font-bold ${totalProfit >= 0 ? 'profit-text' : 'loss-text'}`;
 
             let totalWages = 0;
-            const sortedUsers = Object.keys(userWages).sort((a,b) => userWages[b] - userWages[a]);
+            const sortedUsers = Object.keys(userWages).sort((a,b) => userWages[b].total - userWages[a].total);
 
             sortedUsers.forEach(userId => {
                 const user = allUsers.find(u => u.id === userId);
                 const userName = user ? (user.nickname || user.name) : 'Unknown User';
-                const wage = userWages[userId];
-                totalWages += wage;
+                const wageData = userWages[userId];
+                totalWages += wageData.total;
                 teamWageBody.innerHTML += `
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">${userName}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${wage.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${wageData.total.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right loss-text">${wageData.unpaid > 0 ? wageData.unpaid.toLocaleString() : '-'}</td>
                     </tr>
                 `;
             });
             document.getElementById('total-wage-summary').textContent = totalWages.toLocaleString();
+            document.getElementById('total-unpaid-wage-summary').textContent = totalUnpaidWages.toLocaleString();
+            
+            // Update stats
+            document.getElementById('stat-paid-wages').textContent = totalPaidWages.toLocaleString();
+            document.getElementById('stat-unpaid-wages').textContent = totalUnpaidWages.toLocaleString();
+            document.querySelector('#stat-top-earners').previousElementSibling.textContent = "ทีมงานที่ได้รับเงินสูงสุด";
+
+            sortedUsers.slice(0, 3).forEach((userId, index) => {
+                 const user = allUsers.find(u => u.id === userId);
+                 if (user) {
+                    const crownHTML = index === 0 ? `<i class="ph-fill ph-crown text-yellow-500 text-xl absolute -top-3 left-1/2 -translate-x-1/2"></i>` : '';
+                    statTopEarners.innerHTML += `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="relative mr-3">
+                                <img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full object-cover">
+                                ${crownHTML}
+                            </div>
+                            <span>${user.nickname || user.name}</span>
+                        </div>
+                        <span class="font-bold">${userWages[userId].total.toLocaleString()} บาท</span>
+                    </div>`;
+                 }
+            });
+            
+            // Update Chart
+            updateFinancialChart(jobs, reportStartDate, reportEndDate);
         }
+        
+        function updateFinancialChart(jobs, startDate, endDate) {
+            const ctx = document.getElementById('financial-chart').getContext('2d');
+            const data = {
+                labels: [],
+                datasets: [
+                    { label: 'รายรับ', data: [], backgroundColor: 'rgba(54, 162, 235, 0.5)', borderColor: 'rgb(54, 162, 235)', borderWidth: 1 },
+                    { label: 'รายจ่าย', data: [], backgroundColor: 'rgba(255, 99, 132, 0.5)', borderColor: 'rgb(255, 99, 132)', borderWidth: 1 },
+                    { label: 'กำไร', data: [], backgroundColor: 'rgba(75, 192, 192, 0.5)', borderColor: 'rgb(75, 192, 192)', borderWidth: 1 }
+                ]
+            };
+
+            const monthlyData = {};
+            const monthFormatter = new Intl.DateTimeFormat('th-TH', { month: 'short', year: '2-digit' });
+
+            // Initialize months in the range
+            let current = new Date(startDate);
+            while (current <= endDate) {
+                const monthKey = monthFormatter.format(current);
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = { income: 0, expense: 0, profit: 0 };
+                }
+                current.setMonth(current.getMonth() + 1);
+            }
+            
+            jobs.forEach(job => {
+                const monthKey = monthFormatter.format(new Date(job.startDate));
+                if (monthlyData[monthKey]) {
+                    const teamCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
+                    const otherExpenses = job.expenses.reduce((total, expense) => total + expense.amount, 0);
+                    const totalExpense = teamCost + otherExpenses;
+                    const profit = job.income - totalExpense;
+
+                    monthlyData[monthKey].income += job.income;
+                    monthlyData[monthKey].expense += totalExpense;
+                    monthlyData[monthKey].profit += profit;
+                }
+            });
+
+            for (const monthKey in monthlyData) {
+                data.labels.push(monthKey);
+                data.datasets[0].data.push(monthlyData[monthKey].income);
+                data.datasets[1].data.push(monthlyData[monthKey].expense);
+                data.datasets[2].data.push(monthlyData[monthKey].profit);
+            }
+
+            if (financialChart) financialChart.destroy();
+            financialChart = new Chart(ctx, { type: 'bar', data: data, options: { scales: { y: { beginAtZero: true } } } });
+        }
+
 
         function generateMemberReport(jobs) {
             const memberWageBody = document.getElementById('member-wage-table-body');
@@ -1315,9 +1557,18 @@
                 if (myTeamData) {
                     const wage = calculateTeamCostForMember(myTeamData, job.workdays);
                     totalWage += wage;
+                    const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
+                    let statusHTML = '';
+                    if (job.status === 'completed' && myTeamData.isPaid && myTeamData.paymentDate) {
+                        statusHTML = `<br><i class="text-xs text-green-500">เสร็จงานแล้ว ได้รับเงินเมื่อ ${formatShortDate(myTeamData.paymentDate)}</i>`;
+                    }
+
                     memberWageBody.innerHTML += `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
+                        <tr class="cursor-pointer hover:bg-gray-100 member-job-summary-row" data-id="${job.id}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                ${job.name} <span class="text-xs text-gray-400">(${jobMonth})</span>
+                                ${statusHTML}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${wage.toLocaleString()}</td>
                         </tr>
                     `;
@@ -1325,6 +1576,15 @@
             });
 
             document.getElementById('member-total-wage-summary').textContent = totalWage.toLocaleString();
+            
+            document.querySelectorAll('.member-job-summary-row').forEach(row => {
+                row.addEventListener('click', () => {
+                    const jobId = row.dataset.id;
+                    document.getElementById('financial-summary-view').classList.add('hidden');
+                    mainApp.classList.remove('hidden');
+                    selectJob(jobId);
+                });
+            });
         }
 
         function calculateTeamCostForMember(member, workdays) {
@@ -1341,7 +1601,10 @@
             const options = { day: 'numeric', month: 'short', year: 'numeric' };
             return `${new Date(start).toLocaleDateString('th-TH', options)} - ${new Date(end).toLocaleDateString('th-TH', options)}`;
         }
-        function formatShortDate(dateString) { return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); }
+        function formatShortDate(dateString) { 
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); 
+        }
         
         function showModal(title, contentHTML, onSave, showSaveButton = true, onReady = null) {
             const modalId = `modal-${Date.now()}`;
@@ -1366,6 +1629,25 @@
             modal.querySelector('.confirm-btn').onclick = () => { onConfirm(); closeModal(); };
             modal.querySelector('.close-confirm-btn').onclick = closeModal;
         }
+
+        function showPaymentConfirmModal(memberName, onConfirm) {
+            const today = new Date().toISOString().split('T')[0];
+            const content = `
+                <p>คุณต้องการบันทึกว่าจ่ายค่าแรงให้ <b>${memberName}</b> แล้วใช่หรือไม่?</p>
+                <label for="payment-date" class="block mt-4 text-sm font-medium text-gray-700">วันที่จ่ายเงิน</label>
+                <input type="date" id="payment-date" name="paymentDate" value="${today}" class="w-full p-2 mt-1 border rounded-lg">
+            `;
+            showModal('ยืนยันการจ่ายค่าแรง', content, (formData, submitBtn, modal) => {
+                const paymentDate = formData.get('paymentDate');
+                if (!paymentDate) {
+                    alert('กรุณาระบุวันที่จ่ายเงิน');
+                    return;
+                }
+                onConfirm(paymentDate);
+                modal.remove();
+            });
+        }
+
 
         async function uploadToCloudinary(file) {
             if (!file) return null;
@@ -1906,9 +2188,12 @@
             });
 
             const unreadNotifications = allNotifications.filter(n => !n.isRead);
-            for (const notification of unreadNotifications) {
-                await updateDoc(doc(db, "notifications", notification.id), { isRead: true });
-            }
+            const batch = writeBatch(db);
+            unreadNotifications.forEach(notification => {
+                const notifRef = doc(db, "notifications", notification.id);
+                batch.update(notifRef, { isRead: true });
+            });
+            await batch.commit();
         }
 
         async function approveRequest(notification) {
