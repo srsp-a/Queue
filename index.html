@@ -111,9 +111,17 @@
         .drag-over {
             border-top: 2px solid #ef4444;
         }
-        #financial-filter-buttons .active {
+        #financial-filter-buttons .active, #show-custom-range-btn.active {
             background-color: #ec4899;
             color: white;
+        }
+        .drag-handle {
+            cursor: grab;
+            opacity: 0.2;
+            transition: opacity 0.2s;
+        }
+        tr:hover .drag-handle {
+            opacity: 1;
         }
     </style>
 </head>
@@ -379,13 +387,17 @@
                         <button data-period="3m" class="px-4 py-1 text-sm font-semibold rounded-md">3 เดือน</button>
                         <button data-period="6m" class="px-4 py-1 text-sm font-semibold rounded-md">6 เดือน</button>
                         <button data-period="1y" class="px-4 py-1 text-sm font-semibold rounded-md">1 ปี</button>
-                        <button data-period="all" class="px-4 py-1 text-sm font-semibold rounded-md">ทั้งหมด</button>
                     </div>
                     <div id="month-year-selector" class="flex items-center gap-2">
                         <select id="summary-month" class="p-2 border rounded-lg"></select>
                         <select id="summary-year" class="p-2 border rounded-lg"></select>
                     </div>
-                    <div id="custom-date-range-selector" class="hidden flex-wrap items-center gap-4 ml-auto">
+                    <button id="show-custom-range-btn" class="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-200 hover:bg-gray-300">
+                        ค้นหาตามช่วงเวลา
+                    </button>
+                </div>
+                <div id="custom-date-range-selector" class="hidden flex-wrap items-end gap-4 mt-4">
+                    <div class="flex items-end gap-4">
                         <div>
                             <label for="summary-start-date" class="text-sm font-medium text-gray-700">ตั้งแต่</label>
                             <input type="date" id="summary-start-date" class="p-2 border rounded-lg">
@@ -394,7 +406,7 @@
                             <label for="summary-end-date" class="text-sm font-medium text-gray-700">ถึง</label>
                             <input type="date" id="summary-end-date" class="p-2 border rounded-lg">
                         </div>
-                        <button id="summary-search-button" class="self-end px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                        <button id="summary-search-button" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
                             ค้นหา
                         </button>
                     </div>
@@ -549,6 +561,7 @@
         let memberJobFilter = 'my_jobs'; // 'my_jobs' or 'all'
         let financialChart = null;
         let financialFilter = '1m'; // '1m', '2m', '3m', '6m', '1y', 'all'
+        let draggedItem = null;
 
         const publicView = document.getElementById('public-view');
         const mainApp = document.getElementById('main-app');
@@ -966,10 +979,11 @@
             scheduleBody.innerHTML = '';
             job.team.forEach((member) => {
                 const memberData = allUsers.find(u => u.id === member.userId);
-                if (!memberData) return;
+                if (!memberData) return; // Skip rendering if user data not found
                 const displayName = memberData.nickname || memberData.name;
                 const isTeamLeader = job.teamLeaderId === member.userId;
-                let rowHTML = `<tr class="hover:bg-gray-50"><td class="py-2 px-3 border-b"><div class="flex items-center"><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3 object-cover"><div><p class="font-medium flex items-center">${displayName} ${isTeamLeader ? '<i class="ph-fill ph-crown text-yellow-500 ml-1"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
+                const draggableClass = currentUserRole === 'admin' ? 'draggable-row' : '';
+                let rowHTML = `<tr class="${draggableClass}" draggable="${currentUserRole === 'admin'}" data-userid="${member.userId}"><td class="py-2 px-3 border-b"><div class="flex items-center"><i class="ph ph-dots-six-vertical drag-handle text-gray-400 mr-2 admin-only"></i><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3 object-cover"><div><p class="font-medium flex items-center">${displayName} ${isTeamLeader ? '<i class="ph-fill ph-crown text-yellow-500 ml-1"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
                 
                 job.workdays.forEach(day => {
                     const isWorking = member.workdays.includes(day);
@@ -1224,6 +1238,52 @@
             });
             document.querySelectorAll('.edit-daily-rate-btn').forEach(btn => btn.onclick = (e) => showEditDailyRateModal(e.currentTarget.dataset.userid, e.currentTarget.dataset.day));
             document.querySelectorAll('.edit-day-btn').forEach(btn => btn.onclick = (e) => showEditWorkdayModal(e.currentTarget.dataset.day));
+            
+            // Drag and Drop Event Listeners
+            const scheduleBody = document.getElementById('schedule-body');
+            scheduleBody.addEventListener('dragstart', e => {
+                if (currentUserRole !== 'admin') return;
+                draggedItem = e.target;
+                setTimeout(() => e.target.classList.add('dragging'), 0);
+            });
+
+            scheduleBody.addEventListener('dragend', e => {
+                 if (currentUserRole !== 'admin') return;
+                draggedItem.classList.remove('dragging');
+                draggedItem = null;
+            });
+
+            scheduleBody.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(scheduleBody, e.clientY);
+                const draggable = document.querySelector('.dragging');
+                if (afterElement == null) {
+                    scheduleBody.appendChild(draggable);
+                } else {
+                    scheduleBody.insertBefore(draggable, afterElement);
+                }
+            });
+            
+            scheduleBody.addEventListener('drop', async e => {
+                e.preventDefault();
+                if (currentUserRole !== 'admin') return;
+                const newOrderedIds = [...scheduleBody.querySelectorAll('tr')].map(tr => tr.dataset.userid);
+                const newTeamOrder = newOrderedIds.map(id => currentJobData.team.find(m => m.userId === id));
+                await updateDoc(doc(db, "jobs", currentJobId), { team: newTeamOrder });
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('tr:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
         
         ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs'].forEach(id => {
@@ -1310,6 +1370,7 @@
             const monthSelect = document.getElementById('summary-month');
             const yearSelect = document.getElementById('summary-year');
             const filterButtons = document.getElementById('financial-filter-buttons');
+            const showCustomRangeBtn = document.getElementById('show-custom-range-btn'); // New button
             const customDateSelector = document.getElementById('custom-date-range-selector');
             const searchButton = document.getElementById('summary-search-button');
             const monthYearSelector = document.getElementById('month-year-selector');
@@ -1339,25 +1400,42 @@
             monthSelect.value = today.getMonth();
             yearSelect.value = today.getFullYear();
 
-            // Add event listeners
+            // Add event listeners for the pre-defined period buttons
             filterButtons.querySelectorAll('button').forEach(button => {
                 button.addEventListener('click', (e) => {
                     financialFilter = e.target.dataset.period;
-                     filterButtons.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    
+                    // Update active state
+                    filterButtons.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    showCustomRangeBtn.classList.remove('active');
                     e.target.classList.add('active');
 
-                    if (financialFilter === 'all') {
-                        customDateSelector.classList.remove('hidden');
-                        monthYearSelector.classList.add('hidden');
-                    } else {
-                        customDateSelector.classList.add('hidden');
-                        monthYearSelector.classList.toggle('hidden', financialFilter !== '1m');
-                        generateFinancialReport();
-                    }
+                    // Hide custom selector, show/hide month selector
+                    customDateSelector.classList.add('hidden');
+                    monthYearSelector.classList.toggle('hidden', financialFilter !== '1m');
+                    
+                    // Generate report immediately
+                    generateFinancialReport();
                 });
             });
+
+            // Add event listener for the new "custom range" button
+            showCustomRangeBtn.addEventListener('click', () => {
+                // Update active state
+                filterButtons.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                showCustomRangeBtn.classList.add('active');
+
+                // Show the custom date selector
+                customDateSelector.classList.toggle('hidden');
+                monthYearSelector.classList.add('hidden');
+            });
+
+            // The search button within the custom range selector
+            searchButton.addEventListener('click', () => {
+                financialFilter = 'all'; // This tells generateFinancialReport to use the date pickers
+                generateFinancialReport();
+            });
             
-            searchButton.addEventListener('click', generateFinancialReport);
             monthSelect.addEventListener('change', generateFinancialReport);
             yearSelect.addEventListener('change', generateFinancialReport);
         }
@@ -1451,6 +1529,7 @@
                 `;
 
                 job.team.forEach(member => {
+                    if (!allUsers.find(u => u.id === member.userId)) return; // Skip if user doesn't exist
                     const wage = calculateTeamCostForMember(member, job.workdays);
                     if (!userWages[member.userId]) {
                         userWages[member.userId] = { total: 0, unpaid: 0 };
@@ -1485,7 +1564,8 @@
 
             sortedUsers.forEach(userId => {
                 const user = allUsers.find(u => u.id === userId);
-                const userName = user ? (user.nickname || user.name) : 'Unknown User';
+                if (!user) return; // Double check to prevent errors
+                const userName = user.nickname || user.name;
                 const wageData = userWages[userId];
                 const paidAmount = wageData.total - wageData.unpaid;
                 totalWages += wageData.total;
@@ -1510,17 +1590,14 @@
             sortedUsers.slice(0, 3).forEach((userId, index) => {
                  const user = allUsers.find(u => u.id === userId);
                  if (user) {
-                    const crownHTML = index === 0 ? `<i class="ph-fill ph-crown text-yellow-500 text-xl absolute -top-3 left-1/2 -translate-x-1/2 z-10"></i>` : '';
+                    const topEarnerClass = index === 0 ? 'border-4 border-yellow-400' : '';
                     statTopEarners.innerHTML += `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <div class="relative mr-3">
-                                ${crownHTML}
-                                <img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full object-cover">
-                            </div>
-                            <span>${user.nickname || user.name}</span>
+                            <img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full object-cover mr-3 ${topEarnerClass}">
+                            <span class="${index === 0 ? 'text-lg' : ''}">${user.nickname || user.name}</span>
                         </div>
-                        <span class="font-bold">${userWages[userId].total.toLocaleString()} บาท</span>
+                        <span class="font-bold ${index === 0 ? 'text-lg' : ''}">${userWages[userId].total.toLocaleString()} บาท</span>
                     </div>`;
                  }
             });
@@ -1632,16 +1709,16 @@
         }
         function formatDateRange(start, end) {
             if (!start || !end) return 'N/A';
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
             return `${new Date(start).toLocaleDateString('th-TH', options)} - ${new Date(end).toLocaleDateString('th-TH', options)}`;
         }
         function formatShortDate(dateString) { 
             if (!dateString) return '';
-            return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); 
+            return new Date(dateString).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit' }); 
         }
         function formatShortDateWithBEYear(dateString) { 
             if (!dateString) return '';
-            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
             return new Date(dateString).toLocaleDateString('th-TH', options); 
         }
         
@@ -2245,7 +2322,7 @@
                         <p class="text-sm text-gray-800">
                             ${message}${statusText}
                         </p>
-                        <p class="text-xs text-gray-500 mt-1">${notification.createdAt ? notification.createdAt.toDate().toLocaleString('th-TH') : ''}</p>
+                        <p class="text-xs text-gray-500 mt-1">${notification.createdAt ? notification.createdAt.toDate().toLocaleString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</p>
                         ${actionButtons}
                     </div>
                 `;
