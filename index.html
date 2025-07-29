@@ -123,6 +123,16 @@
         tr:hover .drag-handle {
             opacity: 1;
         }
+        .job-card-title {
+            height: 3rem; /* Height for 2 lines */
+            line-height: 1.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -815,7 +825,7 @@
             const jobListContainer = document.getElementById('public-job-list');
             jobListContainer.innerHTML = '';
             allActiveJobs.forEach(job => {
-                jobListContainer.innerHTML += `<div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white" data-id="${job.id}"><div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2"><i class="ph-fill ph-video-camera text-3xl text-gray-500"></i></div><h5 class="font-semibold truncate">${job.name}</h5><p class="text-xs text-gray-500">${formatDateRange(job.startDate, job.endDate)}</p></div>`;
+                jobListContainer.innerHTML += `<div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white" data-id="${job.id}"><div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2"><i class="ph-fill ph-video-camera text-3xl text-gray-500"></i></div><h5 class="font-semibold job-card-title">${job.name}</h5><p class="text-xs text-gray-500 text-center">${formatDateRange(job.startDate, job.endDate)}</p></div>`;
             });
             jobListContainer.querySelectorAll('.job-card').forEach(card => card.addEventListener('click', () => loginModal.classList.remove('hidden')));
         }
@@ -848,8 +858,8 @@
                         <div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2">
                             <i class="ph-fill ph-video-camera text-3xl ${iconColorClass}"></i>
                         </div>
-                        <h5 class="font-semibold truncate">${job.name}</h5>
-                        <p class="text-xs text-gray-500">${formatDateRange(job.startDate, job.endDate)}</p>
+                        <h5 class="font-semibold job-card-title">${job.name}</h5>
+                        <p class="text-xs text-gray-500 text-center">${formatDateRange(job.startDate, job.endDate)}</p>
                     </div>`;
                 jobList.innerHTML += cardHTML;
             });
@@ -1709,16 +1719,16 @@
         }
         function formatDateRange(start, end) {
             if (!start || !end) return 'N/A';
-            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
             return `${new Date(start).toLocaleDateString('th-TH', options)} - ${new Date(end).toLocaleDateString('th-TH', options)}`;
         }
         function formatShortDate(dateString) { 
             if (!dateString) return '';
-            return new Date(dateString).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit' }); 
+            return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); 
         }
         function formatShortDateWithBEYear(dateString) { 
             if (!dateString) return '';
-            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
             return new Date(dateString).toLocaleDateString('th-TH', options); 
         }
         
