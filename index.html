@@ -191,6 +191,17 @@
                         ลงชื่อเข้าใช้
                     </button>
                 </form>
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-300"></div>
+                    <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือเข้าสู่ระบบด้วย</span>
+                    <div class="flex-grow border-t border-gray-300"></div>
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                     <button id="line-login-btn" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.43,11.3,17.5,6.5a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.41L18.59,10H15a1,1,0,0,0,0,2h3.59l-2.5,2.59a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0L21.43,12.7A1,1,0,0,0,21.43,11.3ZM12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20ZM7,11H4a1,1,0,0,0,0,2H7a1,1,0,0,0,0-2Z"/></svg>
+                        เข้าสู่ระบบด้วย LINE
+                    </button>
+                </div>
                 <p class="text-center text-sm text-gray-600">
                     ยังไม่มีบัญชี? <a href="#" id="show-signup-modal-btn" class="font-medium text-red-600 hover:text-red-500">สมัครสมาชิกที่นี่</a>
                 </p>
@@ -260,6 +271,9 @@
                         <i class="ph ph-bell text-xl"></i>
                         <span id="notification-badge" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 hidden"></span>
                     </button>
+                    <button id="system-settings-button" class="px-4 py-2 font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors admin-only">
+                        <i class="ph ph-wrench mr-1"></i> ตั้งค่าระบบ
+                    </button>
                     <button id="manage-all-users-button" class="px-4 py-2 font-semibold text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors admin-only">
                         <i class="ph ph-users-three mr-1"></i> จัดการทีมงาน
                     </button>
@@ -270,7 +284,7 @@
                         <i class="ph ph-gear mr-1"></i> จัดการโปรไฟล์
                     </button>
                     <button id="logout-button" class="px-4 py-2 font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors">
-                        <i class="ph ph-sign-out mr-1"></i> ออกจากระบบ
+                        <i class="ph ph-sign-out mr-1"></i> Logout
                     </button>
                 </div>
             </header>
@@ -531,6 +545,83 @@
             </div>
         </div>
 
+        <!-- System Settings View -->
+        <div id="settings-view" class="hidden p-4 sm:p-6 lg:p-8">
+            <!-- Header -->
+            <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">ตั้งค่าระบบ</h1>
+                    <p class="mt-1 text-gray-500">จัดการการตั้งค่าทั่วไปของแอปพลิเคชัน</p>
+                </div>
+                <button id="back-to-main-from-settings-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                    <i class="ph ph-arrow-left mr-1"></i> กลับหน้าหลัก
+                </button>
+            </header>
+            <!-- Settings Form -->
+            <section class="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
+                <form id="settings-form" class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Cloudinary (สำหรับอัปโหลดรูป)</h3>
+                         <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+                            <div>
+                                <label for="setting-cloudinary-name" class="block text-sm font-medium text-gray-700">Cloud Name</label>
+                                <input type="text" name="cloudinaryName" id="setting-cloudinary-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                             <div>
+                                <label for="setting-cloudinary-preset" class="block text-sm font-medium text-gray-700">Upload Preset</label>
+                                <input type="text" name="cloudinaryPreset" id="setting-cloudinary-preset" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">LINE Login</h3>
+                        <p class="mt-1 text-sm text-gray-500">ตั้งค่าสำหรับการเข้าสู่ระบบด้วย LINE</p>
+                        <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+                            <div>
+                                <label for="setting-line-channel-id" class="block text-sm font-medium text-gray-700">Channel ID (App ID)</label>
+                                <input type="text" name="lineChannelId" id="setting-line-channel-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="setting-line-channel-secret" class="block text-sm font-medium text-gray-700">
+                                    Channel Secret 
+                                    <span class="tooltip inline-block">
+                                        <i class="ph ph-info text-gray-400"></i>
+                                        <span class="tooltiptext">เพื่อความปลอดภัยสูงสุด Channel Secret ควรถูกจัดเก็บเป็น Environment Variable ใน Cloud Function เท่านั้น ไม่ควรเก็บในฐานข้อมูลโดยตรง</span>
+                                    </span>
+                                </label>
+                                <input type="text" name="lineChannelSecret" id="setting-line-channel-secret" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Facebook Login</h3>
+                        <p class="mt-1 text-sm text-gray-500">ตั้งค่าสำหรับการเข้าสู่ระบบด้วย Facebook</p>
+                        <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+                            <div>
+                                <label for="setting-facebook-app-id" class="block text-sm font-medium text-gray-700">App ID</label>
+                                <input type="text" name="facebookAppId" id="setting-facebook-app-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="setting-facebook-app-secret" class="block text-sm font-medium text-gray-700">
+                                    App Secret
+                                    <span class="tooltip inline-block">
+                                        <i class="ph ph-info text-gray-400"></i>
+                                        <span class="tooltiptext">เพื่อความปลอดภัยสูงสุด App Secret ควรถูกจัดเก็บเป็น Environment Variable ใน Cloud Function เท่านั้น ไม่ควรเก็บในฐานข้อมูลโดยตรง</span>
+                                    </span>
+                                </label>
+                                <input type="text" name="facebookAppSecret" id="setting-facebook-app-secret" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                            บันทึกการตั้งค่า
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
     </div>
 
     <!-- Modals Container -->
@@ -551,10 +642,6 @@
           appId: "1:247047529613:web:d27a980d1de33c22052ec4"
         };
         
-        const CLOUDINARY_UPLOAD_PRESET = "UploadpresetsQ"; 
-        const CLOUDINARY_CLOUD_NAME = "dzs7zbikj"; 
-        const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -572,6 +659,15 @@
         let financialChart = null;
         let financialFilter = '1m'; // '1m', '2m', '3m', '6m', '1y', 'all'
         let draggedItem = null;
+        let appSettings = {
+            whtPercent: 3,
+            cloudinaryName: "dzs7zbikj",
+            cloudinaryPreset: "UploadpresetsQ",
+            lineChannelId: "",
+            lineChannelSecret: "",
+            facebookAppId: "",
+            facebookAppSecret: ""
+        };
 
         const publicView = document.getElementById('public-view');
         const mainApp = document.getElementById('main-app');
@@ -770,6 +866,7 @@
             signupModal.classList.add('hidden');
             mainApp.classList.remove('hidden');
             document.getElementById('financial-summary-view').classList.add('hidden');
+            document.getElementById('settings-view').classList.add('hidden');
 
 
             const banner = document.getElementById('impersonation-banner');
@@ -789,6 +886,11 @@
                 el.style.display = currentUserRole === 'admin' ? '' : 'none';
             });
             document.getElementById('member-job-filters').style.display = currentUserRole === 'member' ? 'flex' : 'none';
+            
+            if (currentUserRole === 'admin') {
+                await loadAppSettings();
+            }
+
             listenForJobs();
             listenForUsers();
             listenForNotifications();
@@ -1035,7 +1137,7 @@
             
             document.getElementById('wht-toggle').checked = job.whtEnabled || false;
             document.getElementById('vat-toggle').checked = job.vatEnabled || false;
-            document.getElementById('wht-percent').value = job.whtPercent === undefined ? 3 : job.whtPercent;
+            document.getElementById('wht-percent').value = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
             
             document.getElementById('admin-notes-textarea').value = job.notes || '';
             
@@ -1102,7 +1204,7 @@
             document.getElementById('summary-team-cost').textContent = `${teamTotalCost.toLocaleString()} บาท`;
             document.getElementById('summary-other-expenses').textContent = `${otherExpensesTotal.toLocaleString()} บาท`;
             
-            const whtPercentValue = job.whtPercent === undefined ? 3 : job.whtPercent;
+            const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
             const subtotal = teamTotalCost + otherExpensesTotal;
             const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
             const vatAmount = job.vatEnabled ? (subtotal * 0.07) : 0;
@@ -1296,7 +1398,7 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
         
-        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs'].forEach(id => {
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (id === 'filter-my-jobs') {
@@ -1321,6 +1423,7 @@
                             case 'edit-job-details-btn': showEditJobDetailsModal(currentJobData); break;
                             case 'manage-profile-button': showManageProfileModal(); break;
                             case 'manage-all-users-button': showUserManagementModal(); break;
+                            case 'system-settings-button': showSettingsView(); break;
                             case 'save-image-btn': 
                                 const captureArea = document.getElementById('capture-area');
                                 if (captureArea) {
@@ -1340,6 +1443,40 @@
                 }
             }
         });
+
+        document.getElementById('back-to-main-from-settings-btn').addEventListener('click', () => {
+            document.getElementById('settings-view').classList.add('hidden');
+            mainApp.classList.remove('hidden');
+        });
+
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'กำลังบันทึก...';
+            const formData = new FormData(e.target);
+            const newSettings = {
+                cloudinaryName: formData.get('cloudinaryName'),
+                cloudinaryPreset: formData.get('cloudinaryPreset'),
+                lineChannelId: formData.get('lineChannelId'),
+                lineChannelSecret: formData.get('lineChannelSecret'),
+                facebookAppId: formData.get('facebookAppId'),
+                facebookAppSecret: formData.get('facebookAppSecret')
+            };
+
+            try {
+                await setDoc(doc(db, "settings", "app-config"), newSettings, { merge: true });
+                appSettings = { ...appSettings, ...newSettings }; // Update local settings object
+                alert('บันทึกการตั้งค่าเรียบร้อยแล้ว');
+            } catch (error) {
+                console.error("Error saving settings:", error);
+                alert('เกิดข้อผิดพลาดในการบันทึกการตั้งค่า');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'บันทึกการตั้งค่า';
+            }
+        });
+
 
         function completeJob(jobId) {
             showConfirmModal('ยืนยันการจบงาน', 'คุณต้องการย้ายงานนี้ออกจากคิวงานปัจจุบันใช่หรือไม่?', async () => {
@@ -1361,6 +1498,7 @@
 
         function showFinancialSummaryView() {
             mainApp.classList.add('hidden');
+            document.getElementById('settings-view').classList.add('hidden');
             document.getElementById('financial-summary-view').classList.remove('hidden');
 
             if (currentUserRole === 'admin') {
@@ -1720,7 +1858,12 @@
         function formatDateRange(start, end) {
             if (!start || !end) return 'N/A';
             const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            return `${new Date(start).toLocaleDateString('th-TH', options)} - ${new Date(end).toLocaleDateString('th-TH', options)}`;
+            const startDate = new Date(start).toLocaleDateString('th-TH', options);
+            const endDate = new Date(end).toLocaleDateString('th-TH', options);
+            if (startDate === endDate) {
+                return startDate;
+            }
+            return `${startDate} - ${endDate}`;
         }
         function formatShortDate(dateString) { 
             if (!dateString) return '';
@@ -1777,13 +1920,14 @@
 
         async function uploadToCloudinary(file) {
             if (!file) return null;
-            if (CLOUDINARY_CLOUD_NAME === "YOUR_CLOUD_NAME" || CLOUDINARY_UPLOAD_PRESET === "YOUR_UNSIGNED_UPLOAD_PRESET") {
-                alert("กรุณาตั้งค่า Cloudinary Cloud Name และ Upload Preset ในโค้ดก่อน");
+            const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${appSettings.cloudinaryName}/image/upload`;
+            if (!appSettings.cloudinaryName || !appSettings.cloudinaryPreset) {
+                alert("กรุณาตั้งค่า Cloudinary Cloud Name และ Upload Preset ในหน้าตั้งค่าระบบก่อน");
                 return null;
             }
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            formData.append('upload_preset', appSettings.cloudinaryPreset);
             try {
                 const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
                 const data = await response.json();
@@ -1820,7 +1964,7 @@
                     teamLeaderId: '',
                     whtEnabled: false,
                     vatEnabled: false,
-                    whtPercent: 3,
+                    whtPercent: appSettings.whtPercent,
                     notes: '',
                     teamNotes: ''
                 });
@@ -2207,6 +2351,32 @@
 
             originalAdminData = null;
             initializeAppUI();
+        }
+
+        async function loadAppSettings() {
+            if (currentUserRole !== 'admin') return;
+            const settingsRef = doc(db, "settings", "app-config");
+            const settingsSnap = await getDoc(settingsRef);
+            if (settingsSnap.exists()) {
+                appSettings = { ...appSettings, ...settingsSnap.data() };
+            } else {
+                // If no settings doc, create one with defaults
+                await setDoc(settingsRef, appSettings).catch(e => console.error("Could not create default settings:", e));
+            }
+        }
+
+        function showSettingsView() {
+            mainApp.classList.add('hidden');
+            document.getElementById('financial-summary-view').classList.add('hidden');
+            document.getElementById('settings-view').classList.remove('hidden');
+
+            // Populate form
+            document.getElementById('setting-cloudinary-name').value = appSettings.cloudinaryName;
+            document.getElementById('setting-cloudinary-preset').value = appSettings.cloudinaryPreset;
+            document.getElementById('setting-line-channel-id').value = appSettings.lineChannelId || '';
+            document.getElementById('setting-line-channel-secret').value = appSettings.lineChannelSecret || '';
+            document.getElementById('setting-facebook-app-id').value = appSettings.facebookAppId || '';
+            document.getElementById('setting-facebook-app-secret').value = appSettings.facebookAppSecret || '';
         }
 
         // --- NOTIFICATION FUNCTIONS ---
