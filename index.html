@@ -233,6 +233,17 @@
                     <p id="signup-error" class="text-sm text-red-500 hidden"></p>
                     <button type="submit" class="w-full px-4 py-3 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 disabled:opacity-75">สมัครสมาชิก</button>
                 </form>
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-300"></div>
+                    <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือสมัครด้วย</span>
+                    <div class="flex-grow border-t border-gray-300"></div>
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                     <button id="line-signup-btn" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.43,11.3,17.5,6.5a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.41L18.59,10H15a1,1,0,0,0,0,2h3.59l-2.5,2.59a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0L21.43,12.7A1,1,0,0,0,21.43,11.3ZM12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20ZM7,11H4a1,1,0,0,0,0,2H7a1,1,0,0,0,0-2Z"/></svg>
+                        สมัครสมาชิกด้วย LINE
+                    </button>
+                </div>
                  <p class="text-center text-sm text-gray-600 mt-4">
                     มีบัญชีอยู่แล้ว? <a href="#" id="show-login-modal-btn" class="font-medium text-red-600 hover:text-red-500">กลับไปล็อกอิน</a>
                 </p>
@@ -643,7 +654,7 @@
         // 4. เลือกแท็บ 'Settings'
         // 5. เลือกแท็บย่อย 'Authorized domains'
         // 6. คลิก 'Add domain' และใส่โดเมนนี้:
-        //    3b8dyoiqnavm8kvmrmf0csdpdfp0s6qv8yf6ijzww1pvgq3k1f-h785866787.scf.usercontent.goog
+        //    35ciwob4ijnxqxnj5nnb7ca3kedzmvcb2eiwr53tfefs13y65j-h785866787.scf.usercontent.goog
         // 7. กด 'Add' เพื่อบันทึก
         //
         // หลังจากทำตามขั้นตอนเหล่านี้แล้ว ปุ่มล็อกอินด้วย LINE จะทำงานได้ตามปกติในหน้าแสดงผลนี้
@@ -700,27 +711,13 @@
                     if (currentUserData.forcePasswordChange) showLoginScreen(null, true);
                     else await initializeAppUI();
                 } else {
-                    // This block handles new users, including those from social logins.
-                    // It prioritizes information from the social provider profile.
-                    const newUserDoc = {
-                        email: user.email || null, // Store email if available, otherwise null
-                        name: user.displayName || `user_${user.uid.substring(0, 6)}`, // Use displayName or a generated unique name
-                        nickname: user.displayName || '',
-                        role: 'member',
-                        forcePasswordChange: false, // Social logins don't have passwords to change
-                        profilePic: user.photoURL || '',
-                        bankAccount: { name: '', bank: '', number: '' },
-                        phone: user.phoneNumber || ''
-                    };
+                    const newUserDoc = { email: user.email, name: user.email.split('@')[0], nickname: '', role: 'member', forcePasswordChange: false, profilePic: '', bankAccount: { name: '', bank: '', number: '' }, phone: '' };
                     try {
                         await setDoc(userDocRef, newUserDoc);
                         currentUserData = newUserDoc;
                         currentUserRole = 'member';
                         await initializeAppUI();
-                    } catch (error) {
-                        console.error("Error creating new user document:", error);
-                        showLoginScreen("เกิดข้อผิดพลาดในการตั้งค่าบัญชีผู้ใช้");
-                    }
+                    } catch (error) { showLoginScreen("เกิดข้อผิดพลาดในการตั้งค่าบัญชีผู้ใช้"); }
                 }
             } else if (!user) {
                 currentUser = null; currentUserData = null; currentUserRole = null;
@@ -1427,7 +1424,7 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
         
-        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-login-btn'].forEach(id => {
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-login-btn', 'line-signup-btn'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (id === 'filter-my-jobs') {
@@ -1454,6 +1451,7 @@
                             case 'manage-all-users-button': showUserManagementModal(); break;
                             case 'system-settings-button': showSettingsView(); break;
                             case 'line-login-btn': handleLineLogin(); break;
+                            case 'line-signup-btn': handleLineLogin(); break;
                             case 'save-image-btn': 
                                 const captureArea = document.getElementById('capture-area');
                                 if (captureArea) {
