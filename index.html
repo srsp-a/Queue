@@ -630,8 +630,23 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, OAuthProvider, signInWithRedirect } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc, query, where, getDocs, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // [!!!] การแก้ไขข้อผิดพลาด 'auth/unauthorized-domain' [!!!]
+        // ข้อผิดพลาดนี้เกิดจากการตั้งค่าความปลอดภัยของ Firebase ซึ่งไม่ได้อนุญาตให้โดเมนที่ใช้แสดงผลนี้ทำการล็อกอิน
+        // คุณจำเป็นต้องเพิ่มโดเมนนี้เข้าไปในโปรเจกต์ Firebase ของคุณเอง โดยทำตามขั้นตอนต่อไปนี้:
+        //
+        // 1. ไปที่ Firebase Console (https://console.firebase.google.com/)
+        // 2. เลือกโปรเจกต์ของคุณ: 'job-queue-app'
+        // 3. ไปที่เมนู 'Authentication'
+        // 4. เลือกแท็บ 'Settings'
+        // 5. เลือกแท็บย่อย 'Authorized domains'
+        // 6. คลิก 'Add domain' และใส่โดเมนนี้:
+        //    35ciwob4ijnxqxnj5nnb7ca3kedzmvcb2eiwr53tfefs13y65j-h785866787.scf.usercontent.goog
+        // 7. กด 'Add' เพื่อบันทึก
+        //
+        // หลังจากทำตามขั้นตอนเหล่านี้แล้ว ปุ่มล็อกอินด้วย LINE จะทำงานได้ตามปกติในหน้าแสดงผลนี้
 
         const firebaseConfig = {
           apiKey: "AIzaSyAedyGR43aEAO_BFufGmplJVuGkmIEYgG0",
@@ -1398,7 +1413,7 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
         
-        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button'].forEach(id => {
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-login-btn'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (id === 'filter-my-jobs') {
@@ -1424,6 +1439,7 @@
                             case 'manage-profile-button': showManageProfileModal(); break;
                             case 'manage-all-users-button': showUserManagementModal(); break;
                             case 'system-settings-button': showSettingsView(); break;
+                            case 'line-login-btn': handleLineLogin(); break;
                             case 'save-image-btn': 
                                 const captureArea = document.getElementById('capture-area');
                                 if (captureArea) {
@@ -2378,6 +2394,34 @@
             document.getElementById('setting-facebook-app-id').value = appSettings.facebookAppId || '';
             document.getElementById('setting-facebook-app-secret').value = appSettings.facebookAppSecret || '';
         }
+
+        async function handleLineLogin() {
+            try {
+                // The provider ID must match the one configured in the Firebase console.
+                const provider = new OAuthProvider('oidc.line');
+                await signInWithRedirect(auth, provider);
+            } catch (error) {
+                console.error("LINE Login Error:", error);
+                if (error.code === 'auth/unauthorized-domain') {
+                    showUnauthorizedDomainModal(window.location.hostname);
+                } else {
+                    const loginError = document.getElementById('login-error');
+                    loginError.textContent = `เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย LINE: ${error.message}`;
+                    loginError.classList.remove('hidden');
+                }
+            }
+        }
+
+        function showUnauthorizedDomainModal(domain) {
+            const content = `
+                <p class="text-center text-red-600 font-semibold">การล็อกอินล้มเหลวเนื่องจากโดเมนไม่ได้รับอนุญาต</p>
+                <p class="mt-4 text-sm text-gray-700">กรุณาเพิ่มโดเมนต่อไปนี้ลงใน "Authorized domains" ในการตั้งค่า Firebase Authentication ของคุณ:</p>
+                <div class="mt-2 p-2 bg-gray-100 rounded-md text-center font-mono text-sm break-all">${domain}</div>
+                <p class="mt-4 text-sm text-gray-500">ขั้นตอน: Firebase Console > Authentication > Settings > Authorized domains > Add domain</p>
+            `;
+            showModal('ข้อผิดพลาด: โดเมนไม่ได้รับอนุญาต', content, null, false, null, "คัดลอก");
+        }
+
 
         // --- NOTIFICATION FUNCTIONS ---
         async function createNotification(recipientId, message, jobId = '', jobName = '') {
