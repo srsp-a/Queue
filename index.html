@@ -374,7 +374,7 @@
             <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
                 <div class="flex flex-wrap items-center gap-4">
                     <div id="financial-filter-buttons" class="flex items-center p-1 bg-gray-200 rounded-lg">
-                        <button data-period="1m" class="px-4 py-1 text-sm font-semibold rounded-md">เดือนนี้</button>
+                        <button data-period="1m" class="px-4 py-1 text-sm font-semibold rounded-md">1 เดือน</button>
                         <button data-period="2m" class="px-4 py-1 text-sm font-semibold rounded-md">2 เดือน</button>
                         <button data-period="3m" class="px-4 py-1 text-sm font-semibold rounded-md">3 เดือน</button>
                         <button data-period="6m" class="px-4 py-1 text-sm font-semibold rounded-md">6 เดือน</button>
@@ -384,6 +384,19 @@
                     <div id="month-year-selector" class="flex items-center gap-2">
                         <select id="summary-month" class="p-2 border rounded-lg"></select>
                         <select id="summary-year" class="p-2 border rounded-lg"></select>
+                    </div>
+                    <div id="custom-date-range-selector" class="hidden flex-wrap items-center gap-4 ml-auto">
+                        <div>
+                            <label for="summary-start-date" class="text-sm font-medium text-gray-700">ตั้งแต่</label>
+                            <input type="date" id="summary-start-date" class="p-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label for="summary-end-date" class="text-sm font-medium text-gray-700">ถึง</label>
+                            <input type="date" id="summary-end-date" class="p-2 border rounded-lg">
+                        </div>
+                        <button id="summary-search-button" class="self-end px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                            ค้นหา
+                        </button>
                     </div>
                 </div>
             </section>
@@ -451,6 +464,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อทีมงาน</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ค่าแรงรวม</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รับเงินแล้ว</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ยังไม่ได้รับเงิน</th>
                                 </tr>
                             </thead>
@@ -460,6 +474,7 @@
                                 <tr>
                                     <td class="px-6 py-4 text-left">รวมทั้งหมด</td>
                                     <td id="total-wage-summary" class="px-6 py-4 text-right">0</td>
+                                    <td id="total-paid-wage-summary" class="px-6 py-4 text-right">0</td>
                                     <td id="total-unpaid-wage-summary" class="px-6 py-4 text-right">0</td>
                                 </tr>
                             </tfoot>
@@ -923,7 +938,7 @@
                     myTotalWage = calculateTeamCostForMember(myTeamData, job.workdays);
                     if (myTeamData.isPaid) {
                         jobIncomeEl.classList.add('profit-text');
-                        memberPaidStatusEl.textContent = `ได้รับเงินแล้ว (${formatShortDate(myTeamData.paymentDate)})`;
+                        memberPaidStatusEl.textContent = `ได้รับเงินแล้ว (${formatShortDateWithBEYear(myTeamData.paymentDate)})`;
                     } else {
                         jobIncomeEl.classList.add('text-blue-600');
                         memberPaidStatusEl.textContent = 'ยังไม่ได้รับเงิน';
@@ -1295,7 +1310,10 @@
             const monthSelect = document.getElementById('summary-month');
             const yearSelect = document.getElementById('summary-year');
             const filterButtons = document.getElementById('financial-filter-buttons');
-            
+            const customDateSelector = document.getElementById('custom-date-range-selector');
+            const searchButton = document.getElementById('summary-search-button');
+            const monthYearSelector = document.getElementById('month-year-selector');
+
             // Populate Months
             monthSelect.innerHTML = '';
             const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -1325,24 +1343,28 @@
             filterButtons.querySelectorAll('button').forEach(button => {
                 button.addEventListener('click', (e) => {
                     financialFilter = e.target.dataset.period;
-                    generateFinancialReport();
+                     filterButtons.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    if (financialFilter === 'all') {
+                        customDateSelector.classList.remove('hidden');
+                        monthYearSelector.classList.add('hidden');
+                    } else {
+                        customDateSelector.classList.add('hidden');
+                        monthYearSelector.classList.toggle('hidden', financialFilter !== '1m');
+                        generateFinancialReport();
+                    }
                 });
             });
+            
+            searchButton.addEventListener('click', generateFinancialReport);
             monthSelect.addEventListener('change', generateFinancialReport);
             yearSelect.addEventListener('change', generateFinancialReport);
         }
 
         function generateFinancialReport() {
             const monthYearSelector = document.getElementById('month-year-selector');
-            const filterButtons = document.getElementById('financial-filter-buttons');
-
-            // Update active button style
-            filterButtons.querySelectorAll('button').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.period === financialFilter);
-            });
-
-            monthYearSelector.style.display = financialFilter === '1m' ? 'flex' : 'none';
-
+            
             let startDate, endDate = new Date();
             const today = new Date();
             
@@ -1366,14 +1388,23 @@
                     startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
                     break;
                 case 'all':
-                    startDate = new Date(2000, 0, 1); // A long time ago
+                    const customStartDate = document.getElementById('summary-start-date').value;
+                    const customEndDate = document.getElementById('summary-end-date').value;
+                    if (customStartDate && customEndDate) {
+                        startDate = new Date(customStartDate);
+                        endDate = new Date(customEndDate);
+                        endDate.setHours(23, 59, 59);
+                    } else {
+                        // If 'all' is clicked but no dates are set, show all time
+                        startDate = new Date(2000, 0, 1); 
+                        endDate = new Date();
+                    }
                     break;
             }
 
             const filteredJobs = allJobs.filter(job => {
                 const jobStart = new Date(job.startDate);
                 const jobEnd = new Date(job.endDate);
-                // Check if job period overlaps with the filter period
                 return jobStart <= endDate && jobEnd >= startDate;
             });
 
@@ -1456,16 +1487,19 @@
                 const user = allUsers.find(u => u.id === userId);
                 const userName = user ? (user.nickname || user.name) : 'Unknown User';
                 const wageData = userWages[userId];
+                const paidAmount = wageData.total - wageData.unpaid;
                 totalWages += wageData.total;
                 teamWageBody.innerHTML += `
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">${userName}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${wageData.total.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right profit-text">${paidAmount.toLocaleString()}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right loss-text">${wageData.unpaid > 0 ? wageData.unpaid.toLocaleString() : '-'}</td>
                     </tr>
                 `;
             });
             document.getElementById('total-wage-summary').textContent = totalWages.toLocaleString();
+            document.getElementById('total-paid-wage-summary').textContent = totalPaidWages.toLocaleString();
             document.getElementById('total-unpaid-wage-summary').textContent = totalUnpaidWages.toLocaleString();
             
             // Update stats
@@ -1476,13 +1510,13 @@
             sortedUsers.slice(0, 3).forEach((userId, index) => {
                  const user = allUsers.find(u => u.id === userId);
                  if (user) {
-                    const crownHTML = index === 0 ? `<i class="ph-fill ph-crown text-yellow-500 text-xl absolute -top-3 left-1/2 -translate-x-1/2"></i>` : '';
+                    const crownHTML = index === 0 ? `<i class="ph-fill ph-crown text-yellow-500 text-xl absolute -top-3 left-1/2 -translate-x-1/2 z-10"></i>` : '';
                     statTopEarners.innerHTML += `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <div class="relative mr-3">
-                                <img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full object-cover">
                                 ${crownHTML}
+                                <img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full object-cover">
                             </div>
                             <span>${user.nickname || user.name}</span>
                         </div>
@@ -1560,7 +1594,7 @@
                     const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
                     let statusHTML = '';
                     if (job.status === 'completed' && myTeamData.isPaid && myTeamData.paymentDate) {
-                        statusHTML = `<br><i class="text-xs text-green-500">เสร็จงานแล้ว ได้รับเงินเมื่อ ${formatShortDate(myTeamData.paymentDate)}</i>`;
+                        statusHTML = `<br><i class="text-xs text-green-500">เสร็จงานแล้ว ได้รับเงินเมื่อ ${formatShortDateWithBEYear(myTeamData.paymentDate)}</i>`;
                     }
 
                     memberWageBody.innerHTML += `
@@ -1605,11 +1639,16 @@
             if (!dateString) return '';
             return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); 
         }
+        function formatShortDateWithBEYear(dateString) { 
+            if (!dateString) return '';
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('th-TH', options); 
+        }
         
-        function showModal(title, contentHTML, onSave, showSaveButton = true, onReady = null) {
+        function showModal(title, contentHTML, onSave, showSaveButton = true, onReady = null, saveButtonText = 'บันทึก') {
             const modalId = `modal-${Date.now()}`;
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = `<div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop"><div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 m-4 modal-content"><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold">${title}</h3><button class="text-gray-400 hover:text-gray-600 text-2xl close-modal-btn">&times;</button></div><form class="modal-form space-y-4">${contentHTML}<div class="flex justify-end space-x-3 pt-4"><button type="button" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 close-modal-btn">ยกเลิก</button>${showSaveButton ? '<button type="submit" class="px-4 py-2 text-white gradient-bg rounded-lg hover:opacity-90">บันทึก</button>' : ''}</div></form></div></div>`;
+            tempDiv.innerHTML = `<div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop"><div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 m-4 modal-content"><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold">${title}</h3><button class="text-gray-400 hover:text-gray-600 text-2xl close-modal-btn">&times;</button></div><form class="modal-form space-y-4">${contentHTML}<div class="flex justify-end space-x-3 pt-4"><button type="button" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 close-modal-btn">ยกเลิก</button>${showSaveButton ? `<button type="submit" class="px-4 py-2 text-white gradient-bg rounded-lg hover:opacity-90">${saveButtonText}</button>` : ''}</div></form></div></div>`;
             const modal = tempDiv.firstElementChild;
             document.getElementById('modals-container').appendChild(modal);
             if (showSaveButton) {
@@ -1866,8 +1905,49 @@
             showModal('การจัดการทีมงานทั้งหมด', userListHTML, null, false, (modal) => {
                 modal.querySelectorAll('.modal-delete-user-btn').forEach(btn => btn.onclick = (e) => {
                     const userIdToDelete = e.currentTarget.dataset.userid;
-                    if (userIdToDelete === currentUser.uid) { alert("ไม่สามารถลบตัวเองได้"); return; }
-                    showConfirmModal('ยืนยันการลบทีมงาน', 'คุณต้องการลบข้อมูลทีมงานนี้ใช่หรือไม่? (การกระทำนี้จะลบข้อมูลจากฐานข้อมูล แต่จะไม่ลบบัญชีล็อกอิน)', async () => await deleteDoc(doc(db, "users", userIdToDelete)));
+                    if (userIdToDelete === currentUser.uid) { 
+                        alert("ไม่สามารถลบตัวเองได้"); 
+                        return; 
+                    }
+                    const userToDelete = allUsers.find(u => u.id === userIdToDelete);
+                    const userName = userToDelete ? (userToDelete.nickname || userToDelete.name) : 'ผู้ใช้คนนี้';
+
+                    showConfirmModal(
+                        `ยืนยันการลบ ${userName}`, 
+                        'การกระทำนี้จะลบผู้ใช้ออกจากระบบและคิวงานทั้งหมดที่เกี่ยวข้องอย่างถาวร แต่จะไม่ลบบัญชีล็อกอิน คุณแน่ใจหรือไม่?', 
+                        async () => {
+                            try {
+                                const batch = writeBatch(db);
+
+                                // 1. Delete the user document
+                                const userRef = doc(db, "users", userIdToDelete);
+                                batch.delete(userRef);
+
+                                // 2. Remove the user from all jobs
+                                const jobsSnapshot = await getDocs(collection(db, "jobs"));
+                                jobsSnapshot.forEach(jobDoc => {
+                                    const jobData = jobDoc.data();
+                                    const team = jobData.team || [];
+                                    
+                                    const newTeam = team.filter(member => member.userId !== userIdToDelete);
+
+                                    if (newTeam.length < team.length) {
+                                        const jobRef = doc(db, "jobs", jobDoc.id);
+                                        batch.update(jobRef, { team: newTeam });
+                                    }
+                                });
+
+                                // Commit the batch
+                                await batch.commit();
+
+                                alert(`ลบ ${userName} เรียบร้อยแล้ว`);
+                                modal.remove(); // Close the user management modal
+                            } catch (error) {
+                                console.error("Error deleting user permanently:", error);
+                                alert("เกิดข้อผิดพลาดในการลบผู้ใช้");
+                            }
+                        }
+                    );
                 });
                 modal.querySelectorAll('.modal-switch-view-btn').forEach(btn => btn.onclick = (e) => {
                     const userIdToImpersonate = e.currentTarget.dataset.userid;
