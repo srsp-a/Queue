@@ -118,7 +118,7 @@
         .drag-over {
             border-top: 2px solid #ef4444;
         }
-        #financial-filter-buttons .active, #show-custom-range-btn.active {
+        #financial-filter-buttons .active, #show-custom-range-btn.active, #member-financial-filters .active {
             background-color: #ec4899;
             color: white;
         }
@@ -149,6 +149,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
             text-align: center;
+        }
+        /* Fix for selected card text color */
+        .job-card.gradient-bg .job-team-status.loss-text,
+        .job-card.gradient-bg .job-team-status.profit-text {
+            color: white !important;
         }
     </style>
 </head>
@@ -269,7 +274,7 @@
                 <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
                     <button id="notifications-button" class="relative p-2 text-gray-600 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                         <i class="ph ph-bell text-xl"></i>
-                        <span id="notification-badge" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 hidden"></span>
+                        <span id="notification-badge" class="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs hidden"></span>
                     </button>
                     <button id="line-bot-button" class="px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors admin-only">
                         <i class="ph ph-robot mr-1"></i> แชทบอทไลน์
@@ -326,6 +331,7 @@
                                     <div id="member-wage-container" class="text-right">
                                         <p id="job-income" class="text-3xl font-bold"></p>
                                         <p id="member-paid-status" class="text-sm text-green-600 font-medium hidden"></p>
+                                        <p id="member-wht-deduction-display" class="text-xs text-red-400"></p>
                                     </div>
                                     <button id="edit-budget-btn" class="ml-2 text-gray-400 hover:text-red-600 admin-only"><i class="ph ph-pencil-simple"></i></button>
                                 </div>
@@ -469,6 +475,7 @@
                         <table class="min-w-full">
                             <thead class="bg-gray-50">
                                 <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><input type="checkbox" id="select-all-jobs-checkbox"></th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายรับ</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">VAT (7%)</th>
@@ -481,6 +488,7 @@
                             </tbody>
                             <tfoot class="bg-gray-100 font-bold">
                                 <tr>
+                                    <td class="px-4 py-4"></td>
                                     <td class="px-6 py-4 text-left">รวมทั้งหมด</td>
                                     <td id="total-income-summary" class="px-6 py-4 text-right">0</td>
                                     <td id="total-vat-summary" class="px-6 py-4 text-right">0</td>
@@ -521,6 +529,13 @@
             </div>
 
             <div id="member-summary-container" class="hidden">
+                 <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
+                    <div id="member-financial-filters" class="flex items-center p-1 bg-gray-200 rounded-lg">
+                        <button data-status="all" class="px-4 py-1 text-sm font-semibold rounded-md active">รายการทั้งหมด</button>
+                        <button data-status="paid" class="px-4 py-1 text-sm font-semibold rounded-md">รับเงินแล้ว</button>
+                        <button data-status="unpaid" class="px-4 py-1 text-sm font-semibold rounded-md">ยังไม่ได้รับเงิน</button>
+                    </div>
+                </section>
                 <section>
                     <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ</h2>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
@@ -753,6 +768,7 @@
         let allNotifications = [];
         let originalAdminData = null;
         let memberJobFilter = 'my_jobs'; // 'my_jobs' or 'all'
+        let memberFinancialFilter = 'all'; // 'all', 'paid', 'unpaid'
         let financialChart = null;
         let financialFilter = '1m'; // '1m', '2m', '3m', '6m', '1y', 'all'
         let draggedItem = null;
@@ -814,6 +830,7 @@
                         forcePasswordChange: false,
                         profilePic: user.photoURL || '',
                         bankAccount: { name: '', bank: '', number: '' },
+                        idCardCopyUrl: '',
                         phone: user.phoneNumber || '',
                         createdAt: serverTimestamp() // Add creation timestamp
                     };
@@ -928,6 +945,7 @@
                     forcePasswordChange: false, 
                     profilePic: '', 
                     bankAccount: { name: '', bank: '', number: '' }, 
+                    idCardCopyUrl: '',
                     phone: '',
                     createdAt: serverTimestamp() // Add creation timestamp
                 };
@@ -1013,7 +1031,7 @@
             mainApp.classList.add('hidden');
             loginModal.classList.add('hidden');
             signupModal.classList.add('hidden');
-            listenForJobs();
+            listenForJobs(true); // Listen for public jobs
         }
 
         async function initializeAppUI() {
@@ -1048,12 +1066,29 @@
                 await loadAppSettings();
             }
 
-            listenForJobs();
+            listenForJobs(false); // Listen for internal jobs
             listenForUsers();
             listenForNotifications();
+            updateNotificationBadge();
+        }
+        
+        function updateNotificationBadge() {
+            if (currentUserRole !== 'member') return;
+
+            const myUnfinishedJobs = allActiveJobs.filter(job =>
+                job.team.some(member => member.userId === currentUser.uid)
+            );
+            
+            const badge = document.getElementById('notification-badge');
+            if(myUnfinishedJobs.length > 0) {
+                badge.textContent = myUnfinishedJobs.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
         }
 
-        function listenForJobs() {
+        function listenForJobs(isPublic = false) {
             const q = collection(db, "jobs");
             onSnapshot(q, (snapshot) => {
                 allJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -1066,14 +1101,14 @@
                     .filter(job => job.status === "completed")
                     .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
 
-                if (currentUser) {
-                    applyFiltersAndRenderJobs();
-                } else {
+                if (isPublic) {
                     renderPublicJobs();
+                } else {
+                    applyFiltersAndRenderJobs();
                 }
             }, (error) => {
                 console.error("Error fetching jobs: ", error);
-                const jobListContainer = document.getElementById(currentUser ? 'job-list' : 'public-job-list');
+                const jobListContainer = document.getElementById(isPublic ? 'public-job-list' : 'job-list');
                 if(jobListContainer) {
                     jobListContainer.innerHTML = `<p class="text-red-500 col-span-full">เกิดข้อผิดพลาดในการโหลดข้อมูลคิวงาน อาจเกิดจากปัญหาการเชื่อมต่อหรือการตั้งค่าสิทธิ์การเข้าถึงข้อมูล</p>`;
                 }
@@ -1081,29 +1116,16 @@
         }
 
         function renderPublicJobs() {
-            const jobListContainer = document.getElementById('public-job-list');
-            jobListContainer.innerHTML = '';
-            allActiveJobs.forEach(job => {
-                jobListContainer.innerHTML += `
-                    <div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white" data-id="${job.id}">
-                        <div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2">
-                            <i class="ph-fill ph-video-camera text-3xl text-gray-500"></i>
-                        </div>
-                        <h5 class="font-semibold job-card-title">${job.name}</h5>
-                        <p class="text-xs text-gray-500 text-center mt-1">${formatDateRange(job.startDate, job.endDate)}</p>
-                        <p class="text-xs text-gray-400 text-center job-card-location mt-1 flex items-center justify-center">
-                            <i class="ph ph-map-pin mr-1"></i>
-                            ${job.location}
-                        </p>
-                    </div>`;
-            });
-            jobListContainer.querySelectorAll('.job-card').forEach(card => card.addEventListener('click', () => loginModal.classList.remove('hidden')));
+             applyFiltersAndRenderJobs(true);
         }
-
-        function applyFiltersAndRenderJobs() {
+        
+        function applyFiltersAndRenderJobs(isPublic = false) {
             let filteredJobs = allActiveJobs;
+            const jobList = document.getElementById(isPublic ? 'public-job-list' : 'job-list');
+            jobList.innerHTML = '';
 
-            if (currentUserRole === 'member') {
+
+            if (!isPublic && currentUserRole === 'member') {
                 document.getElementById('member-job-filters').style.display = 'flex';
                 document.getElementById('filter-my-jobs').classList.toggle('gradient-bg', memberJobFilter === 'my_jobs');
                 document.getElementById('filter-my-jobs').classList.toggle('text-white', memberJobFilter === 'my_jobs');
@@ -1114,28 +1136,28 @@
                         job.team.some(member => member.userId === currentUser.uid)
                     );
                 }
-            } else { // Admin filters
+            } else if (!isPublic) { // Admin filters
                 document.getElementById('member-job-filters').style.display = 'none';
             }
+            
+            updateNotificationBadge();
 
-            const jobList = document.getElementById('job-list');
-            jobList.innerHTML = '';
             filteredJobs.forEach(job => {
-                const isMyJob = job.team.some(m => m.userId === currentUser.uid);
+                const isMyJob = !isPublic && job.team.some(m => m.userId === currentUser.uid);
                 const iconColorClass = isMyJob ? 'main-gradient-text' : 'text-gray-500';
 
                 const teamNeeded = job.teamNeeded || 0;
                 const teamCount = job.team.length;
                 const remaining = teamNeeded - teamCount;
                 let teamStatusHTML = '';
-                if (currentUserRole === 'admin' && teamNeeded > 0) {
-                     const remainingColor = remaining > 0 ? 'text-red-500' : 'text-green-500';
-                     teamStatusHTML = `<p class="text-xs text-center mt-1">
-                                        ทีมงาน (${teamCount}/${teamNeeded}) 
-                                        <span class="${remainingColor}">ขาด ${remaining > 0 ? remaining : 0} คน</span>
-                                     </p>`;
-                }
 
+                if (teamNeeded > 0) {
+                     if (remaining <= 0) {
+                        teamStatusHTML = `<p class="text-xs text-center mt-1 job-team-status loss-text font-bold">เต็มแล้ว</p>`;
+                     } else {
+                        teamStatusHTML = `<p class="text-xs text-center mt-1 job-team-status profit-text">ขาด ${remaining} คน</p>`;
+                     }
+                }
 
                 const cardHTML = `
                     <div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white relative" data-id="${job.id}" data-name="${job.name}">
@@ -1153,17 +1175,28 @@
                 jobList.innerHTML += cardHTML;
             });
 
-            document.querySelectorAll('#job-list .job-card').forEach(card => {
+            jobList.querySelectorAll('.job-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const jobId = card.dataset.id;
                     const jobName = card.dataset.name;
                     const job = allJobs.find(j => j.id === jobId);
-                    const isMyJob = job.team.some(m => m.userId === currentUser.uid);
+                    const isMyJob = !isPublic && job.team.some(m => m.userId === currentUser.uid);
+                    
+                    if(isPublic) {
+                        loginModal.classList.remove('hidden');
+                        return;
+                    }
 
                     if (currentUserRole === 'admin' || isMyJob) {
                         selectJob(jobId);
                     } else {
-                        showRequestToJoinModal(jobId, jobName);
+                        const teamNeeded = job.teamNeeded || 0;
+                        const teamCount = job.team.length;
+                        if(teamCount >= teamNeeded) {
+                             alert("คิวงานนี้เต็มแล้ว ไม่สามารถขอเข้าร่วมได้");
+                        } else {
+                            showRequestToJoinModal(jobId, jobName);
+                        }
                     }
                 });
             });
@@ -1189,7 +1222,7 @@
                 document.getElementById('job-details-section').classList.add('hidden');
                 currentJobData = null;
                 // Untoggle all cards
-                document.querySelectorAll('#job-list .job-card').forEach(card => {
+                document.querySelectorAll('#job-list .job-card, #public-job-list .job-card').forEach(card => {
                     card.classList.remove('gradient-bg');
                     card.classList.add('bg-white');
                     card.querySelector('h5').classList.remove('text-white');
@@ -1201,13 +1234,14 @@
                             p.classList.add('text-gray-400');
                          }
                     })
+                    card.querySelector('.job-team-status')?.classList.remove('text-white');
                 });
                 return; // Stop execution here
             }
 
             // Handle selection
             document.getElementById('job-details-section').classList.remove('hidden');
-            document.querySelectorAll('#job-list .job-card').forEach(card => {
+            document.querySelectorAll('#job-list .job-card, #public-job-list .job-card').forEach(card => {
                 const isSelected = card.dataset.id === jobId;
                 card.classList.toggle('gradient-bg', isSelected);
                 card.classList.toggle('bg-white', !isSelected);
@@ -1218,7 +1252,7 @@
                      p.classList.toggle('text-gray-500', !isSelected && !p.classList.contains('job-card-location'));
                      p.classList.toggle('text-gray-400', !isSelected && p.classList.contains('job-card-location'));
                 })
-
+                card.querySelector('.job-team-status')?.classList.toggle('text-white', isSelected);
             });
 
             // Set up the new listener
@@ -1243,6 +1277,9 @@
             document.getElementById('job-dates').textContent = `${formatDateRange(job.startDate, job.endDate)} (${job.workdays.length} วัน)`;
             document.getElementById('job-location-text').textContent = job.location;
             document.getElementById('team-member-count').textContent = job.team.length;
+            
+            const memberWhtDisplay = document.getElementById('member-wht-deduction-display');
+            memberWhtDisplay.textContent = ''; // Clear previous
 
             const budgetLabel = document.getElementById('budget-label');
             const jobIncomeEl = document.getElementById('job-income');
@@ -1264,6 +1301,12 @@
                         memberPaidStatusEl.textContent = 'ยังไม่ได้รับเงิน';
                     }
                     memberPaidStatusEl.classList.toggle('hidden', !myTeamData.isPaid);
+
+                    if(myTeamData.whtEnabled) {
+                        const whtAmount = myTotalWage * (appSettings.whtPercent / 100);
+                        memberWhtDisplay.textContent = `(หัก ณ ที่จ่าย ${appSettings.whtPercent}% : ${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท)`;
+                    }
+
                 } else {
                     jobIncomeEl.classList.add('text-blue-600');
                 }
@@ -1317,16 +1360,19 @@
                 const payButtonIcon = member.isPaid ? 'ph-arrow-counter-clockwise' : 'ph-currency-dollar';
                 const payButtonColor = member.isPaid ? 'text-orange-500 hover:text-orange-700' : 'text-green-500 hover:text-green-700';
                 rowHTML += `<td class="py-2 px-3 border-b text-center admin-only">
-                                <button class="text-blue-500 hover:text-blue-700 mr-2 edit-member-btn" data-userid="${member.userId}"><i class="ph ph-pencil-simple"></i></button>
-                                <button class="text-red-500 hover:text-red-700 mr-2 remove-member-btn" data-userid="${member.userId}"><i class="ph ph-trash"></i></button>
-                                <button class="pay-member-btn ${payButtonColor}" data-userid="${member.userId}"><i class="ph ${payButtonIcon}"></i></button>
+                                <div class="flex items-center justify-center space-x-2">
+                                    <button class="text-blue-500 hover:text-blue-700 edit-member-btn" data-userid="${member.userId}"><i class="ph ph-pencil-simple"></i></button>
+                                    <button class="text-red-500 hover:text-red-700 remove-member-btn" data-userid="${member.userId}"><i class="ph ph-trash"></i></button>
+                                    <button class="pay-member-btn ${payButtonColor}" data-userid="${member.userId}"><i class="ph ${payButtonIcon}"></i></button>
+                                    <input type="checkbox" title="หัก ณ ที่จ่าย 3%" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 member-wht-checkbox" data-userid="${member.userId}" ${member.whtEnabled ? 'checked' : ''}>
+                                </div>
                             </td></tr>`;
                 scheduleBody.innerHTML += rowHTML;
             });
 
             const expenseList = document.getElementById('expense-list');
             expenseList.innerHTML = '';
-            job.expenses.forEach((expense, index) => {
+            (job.expenses || []).forEach((expense, index) => {
                 expenseList.innerHTML += `<div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100"><div><p>${expense.name}</p></div><div class="flex items-center space-x-3"><p class="font-semibold">${expense.amount.toLocaleString()}</p><button class="text-blue-500 hover:text-blue-700 edit-expense-btn admin-only" data-index="${index}"><i class="ph ph-pencil-simple"></i></button><button class="text-red-500 hover:text-red-700 remove-expense-btn admin-only" data-index="${index}"><i class="ph ph-x-circle"></i></button></div></div>`;
             });
 
@@ -1396,25 +1442,28 @@
         function updateCalculations(job) {
             document.getElementById('summary-team-count').textContent = job.team.length;
             const teamTotalCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
-            const otherExpensesTotal = job.expenses.reduce((total, expense) => total + expense.amount, 0);
+            const otherExpensesTotal = (job.expenses || []).reduce((total, expense) => total + expense.amount, 0);
             document.getElementById('summary-team-cost').textContent = `${teamTotalCost.toLocaleString()} บาท`;
             document.getElementById('summary-other-expenses').textContent = `${otherExpensesTotal.toLocaleString()} บาท`;
 
             const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
             const subtotal = teamTotalCost + otherExpensesTotal;
             const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
-            const vatAmount = job.vatEnabled ? (subtotal * 0.07) : 0;
+            const vatAmount = job.vatEnabled ? (job.income * 0.07) : 0; // VAT is calculated from budget
 
-            const totalCost = subtotal + vatAmount;
-            const profitLoss = job.income - totalCost - whtAmount;
+            const totalCost = subtotal; // Total cost is now team + other expenses
+            const profitLoss = (job.income - vatAmount) - totalCost - whtAmount; // Profit is budget minus vat, minus costs, minus wht
+
             document.getElementById('summary-wht').textContent = `${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
             document.getElementById('summary-vat').textContent = `${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
             document.getElementById('summary-total-cost').textContent = `${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
+            
             const profitLossEl = document.getElementById('summary-profit-loss');
             profitLossEl.textContent = `${profitLoss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
             profitLossEl.className = `font-bold mt-2 ${profitLoss >= 0 ? 'text-5xl profit-text' : 'text-4xl loss-text'}`;
             document.getElementById('profit-loss-label').textContent = profitLoss >= 0 ? 'กำไร' : 'ขาดทุน';
         }
+
 
         async function handleTaxSettingsChange() {
             if (!currentJobId || !currentJobData) return;
@@ -1469,6 +1518,23 @@
                         }
                         return m;
                     });
+                    await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
+                };
+            });
+            
+             document.querySelectorAll('.member-wht-checkbox').forEach(box => {
+                box.onchange = async (e) => {
+                    const checkbox = e.currentTarget;
+                    const { userid } = checkbox.dataset;
+                    const isChecked = checkbox.checked;
+
+                    const updatedTeam = currentJobData.team.map(m => {
+                        if (m.userId === userid) {
+                            return { ...m, whtEnabled: isChecked };
+                        }
+                        return m;
+                    });
+
                     await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
                 };
             });
@@ -1792,9 +1858,23 @@
                 document.getElementById('admin-summary-container').classList.add('hidden');
                 document.getElementById('member-summary-container').classList.remove('hidden');
                 setupFinancialFilters(); // Also setup for members
+                setupMemberFinancialFilters();
                 generateFinancialReport();
             }
         }
+        
+        function setupMemberFinancialFilters() {
+            const filterButtons = document.getElementById('member-financial-filters');
+            filterButtons.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    memberFinancialFilter = e.target.dataset.status;
+                    filterButtons.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    generateFinancialReport();
+                });
+            });
+        }
+
 
         function setupFinancialFilters() {
             const monthSelect = document.getElementById('summary-month');
@@ -1939,14 +2019,14 @@
 
             jobs.forEach(job => {
                 const teamCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
-                const otherExpenses = job.expenses.reduce((total, expense) => total + expense.amount, 0);
+                const otherExpenses = (job.expenses || []).reduce((total, expense) => total + expense.amount, 0);
                 
-                const subtotalForTax = teamCost + otherExpenses;
-                const whtAmount = (job.whtEnabled && job.whtPercent) ? (job.income * job.whtPercent / 100) : 0;
-                const vatAmount = job.vatEnabled ? (subtotalForTax * 0.07) : 0;
-                
-                const jobTotalExpenses = subtotalForTax + vatAmount;
-                const profit = job.income - jobTotalExpenses - whtAmount;
+                const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
+                const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
+                const vatAmount = job.vatEnabled ? (job.income * 0.07) : 0; // VAT from budget
+
+                const jobTotalExpenses = teamCost + otherExpenses;
+                const profit = (job.income - vatAmount) - jobTotalExpenses - whtAmount;
                 
                 const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
                 const statusHTML = job.status === 'completed' ? `<i class="text-xs text-green-500"> (เสร็จงานแล้ว)</i>` : '';
@@ -1961,6 +2041,7 @@
 
                 jobSummaryBody.innerHTML += `
                     <tr class="cursor-pointer hover:bg-gray-100 job-summary-row" data-id="${job.id}">
+                        <td class="px-4 py-4 whitespace-nowrap"><input type="checkbox" class="job-select-checkbox" data-id="${job.id}"></td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             ${job.name} <span class="text-xs text-gray-400">(${jobMonth})</span>${statusHTML}
                         </td>
@@ -1968,7 +2049,6 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right">${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                            ${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                           ${whtAmount > 0 ? '<button class="ml-2 text-blue-500 hover:text-blue-700"><i class="ph ph-download-simple"></i></button>' : ''}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-red-500">${jobTotalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right ${profit >= 0 ? 'profit-text' : 'loss-text'}">${profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -1993,13 +2073,19 @@
             });
 
             document.querySelectorAll('.job-summary-row').forEach(row => {
-                row.addEventListener('click', () => {
+                 // Clicking anywhere on the row except the checkbox
+                row.addEventListener('click', (e) => {
+                    if (e.target.type === 'checkbox') return;
                     const jobId = row.dataset.id;
                     document.getElementById('financial-summary-view').classList.add('hidden');
                     mainApp.classList.remove('hidden');
                     selectJob(jobId);
                 });
             });
+            
+             document.getElementById('select-all-jobs-checkbox').onchange = (e) => {
+                document.querySelectorAll('.job-select-checkbox').forEach(cb => cb.checked = e.target.checked);
+            };
 
             document.getElementById('total-income-summary').textContent = totalIncome.toLocaleString();
             document.getElementById('total-vat-summary').textContent = totalVat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -2087,14 +2173,15 @@
                 const monthKey = monthFormatter.format(new Date(job.startDate));
                 if (monthlyData[monthKey]) {
                     const teamCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
-                    const otherExpenses = job.expenses.reduce((total, expense) => total + expense.amount, 0);
+                    const otherExpenses = (job.expenses || []).reduce((total, expense) => total + expense.amount, 0);
 
-                    const subtotalForTax = teamCost + otherExpenses;
-                    const whtAmount = (job.whtEnabled && job.whtPercent) ? (job.income * job.whtPercent / 100) : 0;
-                    const vatAmount = job.vatEnabled ? (subtotalForTax * 0.07) : 0;
+                    const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
+                    const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
+                    const vatAmount = job.vatEnabled ? (job.income * 0.07) : 0; // VAT from budget
                     
-                    const totalExpense = subtotalForTax + vatAmount;
-                    const profit = job.income - totalExpense - whtAmount;
+                    const totalExpense = teamCost + otherExpenses;
+                    const profit = (job.income - vatAmount) - totalExpense - whtAmount;
+
 
                     monthlyData[monthKey].income += job.income;
                     monthlyData[monthKey].expense += totalExpense;
@@ -2119,13 +2206,27 @@
             memberWageBody.innerHTML = '';
             let totalWage = 0, totalPaid = 0, totalUnpaid = 0, totalWht = 0;
 
-            const memberJobs = jobs.filter(job => job.team.some(m => m.userId === currentUser.uid));
+            let memberJobs = jobs.filter(job => job.team.some(m => m.userId === currentUser.uid));
+            
+            // Apply status filter
+            if (memberFinancialFilter === 'paid') {
+                memberJobs = memberJobs.filter(job => {
+                    const myTeamData = job.team.find(m => m.userId === currentUser.uid);
+                    return myTeamData && myTeamData.isPaid;
+                });
+            } else if (memberFinancialFilter === 'unpaid') {
+                 memberJobs = memberJobs.filter(job => {
+                    const myTeamData = job.team.find(m => m.userId === currentUser.uid);
+                    return myTeamData && !myTeamData.isPaid;
+                });
+            }
+
 
             memberJobs.forEach(job => {
                 const myTeamData = job.team.find(m => m.userId === currentUser.uid);
                 if (myTeamData) {
                     const wage = calculateTeamCostForMember(myTeamData, job.workdays);
-                    const whtAmount = (job.whtEnabled && job.whtPercent) ? (wage * job.whtPercent / 100) : 0;
+                    const whtAmount = myTeamData.whtEnabled ? (wage * (appSettings.whtPercent / 100)) : 0;
                     const paidAmount = myTeamData.isPaid ? wage : 0;
                     const unpaidAmount = !myTeamData.isPaid ? wage : 0;
                     
@@ -2308,7 +2409,7 @@
                 <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded">`;
             showModal('เพิ่มสมาชิกในทีม', content, async (formData, submitButton, modal) => {
                 const userId = formData.get('userId');
-                await updateDoc(doc(db, "jobs", currentJobId), { team: arrayUnion({ userId: userId, position: formData.get('position'), dailyRate: Number(formData.get('dailyRate')), workdays: [], dailyOverrides: {}, isPaid: false })})
+                await updateDoc(doc(db, "jobs", currentJobId), { team: arrayUnion({ userId: userId, position: formData.get('position'), dailyRate: Number(formData.get('dailyRate')), workdays: [], dailyOverrides: {}, isPaid: false, whtEnabled: false })})
                 await createNotification(userId, `คุณถูกเพิ่มเข้าคิวงาน: <b>${currentJobData.name}</b>`, currentJobId, currentJobData.name);
                 modal.remove();
             }, true, (modal) => {
@@ -2633,50 +2734,60 @@
 
         function showBankAccountModal() {
             const bankInfo = currentUserData.bankAccount || { name: '', bank: '', number: '' };
+            const idCardUrl = currentUserData.idCardCopyUrl || '';
             const banks = ['พร้อมเพย์', 'ธนาคารกรุงเทพ', 'ธนาคารกสิกรไทย', 'ธนาคารกรุงไทย', 'ธนาคารไทยพาณิชย์', 'ธนาคารกรุงศรีอยุธยา', 'ธนาคารทหารไทยธนชาต', 'ธนาคารออมสิน', 'ธ.ก.ส.', 'ธนาคารยูโอบี', 'ธนาคารซีไอเอ็มบีไทย'];
             const bankOptions = banks.map(b => `<option value="${b}" ${b === bankInfo.bank ? 'selected' : ''}>${b}</option>`).join('');
             const content = `
                 <label>ชื่อบัญชี</label><input type="text" name="accountName" class="w-full p-2 border rounded" value="${bankInfo.name || ''}">
                 <label>ธนาคาร</label><select name="bankName" class="w-full p-2 border rounded">${bankOptions}</select>
                 <label>หมายเลขบัญชี</label><input type="text" name="accountNumber" class="w-full p-2 border rounded" value="${bankInfo.number || ''}">
+                <hr>
+                <label>สำเนาบัตรประชาชน (สำหรับหัก ณ ที่จ่าย)</label>
+                 <div class="flex items-center space-x-4">
+                    <img id="id-card-preview" src="${idCardUrl || 'https://placehold.co/120x80/E2E8F0/4A5568?text=ID+Card'}" class="w-32 h-20 rounded-md object-cover border-2 border-gray-200">
+                    <div>
+                        <label for="idCardFile" class="cursor-pointer text-sm text-indigo-600 font-semibold hover:text-indigo-800">เลือกไฟล์รูปภาพ</label>
+                        <input type="file" name="idCardFile" id="idCardFile" accept="image/*" class="hidden"/>
+                        <p id="id-card-filename" class="text-xs text-gray-500 mt-1"></p>
+                    </div>
+                </div>
             `;
             showModal('ข้อมูลบัญชีธนาคาร', content, async (formData, submitButton, modal) => {
                 submitButton.disabled = true;
                 submitButton.textContent = 'กำลังบันทึก...';
+
+                const idCardFile = formData.get('idCardFile');
+                let newIdCardUrl = idCardUrl;
+                if (idCardFile && idCardFile.size > 0) {
+                    newIdCardUrl = await uploadToCloudinary(idCardFile) || newIdCardUrl;
+                }
+
                 const updatedBankAccount = {
                     name: formData.get('accountName'),
                     bank: formData.get('bankName'),
                     number: formData.get('accountNumber')
                 };
-                await updateDoc(doc(db, "users", currentUser.uid), { bankAccount: updatedBankAccount });
+                await updateDoc(doc(db, "users", currentUser.uid), { 
+                    bankAccount: updatedBankAccount,
+                    idCardCopyUrl: newIdCardUrl
+                });
                 currentUserData.bankAccount = updatedBankAccount;
+                currentUserData.idCardCopyUrl = newIdCardUrl;
                 alert('บันทึกข้อมูลบัญชีธนาคารเรียบร้อยแล้ว');
                 modal.remove();
+            }, true, (modal) => {
+                const fileInput = modal.querySelector('#idCardFile');
+                const previewImg = modal.querySelector('#id-card-preview');
+                const filenameP = modal.querySelector('#id-card-filename');
+                fileInput.onchange = (e) => {
+                    if (e.target.files && e.target.files[0]) {
+                        previewImg.src = URL.createObjectURL(e.target.files[0]);
+                        filenameP.textContent = e.target.files[0].name;
+                    }
+                };
             });
         }
 
-        function showAdminBankAccountModal(user) {
-            const bankInfo = user.bankAccount || { name: '', bank: '', number: '' };
-            const banks = ['พร้อมเพย์', 'ธนาคารกรุงเทพ', 'ธนาคารกสิกรไทย', 'ธนาคารกรุงไทย', 'ธนาคารไทยพาณิชย์', 'ธนาคารกรุงศรีอยุธยา', 'ธนาคารทหารไทยธนชาต', 'ธนาคารออมสิน', 'ธ.ก.ส.', 'ธนาคารยูโอบี', 'ธนาคารซีไอเอ็มบีไทย'];
-            const bankOptions = banks.map(b => `<option value="${b}" ${b === bankInfo.bank ? 'selected' : ''}>${b}</option>`).join('');
-            const content = `
-                <label>ชื่อบัญชี</label><input type="text" name="accountName" class="w-full p-2 border rounded" value="${bankInfo.name || ''}">
-                <label>ธนาคาร</label><select name="bankName" class="w-full p-2 border rounded">${bankOptions}</select>
-                <label>หมายเลขบัญชี</label><input type="text" name="accountNumber" class="w-full p-2 border rounded" value="${bankInfo.number || ''}">
-            `;
-            showModal(`บัญชีธนาคารของ ${user.nickname || user.name}`, content, async (formData, submitButton, modal) => {
-                submitButton.disabled = true;
-                submitButton.textContent = 'กำลังบันทึก...';
-                const updatedBankAccount = {
-                    name: formData.get('accountName'),
-                    bank: formData.get('bankName'),
-                    number: formData.get('accountNumber')
-                };
-                await updateDoc(doc(db, "users", user.id), { bankAccount: updatedBankAccount });
-                alert('บันทึกข้อมูลบัญชีธนาคารเรียบร้อยแล้ว');
-                modal.remove();
-            });
-        }
 
         function showForgotPasswordModal() {
             const content = `<label>กรุณากรอกอีเมลของคุณเพื่อรีเซ็ตรหัสผ่าน</label><input type="email" name="email" required class="w-full p-2 border rounded" placeholder="your@email.com">`;
@@ -2862,8 +2973,10 @@
                 allNotifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const unreadCount = allNotifications.filter(n => !n.isRead).length;
 
+                // This badge is now for general notifications, not job count
                 const badge = document.getElementById('notification-badge');
                 if (unreadCount > 0) {
+                    badge.textContent = unreadCount;
                     badge.classList.remove('hidden');
                 } else {
                     badge.classList.add('hidden');
@@ -3002,11 +3115,14 @@
                         dailyRate: dailyRate,
                         workdays: [],
                         dailyOverrides: {},
-                        isPaid: false
+                        isPaid: false,
+                        whtEnabled: false
                     })
                 });
 
                 await updateDoc(doc(db, "notifications", notification.id), { status: 'approved' });
+                
+                const notificationMessage = `คำขอเข้าร่วมคิวงาน <b>${notification.jobName}</b> ของคุณได้รับการอนุมัติแล้ว (BG: ${dailyRate.toLocaleString()} บาท/วัน)`;
 
                 await addDoc(collection(db, "notifications"), {
                     senderId: currentUser.uid,
@@ -3016,7 +3132,7 @@
                     jobName: notification.jobName,
                     type: 'request_response',
                     status: 'approved',
-                    message: `คำขอเข้าร่วมคิวงาน <b>${notification.jobName}</b> ของคุณได้รับการอนุมัติแล้ว`,
+                    message: notificationMessage,
                     isRead: false,
                     createdAt: serverTimestamp()
                 });
