@@ -191,17 +191,6 @@
                         ลงชื่อเข้าใช้
                     </button>
                 </form>
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-gray-300"></div>
-                    <span class="flex-shrink mx-4 text-gray-400 text-sm">หรือเข้าสู่ระบบด้วย</span>
-                    <div class="flex-grow border-t border-gray-300"></div>
-                </div>
-                <div class="grid grid-cols-1 gap-4">
-                     <button id="line-login-btn" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.43,11.3,17.5,6.5a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.41L18.59,10H15a1,1,0,0,0,0,2h3.59l-2.5,2.59a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0L21.43,12.7A1,1,0,0,0,21.43,11.3ZM12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20ZM7,11H4a1,1,0,0,0,0,2H7a1,1,0,0,0,0-2Z"/></svg>
-                        เข้าสู่ระบบด้วย LINE
-                    </button>
-                </div>
                 <p class="text-center text-sm text-gray-600">
                     ยังไม่มีบัญชี? <a href="#" id="show-signup-modal-btn" class="font-medium text-red-600 hover:text-red-500">สมัครสมาชิกที่นี่</a>
                 </p>
@@ -270,6 +259,9 @@
                     <button id="notifications-button" class="relative p-2 text-gray-600 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                         <i class="ph ph-bell text-xl"></i>
                         <span id="notification-badge" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 hidden"></span>
+                    </button>
+                    <button id="line-bot-button" class="px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors admin-only">
+                        <i class="ph ph-robot mr-1"></i> แชทบอทไลน์
                     </button>
                     <button id="system-settings-button" class="px-4 py-2 font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors admin-only">
                         <i class="ph ph-wrench mr-1"></i> ตั้งค่าระบบ
@@ -574,22 +566,16 @@
                         </div>
                     </div>
                      <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">LINE Login</h3>
-                        <p class="mt-1 text-sm text-gray-500">ตั้งค่าสำหรับการเข้าสู่ระบบด้วย LINE</p>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Line Bot (Line OA)</h3>
+                        <p class="mt-1 text-sm text-gray-500">ตั้งค่าสำหรับเชื่อมต่อ Line Official Account เพื่อส่งการแจ้งเตือน</p>
                         <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
                             <div>
-                                <label for="setting-line-channel-id" class="block text-sm font-medium text-gray-700">Channel ID (App ID)</label>
-                                <input type="text" name="lineChannelId" id="setting-line-channel-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <label for="setting-line-bot-token" class="block text-sm font-medium text-gray-700">Channel Access Token</label>
+                                <input type="text" name="lineBotChannelAccessToken" id="setting-line-bot-token" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
                             <div>
-                                <label for="setting-line-channel-secret" class="block text-sm font-medium text-gray-700">
-                                    Channel Secret 
-                                    <span class="tooltip inline-block">
-                                        <i class="ph ph-info text-gray-400"></i>
-                                        <span class="tooltiptext">เพื่อความปลอดภัยสูงสุด Channel Secret ควรถูกจัดเก็บเป็น Environment Variable ใน Cloud Function เท่านั้น ไม่ควรเก็บในฐานข้อมูลโดยตรง</span>
-                                    </span>
-                                </label>
-                                <input type="text" name="lineChannelSecret" id="setting-line-channel-secret" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <label for="setting-line-bot-secret" class="block text-sm font-medium text-gray-700">Channel Secret</label>
+                                <input type="text" name="lineBotChannelSecret" id="setting-line-bot-secret" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
                         </div>
                     </div>
@@ -621,6 +607,70 @@
                 </form>
             </section>
         </div>
+        
+        <!-- Line Bot View -->
+        <div id="line-bot-view" class="hidden p-4 sm:p-6 lg:p-8">
+             <!-- Header -->
+            <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">จัดการ Line Bot</h1>
+                    <p class="mt-1 text-gray-500">ทดสอบและส่งข้อความแจ้งเตือนผ่าน Line OA</p>
+                </div>
+                <button id="back-to-main-from-bot-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                    <i class="ph ph-arrow-left mr-1"></i> กลับหน้าหลัก
+                </button>
+            </header>
+
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Test Send Section -->
+                <section class="p-6 bg-white rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">ทดสอบส่งข้อความ</h3>
+                    <form id="line-test-form" class="space-y-4">
+                        <div>
+                            <label for="line-test-userid" class="block text-sm font-medium text-gray-700">Line User ID</label>
+                            <input type="text" id="line-test-userid" placeholder="U123456789..." required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="line-test-message" class="block text-sm font-medium text-gray-700">ข้อความ</label>
+                            <textarea id="line-test-message" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="พิมพ์ข้อความทดสอบ..."></textarea>
+                        </div>
+                        <div class="flex justify-end">
+                             <button type="submit" class="px-6 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+                                ทดสอบส่ง
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Send to Team Section -->
+                <section class="p-6 bg-white rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">ส่งข้อความถึงทีมงาน</h3>
+                    <form id="line-team-form" class="space-y-4">
+                        <div>
+                            <label for="line-job-select" class="block text-sm font-medium text-gray-700">เลือกคิวงาน</label>
+                            <select id="line-job-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option>-- กรุณาเลือกคิวงาน --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="line-member-select" class="block text-sm font-medium text-gray-700">เลือกทีมงาน</label>
+                            <select id="line-member-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" disabled>
+                                <option>-- กรุณาเลือกทีมงาน --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="line-team-message" class="block text-sm font-medium text-gray-700">ข้อความ</label>
+                            <textarea id="line-team-message" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="พิมพ์ข้อความ..."></textarea>
+                        </div>
+                        <div class="flex justify-end">
+                             <button type="submit" class="px-6 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600">
+                                ส่งข้อความ
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
 
     </div>
 
@@ -630,7 +680,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, OAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, OAuthProvider, signInWithRedirect, getRedirectResult, linkWithRedirect, unlink } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc, query, where, getDocs, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // [!!!] การแก้ไขข้อผิดพลาด 'auth/unauthorized-domain' [!!!]
@@ -678,8 +728,8 @@
             whtPercent: 3,
             cloudinaryName: "dzs7zbikj",
             cloudinaryPreset: "UploadpresetsQ",
-            lineChannelId: "",
-            lineChannelSecret: "",
+            lineBotChannelAccessToken: "",
+            lineBotChannelSecret: "",
             facebookAppId: "",
             facebookAppSecret: ""
         };
@@ -915,6 +965,7 @@
             mainApp.classList.remove('hidden');
             document.getElementById('financial-summary-view').classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
+            document.getElementById('line-bot-view').classList.add('hidden');
 
 
             const banner = document.getElementById('impersonation-banner');
@@ -1446,7 +1497,7 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
         
-        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-login-btn'].forEach(id => {
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-bot-button'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (id === 'filter-my-jobs') {
@@ -1472,7 +1523,7 @@
                             case 'manage-profile-button': showManageProfileModal(); break;
                             case 'manage-all-users-button': showUserManagementModal(); break;
                             case 'system-settings-button': showSettingsView(); break;
-                            case 'line-login-btn': handleLineLogin(); break;
+                            case 'line-bot-button': showLineBotView(); break;
                             case 'save-image-btn': 
                                 const captureArea = document.getElementById('capture-area');
                                 if (captureArea) {
@@ -1497,6 +1548,11 @@
             document.getElementById('settings-view').classList.add('hidden');
             mainApp.classList.remove('hidden');
         });
+        
+        document.getElementById('back-to-main-from-bot-btn').addEventListener('click', () => {
+            document.getElementById('line-bot-view').classList.add('hidden');
+            mainApp.classList.remove('hidden');
+        });
 
         document.getElementById('settings-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1507,8 +1563,8 @@
             const newSettings = {
                 cloudinaryName: formData.get('cloudinaryName'),
                 cloudinaryPreset: formData.get('cloudinaryPreset'),
-                lineChannelId: formData.get('lineChannelId'),
-                lineChannelSecret: formData.get('lineChannelSecret'),
+                lineBotChannelAccessToken: formData.get('lineBotChannelAccessToken'),
+                lineBotChannelSecret: formData.get('lineBotChannelSecret'),
                 facebookAppId: formData.get('facebookAppId'),
                 facebookAppSecret: formData.get('facebookAppSecret')
             };
@@ -1523,6 +1579,56 @@
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = 'บันทึกการตั้งค่า';
+            }
+        });
+
+        document.getElementById('line-test-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('line-test-userid').value;
+            const message = document.getElementById('line-test-message').value;
+            if (userId && message) {
+                sendLineMessage(userId, message);
+            }
+        });
+
+        document.getElementById('line-team-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const memberSelect = document.getElementById('line-member-select');
+            const userId = memberSelect.value;
+            const userName = memberSelect.options[memberSelect.selectedIndex].text;
+            const message = document.getElementById('line-team-message').value;
+            if (userId && message) {
+                sendLineMessage(userId, message, userName);
+            } else {
+                alert('กรุณาเลือกทีมงานและป้อนข้อความ');
+            }
+        });
+        
+        document.getElementById('line-job-select').addEventListener('change', (e) => {
+            const jobId = e.target.value;
+            const memberSelect = document.getElementById('line-member-select');
+            memberSelect.innerHTML = '<option value="">-- กรุณาเลือกทีมงาน --</option>';
+            memberSelect.disabled = true;
+
+            if (jobId) {
+                const selectedJob = allJobs.find(j => j.id === jobId);
+                if (selectedJob && selectedJob.team) {
+                    selectedJob.team.forEach(member => {
+                        const userData = allUsers.find(u => u.id === member.userId);
+                        if (userData) { // Ensure user data exists
+                            // Here we assume userData.lineUserId exists. In a real app, you'd need to handle cases where it doesn't.
+                            const option = document.createElement('option');
+                            option.value = userData.lineUserId || ''; // Use Line User ID
+                            option.textContent = userData.nickname || userData.name;
+                            if (!userData.lineUserId) {
+                                option.disabled = true;
+                                option.textContent += ' (ยังไม่เชื่อมต่อ Line)';
+                            }
+                            memberSelect.appendChild(option);
+                        }
+                    });
+                    memberSelect.disabled = false;
+                }
             }
         });
 
@@ -1548,6 +1654,7 @@
         function showFinancialSummaryView() {
             mainApp.classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
+            document.getElementById('line-bot-view').classList.add('hidden');
             document.getElementById('financial-summary-view').classList.remove('hidden');
 
             if (currentUserRole === 'admin') {
@@ -2248,6 +2355,8 @@
                 <label>Username</label><input type="text" readonly class="w-full p-2 border rounded bg-gray-100" value="${currentUserData.name}">
                 <label>เบอร์โทร</label><input type="tel" name="phone" class="w-full p-2 border rounded" value="${currentUserData.phone || ''}">
                 <hr>
+                <div id="social-linking-container" class="space-y-2"></div>
+                <hr>
                 <div class="grid grid-cols-2 gap-4">
                     <button type="button" id="manage-bank-account-btn" class="w-full px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors">บัญชีธนาคาร</button>
                     <button type="button" id="change-password-from-profile-btn" class="w-full px-4 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors">เปลี่ยนรหัสผ่าน</button>
@@ -2277,6 +2386,21 @@
                         previewImg.src = URL.createObjectURL(e.target.files[0]);
                     }
                 };
+
+                // Social Linking UI
+                const socialContainer = modal.querySelector('#social-linking-container');
+                if (currentUserData.lineUserId) {
+                    socialContainer.innerHTML = `<div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-700">เชื่อมต่อกับ LINE แล้ว</p>
+                        <button type="button" id="unlink-line-btn" class="text-sm text-red-600 hover:text-red-800">ยกเลิกการเชื่อมต่อ</button>
+                    </div>`;
+                    modal.querySelector('#unlink-line-btn').onclick = () => { handleUnlinkLineAccount(); modal.remove(); };
+                } else {
+                    socialContainer.innerHTML = `<button type="button" id="link-line-btn" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600">เชื่อมต่อบัญชี LINE</button>`;
+                    modal.querySelector('#link-line-btn').onclick = () => { handleLinkLineAccount(); modal.remove(); };
+                }
+
+
                 modal.querySelector('#change-password-from-profile-btn').onclick = () => { modal.remove(); showChangePasswordForCurrentUserModal(); };
                 modal.querySelector('#manage-bank-account-btn').onclick = () => { modal.remove(); showBankAccountModal(); };
             });
@@ -2417,37 +2541,72 @@
         function showSettingsView() {
             mainApp.classList.add('hidden');
             document.getElementById('financial-summary-view').classList.add('hidden');
+            document.getElementById('line-bot-view').classList.add('hidden');
             document.getElementById('settings-view').classList.remove('hidden');
 
             // Populate form
             document.getElementById('setting-cloudinary-name').value = appSettings.cloudinaryName;
             document.getElementById('setting-cloudinary-preset').value = appSettings.cloudinaryPreset;
-            document.getElementById('setting-line-channel-id').value = appSettings.lineChannelId || '';
-            document.getElementById('setting-line-channel-secret').value = appSettings.lineChannelSecret || '';
+            document.getElementById('setting-line-bot-token').value = appSettings.lineBotChannelAccessToken || '';
+            document.getElementById('setting-line-bot-secret').value = appSettings.lineBotChannelSecret || '';
             document.getElementById('setting-facebook-app-id').value = appSettings.facebookAppId || '';
             document.getElementById('setting-facebook-app-secret').value = appSettings.facebookAppSecret || '';
         }
 
-        async function handleLineLogin() {
+        function showLineBotView() {
+            mainApp.classList.add('hidden');
+            document.getElementById('financial-summary-view').classList.add('hidden');
+            document.getElementById('settings-view').classList.add('hidden');
+            document.getElementById('line-bot-view').classList.remove('hidden');
+
+            const jobSelect = document.getElementById('line-job-select');
+            jobSelect.innerHTML = '<option value="">-- กรุณาเลือกคิวงาน --</option>';
+            allActiveJobs.forEach(job => {
+                const option = document.createElement('option');
+                option.value = job.id;
+                option.textContent = job.name;
+                jobSelect.appendChild(option);
+            });
+        }
+        
+        function sendLineMessage(userId, message, userName = null) {
+            // This is a placeholder function.
+            // In a real application, this would trigger a Cloud Function
+            // that uses the Channel Access Token to send a message via the LINE Messaging API.
+            const recipientName = userName ? `${userName} (${userId})` : userId;
+            const alertMessage = `[จำลองการส่งข้อความ]\n\nถึง: ${recipientName}\n\nข้อความ: ${message}\n\n(ฟังก์ชันนี้ต้องมีการพัฒนาเพิ่มเติมในฝั่งเซิร์ฟเวอร์เพื่อส่งข้อความจริง)`;
+            alert(alertMessage);
+        }
+
+        async function handleLinkLineAccount() {
             try {
-                // The provider ID must match the one configured in the Firebase console.
                 const provider = new OAuthProvider('oidc.line');
-                await signInWithRedirect(auth, provider);
+                await linkWithRedirect(auth.currentUser, provider);
             } catch (error) {
-                console.error("LINE Login Error:", error);
-                if (error.code === 'auth/unauthorized-domain') {
+                console.error("LINE Linking Error:", error);
+                 if (error.code === 'auth/unauthorized-domain') {
                     showUnauthorizedDomainModal(window.location.hostname);
                 } else {
-                    const loginError = document.getElementById('login-error');
-                    loginError.textContent = `เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย LINE: ${error.message}`;
-                    loginError.classList.remove('hidden');
+                    alert(`เกิดข้อผิดพลาดในการเชื่อมต่อบัญชี LINE: ${error.message}`);
                 }
+            }
+        }
+
+        async function handleUnlinkLineAccount() {
+            try {
+                await unlink(auth.currentUser, 'oidc.line');
+                await updateDoc(doc(db, "users", currentUser.uid), { lineUserId: null });
+                currentUserData.lineUserId = null;
+                alert('ยกเลิกการเชื่อมต่อบัญชี LINE สำเร็จ');
+            } catch (error) {
+                console.error("LINE Unlinking Error:", error);
+                alert(`เกิดข้อผิดพลาดในการยกเลิกการเชื่อมต่อ: ${error.message}`);
             }
         }
 
         function showUnauthorizedDomainModal(domain) {
             const content = `
-                <p class="text-center text-red-600 font-semibold">การล็อกอินล้มเหลวเนื่องจากโดเมนไม่ได้รับอนุญาต</p>
+                <p class="text-center text-red-600 font-semibold">การดำเนินการล้มเหลวเนื่องจากโดเมนไม่ได้รับอนุญาต</p>
                 <p class="mt-4 text-sm text-gray-700">กรุณาเพิ่มโดเมนต่อไปนี้ลงใน "Authorized domains" ในการตั้งค่า Firebase Authentication ของคุณ:</p>
                 <div class="mt-2 p-2 bg-gray-100 rounded-md text-center font-mono text-sm break-all">${domain}</div>
                 <p class="mt-4 text-sm text-gray-500">ขั้นตอน: Firebase Console > Authentication > Settings > Authorized domains > Add domain</p>
