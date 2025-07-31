@@ -27,6 +27,12 @@
         body {
             font-family: 'Kanit', sans-serif;
             background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        #app-container {
+            flex-grow: 1;
         }
         .gradient-bg {
             background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
@@ -134,6 +140,16 @@
             text-overflow: ellipsis;
             text-align: center;
         }
+        .job-card-location {
+            height: 2.5rem; /* Height for 2 lines with smaller text */
+            line-height: 1.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -152,7 +168,9 @@
                     <p class="mt-1 text-gray-500">คิวงานทั้งหมด</p>
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
-                    <p class="text-sm text-gray-500">คลิกที่คิวงานเพื่อดูรายละเอียดและลงชื่อเข้าใช้</p>
+                    <button id="public-login-button" class="px-4 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                       <i class="ph ph-sign-in mr-1"></i> ลงชื่อเข้าใช้
+                    </button>
                 </div>
             </header>
             <section class="max-w-7xl mx-auto">
@@ -199,8 +217,8 @@
                 <h2 class="text-2xl font-bold text-center">สร้างบัญชีใหม่</h2>
                 <form id="signup-form" class="mt-6 space-y-4">
                     <div>
-                        <label for="signup-username" class="text-sm font-medium text-gray-700">Username (สำหรับล็อกอิน, ไม่สามารถเปลี่ยนได้)</label>
-                        <input type="text" id="signup-username" name="username" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                        <label for="signup-username" class="text-sm font-medium text-gray-700">Username (อังกฤษ/ตัวเลขเท่านั้น)</label>
+                        <input type="text" id="signup-username" name="username" required class="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500" pattern="[a-zA-Z0-9_]+">
                     </div>
                     <div>
                         <label for="signup-email" class="text-sm font-medium text-gray-700">อีเมล</label>
@@ -315,7 +333,7 @@
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div class="lg:col-span-2">
-                                <h4 class="text-xl font-semibold mb-4">ทีมงาน</h4>
+                                <h4 class="text-xl font-semibold mb-4">ทีมงาน (<span id="team-member-count">0</span> คน)</h4>
                                 <div class="overflow-x-auto"><table class="min-w-full bg-white"><thead id="schedule-head"></thead><tbody id="schedule-body"></tbody></table></div>
                                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="admin-only">
@@ -344,7 +362,7 @@
                             <div>
                                 <h4 class="text-xl font-semibold mb-4">สรุปค่าใช้จ่าย</h4>
                                 <div class="space-y-3">
-                                    <div class="flex justify-between items-center"><p>ค่าทีมงานรวม</p><p id="summary-team-cost" class="font-semibold">0 บาท</p></div>
+                                    <div class="flex justify-between items-center"><p>ค่าทีมงานรวม (<span id="summary-team-count">0</span> คน)</p><p id="summary-team-cost" class="font-semibold">0 บาท</p></div>
                                     <div class="flex justify-between items-center"><p>ค่าใช้จ่ายอื่นๆ รวม</p><p id="summary-other-expenses" class="font-semibold">0 บาท</p></div>
                                     <hr>
                                     <div class="flex justify-between items-center"><div class="flex items-center"><input type="checkbox" id="wht-toggle" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"><label for="wht-toggle" class="ml-2">หัก ณ ที่จ่าย (<input type="number" id="wht-percent" value="3" class="w-12 text-center bg-gray-100 rounded">%)</label></div><p id="summary-wht" class="font-semibold">0 บาท</p></div>
@@ -374,7 +392,7 @@
             <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">สรุปบัญชีและการเงิน</h1>
-                    <p class="mt-1 text-gray-500">รายงานรายรับ-รายจ่าย และค่าแรงทีมงาน</p>
+                    <p class="mt-1 text-gray-500">รายงานรายรับ-รายจ่าย</p>
                 </div>
                 <button id="back-to-main-app-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
                     <i class="ph ph-arrow-left mr-1"></i> กลับหน้าหลัก
@@ -428,9 +446,14 @@
                             <h2 class="text-2xl font-semibold mb-4">สถิติ</h2>
                             <div class="space-y-4">
                                 <div class="p-4 bg-white rounded-2xl shadow-lg">
-                                    <h3 class="font-semibold mb-2">ค่าแรงทีมงาน</h3>
-                                    <p>จ่ายแล้ว: <span id="stat-paid-wages" class="font-bold profit-text">0</span> บาท</p>
-                                    <p>ยังไม่จ่าย: <span id="stat-unpaid-wages" class="font-bold loss-text">0</span> บาท</p>
+                                    <h3 class="font-semibold mb-2">ค่าใช้จ่ายรวม</h3>
+                                    <div class="space-y-1 text-sm">
+                                        <p>ค่าแรงจ่ายแล้ว: <span id="stat-paid-wages" class="font-bold profit-text">0</span> บาท</p>
+                                        <p>ค่าแรงยังไม่จ่าย: <span id="stat-unpaid-wages" class="font-bold loss-text">0</span> บาท</p>
+                                        <p>ค่าใช้จ่ายอื่นๆ: <span id="stat-other-expenses" class="font-bold text-gray-700">0</span> บาท</p>
+                                        <p>หัก ณ ที่จ่าย: <span id="stat-wht" class="font-bold text-gray-700">0</span> บาท</p>
+                                        <p>VAT (7%): <span id="stat-vat" class="font-bold text-gray-700">0</span> บาท</p>
+                                    </div>
                                 </div>
                                 <div class="p-4 bg-white rounded-2xl shadow-lg">
                                     <h3 class="font-semibold mb-2">ทีมงานที่ได้รับเงินสูงสุด</h3>
@@ -448,6 +471,8 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายรับ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">VAT (7%)</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายจ่ายทั้งหมด</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">กำไร/ขาดทุน</th>
                                 </tr>
@@ -458,6 +483,8 @@
                                 <tr>
                                     <td class="px-6 py-4 text-left">รวมทั้งหมด</td>
                                     <td id="total-income-summary" class="px-6 py-4 text-right">0</td>
+                                    <td id="total-vat-summary" class="px-6 py-4 text-right">0</td>
+                                    <td id="total-wht-summary" class="px-6 py-4 text-right">0</td>
                                     <td id="total-expense-summary" class="px-6 py-4 text-right">0</td>
                                     <td id="total-profit-summary" class="px-6 py-4 text-right">0</td>
                                 </tr>
@@ -501,7 +528,10 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">BG ที่ได้รับ</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">BG</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รับเงินแล้ว</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ยังไม่ได้รับเงิน</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
                                 </tr>
                             </thead>
                             <tbody id="member-wage-table-body" class="bg-white divide-y divide-gray-200">
@@ -510,6 +540,9 @@
                                 <tr>
                                     <td class="px-6 py-4 text-left">รวมทั้งหมด</td>
                                     <td id="member-total-wage-summary" class="px-6 py-4 text-right">0</td>
+                                    <td id="member-total-paid-summary" class="px-6 py-4 text-right">0</td>
+                                    <td id="member-total-unpaid-summary" class="px-6 py-4 text-right">0</td>
+                                    <td id="member-total-wht-summary" class="px-6 py-4 text-right">0</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -670,6 +703,11 @@
 
     </div>
 
+    <footer class="text-center p-4 text-xs text-gray-500 mt-auto">
+        © SIRASUPA CORPORATION (THAILAND) CO., LTD. Tax ID: 0435562000799
+    </footer>
+
+
     <div id="modals-container"></div>
 
     <script type="module">
@@ -776,7 +814,8 @@
                         forcePasswordChange: false,
                         profilePic: user.photoURL || '',
                         bankAccount: { name: '', bank: '', number: '' },
-                        phone: user.phoneNumber || ''
+                        phone: user.phoneNumber || '',
+                        createdAt: serverTimestamp() // Add creation timestamp
                     };
                     try {
                         await setDoc(userDocRef, newUserDoc);
@@ -832,16 +871,24 @@
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitButton = e.target.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = 'กรุณารอสักครู่...';
-
             const signupError = document.getElementById('signup-error');
             signupError.classList.add('hidden');
 
-            const username = e.target.username.value;
+            const usernameInput = e.target.username;
+            const username = usernameInput.value;
             const email = e.target.email.value;
             const password = e.target.password.value;
             const confirmPassword = e.target.confirmPassword.value;
+
+            if (!usernameInput.checkValidity()) {
+                 signupError.textContent = "Username ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น";
+                 signupError.classList.remove('hidden');
+                 return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'กรุณารอสักครู่...';
+
 
             const resetSubmitButton = () => {
                 submitButton.disabled = false;
@@ -873,7 +920,17 @@
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                const newUserDoc = { email: user.email, name: username, nickname: '', role: 'member', forcePasswordChange: false, profilePic: '', bankAccount: { name: '', bank: '', number: '' }, phone: '' };
+                const newUserDoc = { 
+                    email: user.email, 
+                    name: username, 
+                    nickname: '', 
+                    role: 'member', 
+                    forcePasswordChange: false, 
+                    profilePic: '', 
+                    bankAccount: { name: '', bank: '', number: '' }, 
+                    phone: '',
+                    createdAt: serverTimestamp() // Add creation timestamp
+                };
                 await setDoc(doc(db, "users", user.uid), newUserDoc);
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
@@ -923,6 +980,10 @@
             e.preventDefault();
             signupModal.classList.add('hidden');
             loginModal.classList.remove('hidden');
+        });
+        
+        document.getElementById('public-login-button').addEventListener('click', () => {
+             loginModal.classList.remove('hidden');
         });
 
         document.getElementById('close-login-modal-btn').addEventListener('click', () => loginModal.classList.add('hidden'));
@@ -1023,7 +1084,18 @@
             const jobListContainer = document.getElementById('public-job-list');
             jobListContainer.innerHTML = '';
             allActiveJobs.forEach(job => {
-                jobListContainer.innerHTML += `<div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white" data-id="${job.id}"><div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2"><i class="ph-fill ph-video-camera text-3xl text-gray-500"></i></div><h5 class="font-semibold job-card-title">${job.name}</h5><p class="text-xs text-gray-500 text-center">${formatDateRange(job.startDate, job.endDate)}</p></div>`;
+                jobListContainer.innerHTML += `
+                    <div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white" data-id="${job.id}">
+                        <div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2">
+                            <i class="ph-fill ph-video-camera text-3xl text-gray-500"></i>
+                        </div>
+                        <h5 class="font-semibold job-card-title">${job.name}</h5>
+                        <p class="text-xs text-gray-500 text-center mt-1">${formatDateRange(job.startDate, job.endDate)}</p>
+                        <p class="text-xs text-gray-400 text-center job-card-location mt-1 flex items-center justify-center">
+                            <i class="ph ph-map-pin mr-1"></i>
+                            ${job.location}
+                        </p>
+                    </div>`;
             });
             jobListContainer.querySelectorAll('.job-card').forEach(card => card.addEventListener('click', () => loginModal.classList.remove('hidden')));
         }
@@ -1051,13 +1123,32 @@
             filteredJobs.forEach(job => {
                 const isMyJob = job.team.some(m => m.userId === currentUser.uid);
                 const iconColorClass = isMyJob ? 'main-gradient-text' : 'text-gray-500';
+
+                const teamNeeded = job.teamNeeded || 0;
+                const teamCount = job.team.length;
+                const remaining = teamNeeded - teamCount;
+                let teamStatusHTML = '';
+                if (currentUserRole === 'admin' && teamNeeded > 0) {
+                     const remainingColor = remaining > 0 ? 'text-red-500' : 'text-green-500';
+                     teamStatusHTML = `<p class="text-xs text-center mt-1">
+                                        ทีมงาน (${teamCount}/${teamNeeded}) 
+                                        <span class="${remainingColor}">ขาด ${remaining > 0 ? remaining : 0} คน</span>
+                                     </p>`;
+                }
+
+
                 const cardHTML = `
                     <div class="job-card cursor-pointer p-4 rounded-2xl shadow-md hover:shadow-xl transition-shadow bg-white relative" data-id="${job.id}" data-name="${job.name}">
                         <div class="w-full h-16 flex items-center justify-center rounded-lg bg-gray-100 mb-2">
                             <i class="ph-fill ph-video-camera text-3xl ${iconColorClass}"></i>
                         </div>
                         <h5 class="font-semibold job-card-title">${job.name}</h5>
-                        <p class="text-xs text-gray-500 text-center">${formatDateRange(job.startDate, job.endDate)}</p>
+                        <p class="text-xs text-gray-500 text-center mt-1">${formatDateRange(job.startDate, job.endDate)}</p>
+                        <p class="text-xs text-gray-400 text-center job-card-location mt-1 flex items-center justify-center">
+                            <i class="ph ph-map-pin mr-1"></i>
+                            ${job.location}
+                        </p>
+                        ${teamStatusHTML}
                     </div>`;
                 jobList.innerHTML += cardHTML;
             });
@@ -1082,6 +1173,8 @@
             if (usersUnsubscribe) usersUnsubscribe();
             usersUnsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
                 allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Sort users by creation date
+                allUsers.sort((a, b) => (a.createdAt?.toDate() || 0) - (b.createdAt?.toDate() || 0));
             });
         }
 
@@ -1100,11 +1193,14 @@
                     card.classList.remove('gradient-bg');
                     card.classList.add('bg-white');
                     card.querySelector('h5').classList.remove('text-white');
-                    const dateP = card.querySelector('p');
-                    if(dateP) {
-                        dateP.classList.remove('text-white');
-                        dateP.classList.add('text-gray-500');
-                    }
+                    card.querySelectorAll('p').forEach(p => {
+                         p.classList.remove('text-white', 'text-gray-300');
+                         if(!p.classList.contains('job-card-location')) {
+                            p.classList.add('text-gray-500');
+                         } else {
+                            p.classList.add('text-gray-400');
+                         }
+                    })
                 });
                 return; // Stop execution here
             }
@@ -1116,11 +1212,13 @@
                 card.classList.toggle('gradient-bg', isSelected);
                 card.classList.toggle('bg-white', !isSelected);
                 card.querySelector('h5').classList.toggle('text-white', isSelected);
-                const dateP = card.querySelector('p');
-                if(dateP) {
-                    dateP.classList.toggle('text-white', isSelected);
-                    dateP.classList.toggle('text-gray-500', !isSelected);
-                }
+                card.querySelectorAll('p').forEach(p => {
+                     p.classList.toggle('text-white', isSelected);
+                     p.classList.toggle('text-gray-300', isSelected);
+                     p.classList.toggle('text-gray-500', !isSelected && !p.classList.contains('job-card-location'));
+                     p.classList.toggle('text-gray-400', !isSelected && p.classList.contains('job-card-location'));
+                })
+
             });
 
             // Set up the new listener
@@ -1144,6 +1242,7 @@
             document.getElementById('job-title').textContent = job.name;
             document.getElementById('job-dates').textContent = `${formatDateRange(job.startDate, job.endDate)} (${job.workdays.length} วัน)`;
             document.getElementById('job-location-text').textContent = job.location;
+            document.getElementById('team-member-count').textContent = job.team.length;
 
             const budgetLabel = document.getElementById('budget-label');
             const jobIncomeEl = document.getElementById('job-income');
@@ -1295,6 +1394,7 @@
         }
 
         function updateCalculations(job) {
+            document.getElementById('summary-team-count').textContent = job.team.length;
             const teamTotalCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
             const otherExpensesTotal = job.expenses.reduce((total, expense) => total + expense.amount, 0);
             document.getElementById('summary-team-cost').textContent = `${teamTotalCost.toLocaleString()} บาท`;
@@ -1425,10 +1525,16 @@
                     });
                 }
             });
-            document.querySelectorAll('.remove-expense-btn').forEach(btn => btn.onclick = (e) => showConfirmModal('ยืนยันการลบ', 'คุณต้องการลบค่าใช้จ่ายรายการนี้หรือไม่?', async () => {
-                currentJobData.expenses.splice(parseInt(e.currentTarget.dataset.index), 1);
-                await updateDoc(doc(db, "jobs", currentJobId), { expenses: currentJobData.expenses });
-            }));
+            document.querySelectorAll('.remove-expense-btn').forEach(btn => btn.onclick = (e) => {
+                const indexToRemove = parseInt(e.currentTarget.dataset.index);
+                const expenseToRemove = currentJobData.expenses[indexToRemove];
+                if (expenseToRemove) {
+                    showConfirmModal('ยืนยันการลบ', `คุณต้องการลบค่าใช้จ่ายรายการ "${expenseToRemove.name}" หรือไม่?`, async () => {
+                        const updatedExpenses = currentJobData.expenses.filter((_, index) => index !== indexToRemove);
+                        await updateDoc(doc(db, "jobs", currentJobId), { expenses: updatedExpenses });
+                    });
+                }
+            });
             document.querySelectorAll('.edit-expense-btn').forEach(btn => btn.onclick = (e) => {
                 const index = parseInt(e.currentTarget.dataset.index);
                 showEditExpenseModal(currentJobData.expenses[index], index);
@@ -1827,19 +1933,31 @@
 
             let totalIncome = 0, totalExpenses = 0, totalProfit = 0;
             let totalPaidWages = 0, totalUnpaidWages = 0;
+            let totalOtherExpenses = 0, totalWht = 0, totalVat = 0;
+
             const userWages = {};
 
             jobs.forEach(job => {
                 const teamCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
                 const otherExpenses = job.expenses.reduce((total, expense) => total + expense.amount, 0);
-                const jobTotalExpenses = teamCost + otherExpenses;
-                const profit = job.income - jobTotalExpenses;
+                
+                const subtotalForTax = teamCost + otherExpenses;
+                const whtAmount = (job.whtEnabled && job.whtPercent) ? (job.income * job.whtPercent / 100) : 0;
+                const vatAmount = job.vatEnabled ? (subtotalForTax * 0.07) : 0;
+                
+                const jobTotalExpenses = subtotalForTax + vatAmount;
+                const profit = job.income - jobTotalExpenses - whtAmount;
+                
                 const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
                 const statusHTML = job.status === 'completed' ? `<i class="text-xs text-green-500"> (เสร็จงานแล้ว)</i>` : '';
 
                 totalIncome += job.income;
                 totalExpenses += jobTotalExpenses;
                 totalProfit += profit;
+                totalOtherExpenses += otherExpenses;
+                totalWht += whtAmount;
+                totalVat += vatAmount;
+
 
                 jobSummaryBody.innerHTML += `
                     <tr class="cursor-pointer hover:bg-gray-100 job-summary-row" data-id="${job.id}">
@@ -1847,8 +1965,13 @@
                             ${job.name} <span class="text-xs text-gray-400">(${jobMonth})</span>${statusHTML}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">${job.income.toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-red-500">${jobTotalExpenses.toLocaleString()}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right ${profit >= 0 ? 'profit-text' : 'loss-text'}">${profit.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">${vatAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                           ${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                           ${whtAmount > 0 ? '<button class="ml-2 text-blue-500 hover:text-blue-700"><i class="ph ph-download-simple"></i></button>' : ''}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-red-500">${jobTotalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right ${profit >= 0 ? 'profit-text' : 'loss-text'}">${profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     </tr>
                 `;
 
@@ -1879,8 +2002,10 @@
             });
 
             document.getElementById('total-income-summary').textContent = totalIncome.toLocaleString();
-            document.getElementById('total-expense-summary').textContent = totalExpenses.toLocaleString();
-            document.getElementById('total-profit-summary').textContent = totalProfit.toLocaleString();
+            document.getElementById('total-vat-summary').textContent = totalVat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('total-wht-summary').textContent = totalWht.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('total-expense-summary').textContent = totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('total-profit-summary').textContent = totalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('total-profit-summary').className = `px-6 py-4 text-right font-bold ${totalProfit >= 0 ? 'profit-text' : 'loss-text'}`;
 
             let totalWages = 0;
@@ -1909,9 +2034,13 @@
             // Update stats
             document.getElementById('stat-paid-wages').textContent = totalPaidWages.toLocaleString();
             document.getElementById('stat-unpaid-wages').textContent = totalUnpaidWages.toLocaleString();
+            document.getElementById('stat-other-expenses').textContent = totalOtherExpenses.toLocaleString();
+            document.getElementById('stat-wht').textContent = totalWht.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('stat-vat').textContent = totalVat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
             document.querySelector('#stat-top-earners').previousElementSibling.textContent = "ทีมงานที่ได้รับเงินสูงสุด";
 
-            sortedUsers.slice(0, 3).forEach((userId, index) => {
+            sortedUsers.slice(0, 5).forEach((userId, index) => {
                  const user = allUsers.find(u => u.id === userId);
                  if (user) {
                     const topEarnerClass = index === 0 ? 'border-4 border-yellow-400' : '';
@@ -1959,8 +2088,13 @@
                 if (monthlyData[monthKey]) {
                     const teamCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
                     const otherExpenses = job.expenses.reduce((total, expense) => total + expense.amount, 0);
-                    const totalExpense = teamCost + otherExpenses;
-                    const profit = job.income - totalExpense;
+
+                    const subtotalForTax = teamCost + otherExpenses;
+                    const whtAmount = (job.whtEnabled && job.whtPercent) ? (job.income * job.whtPercent / 100) : 0;
+                    const vatAmount = job.vatEnabled ? (subtotalForTax * 0.07) : 0;
+                    
+                    const totalExpense = subtotalForTax + vatAmount;
+                    const profit = job.income - totalExpense - whtAmount;
 
                     monthlyData[monthKey].income += job.income;
                     monthlyData[monthKey].expense += totalExpense;
@@ -1983,7 +2117,7 @@
         function generateMemberReport(jobs) {
             const memberWageBody = document.getElementById('member-wage-table-body');
             memberWageBody.innerHTML = '';
-            let totalWage = 0;
+            let totalWage = 0, totalPaid = 0, totalUnpaid = 0, totalWht = 0;
 
             const memberJobs = jobs.filter(job => job.team.some(m => m.userId === currentUser.uid));
 
@@ -1991,26 +2125,34 @@
                 const myTeamData = job.team.find(m => m.userId === currentUser.uid);
                 if (myTeamData) {
                     const wage = calculateTeamCostForMember(myTeamData, job.workdays);
+                    const whtAmount = (job.whtEnabled && job.whtPercent) ? (wage * job.whtPercent / 100) : 0;
+                    const paidAmount = myTeamData.isPaid ? wage : 0;
+                    const unpaidAmount = !myTeamData.isPaid ? wage : 0;
+                    
                     totalWage += wage;
-                    const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
-                    let statusHTML = '';
-                    if (job.status === 'completed' && myTeamData.isPaid && myTeamData.paymentDate) {
-                        statusHTML = `<br><i class="text-xs text-green-500">เสร็จงานแล้ว ได้รับเงินเมื่อ ${formatShortDateWithBEYear(myTeamData.paymentDate)}</i>`;
-                    }
+                    totalPaid += paidAmount;
+                    totalUnpaid += unpaidAmount;
+                    totalWht += whtAmount;
 
+                    const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
+                    
                     memberWageBody.innerHTML += `
                         <tr class="cursor-pointer hover:bg-gray-100 member-job-summary-row" data-id="${job.id}">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                ${job.name} <span class="text-xs text-gray-400">(${jobMonth})</span>
-                                ${statusHTML}
-                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">${job.name} <span class="text-xs text-gray-400">(${jobMonth})</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${wage.toLocaleString()}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right profit-text">${paidAmount > 0 ? paidAmount.toLocaleString() : '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right loss-text">${unpaidAmount > 0 ? unpaidAmount.toLocaleString() : '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount > 0 ? whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-'}</td>
                         </tr>
                     `;
                 }
             });
 
             document.getElementById('member-total-wage-summary').textContent = totalWage.toLocaleString();
+            document.getElementById('member-total-paid-summary').textContent = totalPaid.toLocaleString();
+            document.getElementById('member-total-unpaid-summary').textContent = totalUnpaid.toLocaleString();
+            document.getElementById('member-total-wht-summary').textContent = totalWht.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
 
             document.querySelectorAll('.member-job-summary-row').forEach(row => {
                 row.addEventListener('click', () => {
@@ -2122,7 +2264,13 @@
         }
 
         function showJobModal() {
-            const content = `<input type="text" name="name" placeholder="ชื่อคิวงาน" required class="w-full p-2 border rounded"><input type="text" name="location" placeholder="สถานที่" required class="w-full p-2 border rounded"><input type="number" name="income" placeholder="งบประมาณ" required class="w-full p-2 border rounded"><label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded"><label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded">`;
+            const content = `
+                <input type="text" name="name" placeholder="ชื่อคิวงาน" required class="w-full p-2 border rounded">
+                <input type="text" name="location" placeholder="สถานที่" required class="w-full p-2 border rounded">
+                <input type="number" name="income" placeholder="งบประมาณ" required class="w-full p-2 border rounded">
+                <input type="number" name="teamNeeded" placeholder="จำนวนทีมงานที่รับ" required class="w-full p-2 border rounded">
+                <label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded">
+                <label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded">`;
             showModal('เพิ่มคิวงานใหม่', content, async (formData, submitButton, modal) => {
                 const startDate = formData.get('startDate'), endDate = formData.get('endDate');
                 let workdays = [];
@@ -2131,6 +2279,7 @@
                     name: formData.get('name'),
                     location: formData.get('location'),
                     income: Number(formData.get('income')),
+                    teamNeeded: Number(formData.get('teamNeeded')),
                     startDate,
                     endDate,
                     workdays,
@@ -2222,7 +2371,7 @@
         }
 
         function showEditBudgetModal(currentBudget) {
-            showModal('แก้ไขงบประมาณ', `<input type="number" name="budget" required class="w-full p-2 border rounded" value="${currentBudget}">`, async (formData, submitButton, modal) => {
+            showModal('แก้ไขงบประมาณ', `<input type="number" name="income" required class="w-full p-2 border rounded" value="${currentBudget}">`, async (formData, submitButton, modal) => {
                 await updateDoc(doc(db, "jobs", currentJobId), { income: Number(formData.get('income')) });
                 modal.remove();
             });
@@ -2273,9 +2422,20 @@
         }
 
         function showEditJobDetailsModal(job) {
-            const content = `<label>ชื่องาน</label><input type="text" name="name" required class="w-full p-2 border rounded" value="${job.name}"><label>สถานที่</label><input type="text" name="location" required class="w-full p-2 border rounded" value="${job.location}"><label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded" value="${job.startDate}"><label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded" value="${job.endDate}">`;
+            const content = `
+                <label>ชื่องาน</label><input type="text" name="name" required class="w-full p-2 border rounded" value="${job.name}">
+                <label>สถานที่</label><input type="text" name="location" required class="w-full p-2 border rounded" value="${job.location}">
+                <label>จำนวนทีมงานที่รับ</label><input type="number" name="teamNeeded" required class="w-full p-2 border rounded" value="${job.teamNeeded || 0}">
+                <label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded" value="${job.startDate}">
+                <label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded" value="${job.endDate}">`;
             showModal('แก้ไขข้อมูล Job', content, async (formData, submitButton, modal) => {
-                await updateDoc(doc(db, "jobs", currentJobId), { name: formData.get('name'), location: formData.get('location'), startDate: formData.get('startDate'), endDate: formData.get('endDate') });
+                await updateDoc(doc(db, "jobs", currentJobId), { 
+                    name: formData.get('name'), 
+                    location: formData.get('location'), 
+                    teamNeeded: Number(formData.get('teamNeeded')),
+                    startDate: formData.get('startDate'), 
+                    endDate: formData.get('endDate') 
+                });
                 modal.remove();
             });
         }
@@ -2309,7 +2469,7 @@
             });
             userListHTML += `</div>`;
 
-            showModal('การจัดการทีมงานทั้งหมด', userListHTML, null, false, (modal) => {
+            showModal(`การจัดการทีมงานทั้งหมด (${allUsers.length} คน)`, userListHTML, null, false, (modal) => {
                 modal.querySelectorAll('.modal-delete-user-btn').forEach(btn => btn.onclick = (e) => {
                     const userIdToDelete = e.currentTarget.dataset.userid;
                     if (userIdToDelete === currentUser.uid) {
@@ -2367,13 +2527,13 @@
         function showManageProfileModal() {
             const content = `
                 <div class="flex flex-col items-center space-y-2">
-                    <input type="text" name="nickname" class="w-1/2 p-2 border rounded text-center" placeholder="ชื่อเล่น" value="${currentUserData.nickname || ''}">
+                    <input type="text" name="nickname" required class="w-1/2 p-2 border rounded text-center" placeholder="ชื่อเล่น" value="${currentUserData.nickname || ''}">
                     <img id="profile-pic-preview" src="${currentUserData.profilePic || 'https://placehold.co/100x100/E2E8F0/4A5568?text=รูป'}" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200">
                     <label for="profilePicFile" class="cursor-pointer text-sm text-violet-700 font-semibold hover:text-violet-900">เลือกรูปภาพ</label>
                     <input type="file" name="profilePicFile" id="profilePicFile" accept="image/*" class="hidden"/>
                 </div>
                 <label>Username</label><input type="text" readonly class="w-full p-2 border rounded bg-gray-100" value="${currentUserData.name}">
-                <label>เบอร์โทร</label><input type="tel" name="phone" class="w-full p-2 border rounded" value="${currentUserData.phone || ''}">
+                <label>เบอร์โทร</label><input type="tel" name="phone" required class="w-full p-2 border rounded" value="${currentUserData.phone || ''}">
                 <hr>
                 <div id="social-linking-container" class="space-y-2"></div>
                 <hr>
@@ -2382,6 +2542,14 @@
                     <button type="button" id="change-password-from-profile-btn" class="w-full px-4 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors">เปลี่ยนรหัสผ่าน</button>
                 </div>`;
             showModal('จัดการโปรไฟล์', content, async (formData, submitButton, modal) => {
+                const nickname = formData.get('nickname').trim();
+                const phone = formData.get('phone').trim();
+
+                if (!nickname || !phone) {
+                    alert('กรุณากรอกชื่อเล่นและเบอร์โทรให้ครบถ้วน');
+                    return;
+                }
+
                 submitButton.textContent = 'กำลังบันทึก...';
                 submitButton.disabled = true;
                 const profilePicFile = formData.get('profilePicFile');
@@ -2390,8 +2558,8 @@
                     newProfilePicUrl = await uploadToCloudinary(profilePicFile) || newProfilePicUrl;
                 }
                 const updatedData = {
-                    nickname: formData.get('nickname'),
-                    phone: formData.get('phone'),
+                    nickname: nickname,
+                    phone: phone,
                     profilePic: newProfilePicUrl
                 };
                 await updateDoc(doc(db, "users", currentUser.uid), updatedData);
