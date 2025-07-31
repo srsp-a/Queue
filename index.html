@@ -3,30 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- ✅ Favicon -->
-  <link rel="icon" href="https://liveder.tv/wp-content/uploads/2025/07/Liveder.png" type="image/png">
+    <title>LDB QUEUE - Job Management (v4)</title>
 
-  <!-- ✅ Open Graph Image (OG Image) -->
-  <meta property="og:image" content="https://liveder.tv/wp-content/uploads/2025/07/LDB.jpg">
-    <title>LDB QUEUE - Job Management</title>
-    
-    <!-- Tailwind CSS -->
+    <link id="favicon-link" rel="icon" href="">
+    <meta id="og-image-meta" property="og:image" content="">
+    <meta property="og:title" content="LDB QUEUE - Job Management">
+    <meta property="og:description" content="ระบบจัดการคิวงานสำหรับทีมงานฟรีแลนซ์">
+
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Kanit -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Phosphor Icons -->
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <!-- html2canvas for image capture -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Chart.js for graphs -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <style>
         body {
             font-family: 'Kanit', sans-serif;
@@ -142,16 +138,13 @@
 </head>
 <body class="antialiased text-gray-800">
 
-    <!-- Impersonation Banner -->
     <div id="impersonation-banner" class="hidden fixed top-0 left-0 right-0 bg-yellow-400 text-black p-2 text-center z-50 shadow-lg">
         กำลังดูในฐานะ: <span id="impersonated-user-name" class="font-bold"></span>
         <button id="return-to-admin-btn" class="ml-4 bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-sm">กลับสู่มุมมองแอดมิน</button>
     </div>
 
-    <!-- Main Container -->
     <div id="app-container" class="min-h-screen">
 
-        <!-- Public View (Visible to everyone) -->
         <div id="public-view" class="p-4 sm:p-6 lg:p-8">
             <header class="flex flex-wrap items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
@@ -167,12 +160,10 @@
                     <h2 class="text-2xl font-semibold">รายการคิวงาน</h2>
                 </div>
                 <div id="public-job-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <!-- Public job list will be rendered here -->
-                </div>
+                    </div>
             </section>
         </div>
 
-        <!-- Login Modal (was a screen) -->
         <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-backdrop">
             <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-xl modal-content">
                 <div class="text-center">
@@ -202,8 +193,7 @@
                  <button id="close-login-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
         </div>
-        
-        <!-- Sign Up Modal -->
+
         <div id="signup-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-backdrop">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 m-4 modal-content">
                 <h2 class="text-2xl font-bold text-center">สร้างบัญชีใหม่</h2>
@@ -234,7 +224,6 @@
             </div>
         </div>
 
-        <!-- Change Password Modal -->
         <div id="change-password-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-backdrop">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 m-4 modal-content">
                 <h2 class="text-2xl font-bold text-center">เปลี่ยนรหัสผ่านใหม่</h2>
@@ -252,7 +241,6 @@
             </div>
         </div>
 
-        <!-- Main App Screen (For logged-in users) -->
         <div id="main-app" class="hidden p-4 sm:p-6 lg:p-8">
             <header class="flex flex-wrap items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
@@ -286,7 +274,6 @@
                 </div>
             </header>
 
-            <!-- Job List -->
             <section class="max-w-7xl mx-auto">
                 <div class="flex flex-wrap items-center justify-between mb-4">
                     <h2 class="text-2xl font-semibold">รายการคิวงาน</h2>
@@ -303,10 +290,8 @@
                 <div id="job-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
             </section>
 
-            <!-- Selected Job Details -->
             <section id="job-details-section" class="mt-8 hidden">
                 <div class="p-6 bg-white rounded-2xl shadow-lg">
-                    <!-- This div is the main container for the image capture -->
                     <div id="capture-area">
                         <div class="flex flex-wrap items-start justify-between pb-4 mb-4 border-b">
                             <div>
@@ -349,8 +334,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Buttons are now outside the capture area -->
-                     <div class="mt-4 flex space-x-2">
+                    <div class="mt-4 flex space-x-2">
                         <button id="add-member-button" class="px-3 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 admin-only"><i class="ph ph-user-plus mr-1"></i> เพิ่มทีมงาน</button>
                         <button id="add-day-button" class="px-3 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 admin-only"><i class="ph ph-calendar-plus mr-1"></i> เพิ่มวันทำงาน</button>
                         <button id="save-image-btn" class="px-3 py-2 text-sm font-semibold text-white bg-purple-500 rounded-lg hover:bg-purple-600 admin-only"><i class="ph ph-image mr-1"></i> บันทึกรูปภาพ</button>
@@ -386,9 +370,7 @@
             </section>
         </div>
 
-        <!-- Financial Summary View -->
         <div id="financial-summary-view" class="hidden p-4 sm:p-6 lg:p-8">
-            <!-- Header -->
             <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">สรุปบัญชีและการเงิน</h1>
@@ -399,7 +381,6 @@
                 </button>
             </header>
 
-            <!-- Date Filter -->
             <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
                 <div class="flex flex-wrap items-center gap-4">
                     <div id="financial-filter-buttons" class="flex items-center p-1 bg-gray-200 rounded-lg">
@@ -434,10 +415,8 @@
                 </div>
             </section>
 
-            <!-- Admin Summary -->
             <div id="admin-summary-container" class="hidden space-y-8">
-                 <!-- Charts and Stats -->
-                <section>
+                 <section>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
                             <h2 class="text-2xl font-semibold mb-4">สรุปภาพรวม</h2>
@@ -461,7 +440,6 @@
                         </div>
                     </div>
                 </section>
-                <!-- Income/Expense Summary -->
                 <section>
                     <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ-รายจ่าย</h2>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
@@ -488,7 +466,6 @@
                     </div>
                 </section>
 
-                <!-- Team Wage Summary -->
                 <section>
                     <h2 class="text-2xl font-semibold mb-4">สรุปค่าแรงทีมงาน</h2>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
@@ -516,7 +493,6 @@
                 </section>
             </div>
 
-            <!-- Member Summary -->
             <div id="member-summary-container" class="hidden">
                 <section>
                     <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ</h2>
@@ -542,9 +518,7 @@
             </div>
         </div>
 
-        <!-- System Settings View -->
         <div id="settings-view" class="hidden p-4 sm:p-6 lg:p-8">
-            <!-- Header -->
             <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">ตั้งค่าระบบ</h1>
@@ -554,9 +528,26 @@
                     <i class="ph ph-arrow-left mr-1"></i> กลับหน้าหลัก
                 </button>
             </header>
-            <!-- Settings Form -->
             <section class="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
                 <form id="settings-form" class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Favicon & OG Image</h3>
+                        <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+                            <div class="flex flex-col items-center">
+                                <label class="block text-sm font-medium text-gray-700">Favicon</label>
+                                <img id="favicon-preview" src="https://placehold.co/64x64/E2E8F0/4A5568?text=Icon" class="mt-1 w-16 h-16 rounded-md object-cover border-2 border-gray-200">
+                                <label for="setting-favicon-file" class="mt-2 cursor-pointer text-sm text-indigo-600 font-semibold hover:text-indigo-800">เปลี่ยนรูป</label>
+                                <input type="file" name="faviconFile" id="setting-favicon-file" accept="image/x-icon, image/png, image/jpeg" class="hidden">
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <label class="block text-sm font-medium text-gray-700">OG Image</label>
+                                <img id="og-image-preview" src="https://placehold.co/300x157/E2E8F0/4A5568?text=OG+Image" class="mt-1 w-48 h-24 rounded-md object-cover border-2 border-gray-200">
+                                <label for="setting-og-image-file" class="mt-2 cursor-pointer text-sm text-indigo-600 font-semibold hover:text-indigo-800">เปลี่ยนรูป</label>
+                                <input type="file" name="ogImageFile" id="setting-og-image-file" accept="image/png, image/jpeg" class="hidden">
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Cloudinary (สำหรับอัปโหลดรูป)</h3>
                          <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
@@ -582,6 +573,10 @@
                                 <label for="setting-line-bot-secret" class="block text-sm font-medium text-gray-700">Channel Secret</label>
                                 <input type="text" name="lineBotChannelSecret" id="setting-line-bot-secret" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <input id="setting-line-login-enabled" name="isLineLoginEnabled" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <label for="setting-line-login-enabled" class="ml-3 block text-sm font-medium text-gray-700">เปิดใช้งานปุ่ม "เชื่อมต่อบัญชี Line" ในหน้าโปรไฟล์</label>
                         </div>
                     </div>
                      <div>
@@ -612,11 +607,9 @@
                 </form>
             </section>
         </div>
-        
-        <!-- Line Bot View -->
+
         <div id="line-bot-view" class="hidden p-4 sm:p-6 lg:p-8">
-             <!-- Header -->
-            <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+             <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">จัดการ Line Bot</h1>
                     <p class="mt-1 text-gray-500">ทดสอบและส่งข้อความแจ้งเตือนผ่าน Line OA</p>
@@ -627,7 +620,6 @@
             </header>
 
             <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Test Send Section -->
                 <section class="p-6 bg-white rounded-2xl shadow-lg">
                     <h3 class="text-xl font-semibold mb-4">ทดสอบส่งข้อความ</h3>
                     <form id="line-test-form" class="space-y-4">
@@ -647,7 +639,6 @@
                     </form>
                 </section>
 
-                <!-- Send to Team Section -->
                 <section class="p-6 bg-white rounded-2xl shadow-lg">
                     <h3 class="text-xl font-semibold mb-4">ส่งข้อความถึงทีมงาน</h3>
                     <form id="line-team-form" class="space-y-4">
@@ -679,10 +670,8 @@
 
     </div>
 
-    <!-- Modals Container -->
     <div id="modals-container"></div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential, OAuthProvider, signInWithRedirect, getRedirectResult, linkWithRedirect, unlink } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -711,7 +700,7 @@
           messagingSenderId: "247047529613",
           appId: "1:247047529613:web:d27a980d1de33c22052ec4"
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -736,14 +725,17 @@
             lineBotChannelAccessToken: "",
             lineBotChannelSecret: "",
             facebookAppId: "",
-            facebookAppSecret: ""
+            facebookAppSecret: "",
+            faviconUrl: "",
+            ogImageUrl: "",
+            isLineLoginEnabled: true
         };
 
         const publicView = document.getElementById('public-view');
         const mainApp = document.getElementById('main-app');
         const loginModal = document.getElementById('login-modal');
         const signupModal = document.getElementById('signup-modal');
-        
+
         // Handle the redirect result when the page loads
         getRedirectResult(auth)
           .then((result) => {
@@ -836,7 +828,7 @@
                     submitButton.innerHTML = 'ลงชื่อเข้าใช้';
                 });
         });
-        
+
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitButton = e.target.querySelector('button[type="submit"]');
@@ -932,7 +924,7 @@
             signupModal.classList.add('hidden');
             loginModal.classList.remove('hidden');
         });
-        
+
         document.getElementById('close-login-modal-btn').addEventListener('click', () => loginModal.classList.add('hidden'));
         document.getElementById('close-signup-modal-btn').addEventListener('click', () => signupModal.classList.add('hidden'));
         document.getElementById('forgot-password-btn').addEventListener('click', (e) => {
@@ -990,7 +982,7 @@
                 el.style.display = currentUserRole === 'admin' ? '' : 'none';
             });
             document.getElementById('member-job-filters').style.display = currentUserRole === 'member' ? 'flex' : 'none';
-            
+
             if (currentUserRole === 'admin') {
                 await loadAppSettings();
             }
@@ -1004,15 +996,15 @@
             const q = collection(db, "jobs");
             onSnapshot(q, (snapshot) => {
                 allJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
+
                 allActiveJobs = allJobs
                     .filter(job => job.status !== "completed")
                     .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-                    
+
                 allCompletedJobs = allJobs
                     .filter(job => job.status === "completed")
                     .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
-                
+
                 if (currentUser) {
                     applyFiltersAndRenderJobs();
                 } else {
@@ -1026,7 +1018,7 @@
                 }
             });
         }
-        
+
         function renderPublicJobs() {
             const jobListContainer = document.getElementById('public-job-list');
             jobListContainer.innerHTML = '';
@@ -1046,7 +1038,7 @@
                 document.getElementById('filter-all-jobs').classList.toggle('gradient-bg', memberJobFilter === 'all');
                 document.getElementById('filter-all-jobs').classList.toggle('text-white', memberJobFilter === 'all');
                 if (memberJobFilter === 'my_jobs') {
-                    filteredJobs = allActiveJobs.filter(job => 
+                    filteredJobs = allActiveJobs.filter(job =>
                         job.team.some(member => member.userId === currentUser.uid)
                     );
                 }
@@ -1069,7 +1061,7 @@
                     </div>`;
                 jobList.innerHTML += cardHTML;
             });
-            
+
             document.querySelectorAll('#job-list .job-card').forEach(card => {
                 card.addEventListener('click', () => {
                     const jobId = card.dataset.id;
@@ -1085,17 +1077,17 @@
                 });
             });
         }
-        
+
         function listenForUsers() {
             if (usersUnsubscribe) usersUnsubscribe();
             usersUnsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
                 allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             });
         }
-        
+
         function selectJob(jobId) {
             currentJobId = jobId;
-            
+
             // Always unsubscribe from the previous listener
             if (jobUnsubscribe) jobUnsubscribe();
 
@@ -1130,7 +1122,7 @@
                     dateP.classList.toggle('text-gray-500', !isSelected);
                 }
             });
-            
+
             // Set up the new listener
             jobUnsubscribe = onSnapshot(doc(db, "jobs", jobId), (docSnap) => {
                 if (docSnap.exists()) {
@@ -1152,7 +1144,7 @@
             document.getElementById('job-title').textContent = job.name;
             document.getElementById('job-dates').textContent = `${formatDateRange(job.startDate, job.endDate)} (${job.workdays.length} วัน)`;
             document.getElementById('job-location-text').textContent = job.location;
-            
+
             const budgetLabel = document.getElementById('budget-label');
             const jobIncomeEl = document.getElementById('job-income');
             const memberPaidStatusEl = document.getElementById('member-paid-status');
@@ -1190,7 +1182,7 @@
             });
             headHTML += '<th class="py-2 px-3 border-b text-center admin-only">รวม</th><th class="py-2 px-3 border-b text-center admin-only">จัดการ</th></tr>';
             document.getElementById('schedule-head').innerHTML = headHTML;
-            
+
             const scheduleBody = document.getElementById('schedule-body');
             scheduleBody.innerHTML = '';
             job.team.forEach((member) => {
@@ -1200,12 +1192,12 @@
                 const isTeamLeader = job.teamLeaderId === member.userId;
                 const draggableClass = currentUserRole === 'admin' ? 'draggable-row' : '';
                 let rowHTML = `<tr class="${draggableClass}" draggable="${currentUserRole === 'admin'}" data-userid="${member.userId}"><td class="py-2 px-3 border-b"><div class="flex items-center"><i class="ph ph-dots-six-vertical drag-handle text-gray-400 mr-2 admin-only"></i><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3 object-cover"><div><p class="font-medium flex items-center">${displayName} ${isTeamLeader ? '<i class="ph-fill ph-crown text-yellow-500 ml-1"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
-                
+
                 job.workdays.forEach(day => {
                     const isWorking = member.workdays.includes(day);
                     const dailyRate = (member.dailyOverrides && member.dailyOverrides[day] !== undefined) ? member.dailyOverrides[day] : member.dailyRate;
                     const canViewRate = (currentUserRole === 'admin' || currentUser.uid === member.userId || (job.teamLeaderId && currentUser.uid === job.teamLeaderId));
-                    let rateDisplayHTML = `<span class="text-xs text-gray-400">-</span>`; 
+                    let rateDisplayHTML = `<span class="text-xs text-gray-400">-</span>`;
                     if (canViewRate) {
                         const canEditRate = (currentUserRole === 'admin');
                         rateDisplayHTML = `<span class="text-xs text-gray-500 ${canEditRate ? 'hover:text-blue-600 cursor-pointer edit-daily-rate-btn' : ''}" data-userid="${member.userId}" data-day="${day}">${dailyRate.toLocaleString()}</span>`;
@@ -1238,13 +1230,13 @@
             job.expenses.forEach((expense, index) => {
                 expenseList.innerHTML += `<div class="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100"><div><p>${expense.name}</p></div><div class="flex items-center space-x-3"><p class="font-semibold">${expense.amount.toLocaleString()}</p><button class="text-blue-500 hover:text-blue-700 edit-expense-btn admin-only" data-index="${index}"><i class="ph ph-pencil-simple"></i></button><button class="text-red-500 hover:text-red-700 remove-expense-btn admin-only" data-index="${index}"><i class="ph ph-x-circle"></i></button></div></div>`;
             });
-            
+
             document.getElementById('wht-toggle').checked = job.whtEnabled || false;
             document.getElementById('vat-toggle').checked = job.vatEnabled || false;
             document.getElementById('wht-percent').value = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
-            
+
             document.getElementById('admin-notes-textarea').value = job.notes || '';
-            
+
             const teamNotesContainer = document.getElementById('team-notes-container');
             const teamNotesTextarea = document.getElementById('team-notes-textarea');
             teamNotesTextarea.value = job.teamNotes || '';
@@ -1252,7 +1244,7 @@
             const canEditTeamNotes = currentUserRole === 'admin' || isTeamLeader;
             teamNotesTextarea.disabled = !canEditTeamNotes;
             teamNotesTextarea.classList.toggle('bg-gray-100', !canEditTeamNotes);
-            
+
             if (!job.teamNotes && !canEditTeamNotes) {
                 teamNotesContainer.classList.add('hidden');
             } else {
@@ -1261,7 +1253,7 @@
 
             updateCalculations(job);
             renderPaymentSummary(job);
-            
+
             const completeJobBtn = document.getElementById('complete-job-btn');
             if (job.status === 'completed') {
                 completeJobBtn.innerHTML = `<i class="ph ph-arrow-u-left-up mr-1"></i> ย้อนคืนคิวงาน`;
@@ -1284,13 +1276,13 @@
             const unpaidMembers = job.team.filter(m => !m.isPaid);
             const paidCount = paidMembers.length;
             const paidAmount = paidMembers.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
-            
+
             const summaryEl = document.getElementById('payment-summary');
             summaryEl.textContent = `จ่ายแล้ว: ${paidAmount.toLocaleString()} บาท / ${paidCount} คน`;
 
             const payAllBtn = document.getElementById('pay-all-btn');
             payAllBtn.disabled = unpaidMembers.length === 0;
-            
+
             const completeJobBtn = document.getElementById('complete-job-btn');
             if (job.status !== 'completed') {
                 completeJobBtn.disabled = unpaidMembers.length > 0;
@@ -1301,18 +1293,18 @@
                  completeJobBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
-        
+
         function updateCalculations(job) {
             const teamTotalCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
             const otherExpensesTotal = job.expenses.reduce((total, expense) => total + expense.amount, 0);
             document.getElementById('summary-team-cost').textContent = `${teamTotalCost.toLocaleString()} บาท`;
             document.getElementById('summary-other-expenses').textContent = `${otherExpensesTotal.toLocaleString()} บาท`;
-            
+
             const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
             const subtotal = teamTotalCost + otherExpensesTotal;
             const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
             const vatAmount = job.vatEnabled ? (subtotal * 0.07) : 0;
-            
+
             const totalCost = subtotal + vatAmount;
             const profitLoss = job.income - totalCost - whtAmount;
             document.getElementById('summary-wht').textContent = `${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
@@ -1341,7 +1333,7 @@
 
         function addDynamicEventListeners(job) {
             ['wht-toggle', 'wht-percent', 'vat-toggle'].forEach(id => { document.getElementById(id).oninput = handleTaxSettingsChange; });
-            
+
             const adminNotesTextarea = document.getElementById('admin-notes-textarea');
             if (adminNotesTextarea) {
                 adminNotesTextarea.onblur = async (e) => {
@@ -1351,7 +1343,7 @@
                     }
                 };
             }
-            
+
             const teamNotesTextarea = document.getElementById('team-notes-textarea');
             if (teamNotesTextarea) {
                 teamNotesTextarea.onblur = async (e) => {
@@ -1380,13 +1372,13 @@
                     await updateDoc(doc(db, "jobs", currentJobId), { team: updatedTeam });
                 };
             });
-            
+
             document.querySelectorAll('.pay-member-btn').forEach(btn => btn.onclick = (e) => {
                 const userIdToToggle = e.currentTarget.dataset.userid;
                 const memberInfo = currentJobData.team.find(m => m.userId === userIdToToggle);
                 const memberUser = allUsers.find(u => u.id === userIdToToggle);
                 const memberName = memberUser.nickname || memberUser.name;
-                
+
                 if (memberInfo.isPaid) {
                     showConfirmModal('ยืนยันการยกเลิกจ่ายค่าแรง', `คุณต้องการยกเลิกสถานะ "ได้รับเงินแล้ว" ของ ${memberName} ใช่หรือไม่?`, async () => {
                         const updatedTeam = currentJobData.team.map(m => {
@@ -1454,7 +1446,7 @@
             });
             document.querySelectorAll('.edit-daily-rate-btn').forEach(btn => btn.onclick = (e) => showEditDailyRateModal(e.currentTarget.dataset.userid, e.currentTarget.dataset.day));
             document.querySelectorAll('.edit-day-btn').forEach(btn => btn.onclick = (e) => showEditWorkdayModal(e.currentTarget.dataset.day));
-            
+
             // Drag and Drop Event Listeners
             const scheduleBody = document.getElementById('schedule-body');
             scheduleBody.addEventListener('dragstart', e => {
@@ -1479,7 +1471,7 @@
                     scheduleBody.insertBefore(draggable, afterElement);
                 }
             });
-            
+
             scheduleBody.addEventListener('drop', async e => {
                 e.preventDefault();
                 if (currentUserRole !== 'admin') return;
@@ -1501,7 +1493,7 @@
                 }
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
-        
+
         ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-bot-button'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -1529,7 +1521,7 @@
                             case 'manage-all-users-button': showUserManagementModal(); break;
                             case 'system-settings-button': showSettingsView(); break;
                             case 'line-bot-button': showLineBotView(); break;
-                            case 'save-image-btn': 
+                            case 'save-image-btn':
                                 const captureArea = document.getElementById('capture-area');
                                 if (captureArea) {
                                     html2canvas(captureArea, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
@@ -1553,7 +1545,7 @@
             document.getElementById('settings-view').classList.add('hidden');
             mainApp.classList.remove('hidden');
         });
-        
+
         document.getElementById('back-to-main-from-bot-btn').addEventListener('click', () => {
             document.getElementById('line-bot-view').classList.add('hidden');
             mainApp.classList.remove('hidden');
@@ -1564,19 +1556,41 @@
             const submitButton = e.target.querySelector('button[type="submit"]');
             submitButton.disabled = true;
             submitButton.textContent = 'กำลังบันทึก...';
+
             const formData = new FormData(e.target);
+            const faviconFile = formData.get('faviconFile');
+            const ogImageFile = formData.get('ogImageFile');
+
+            let newFaviconUrl = appSettings.faviconUrl;
+            if (faviconFile && faviconFile.size > 0) {
+                newFaviconUrl = await uploadToCloudinary(faviconFile) || newFaviconUrl;
+            }
+
+            let newOgImageUrl = appSettings.ogImageUrl;
+            if (ogImageFile && ogImageFile.size > 0) {
+                newOgImageUrl = await uploadToCloudinary(ogImageFile) || newOgImageUrl;
+            }
+
             const newSettings = {
                 cloudinaryName: formData.get('cloudinaryName'),
                 cloudinaryPreset: formData.get('cloudinaryPreset'),
                 lineBotChannelAccessToken: formData.get('lineBotChannelAccessToken'),
                 lineBotChannelSecret: formData.get('lineBotChannelSecret'),
                 facebookAppId: formData.get('facebookAppId'),
-                facebookAppSecret: formData.get('facebookAppSecret')
+                facebookAppSecret: formData.get('facebookAppSecret'),
+                faviconUrl: newFaviconUrl,
+                ogImageUrl: newOgImageUrl,
+                isLineLoginEnabled: formData.get('isLineLoginEnabled') === 'on'
             };
 
             try {
                 await setDoc(doc(db, "settings", "app-config"), newSettings, { merge: true });
                 appSettings = { ...appSettings, ...newSettings }; // Update local settings object
+
+                // Update live DOM elements
+                document.getElementById('favicon-link').href = appSettings.faviconUrl;
+                document.getElementById('og-image-meta').content = appSettings.ogImageUrl;
+
                 alert('บันทึกการตั้งค่าเรียบร้อยแล้ว');
             } catch (error) {
                 console.error("Error saving settings:", error);
@@ -1586,6 +1600,7 @@
                 submitButton.textContent = 'บันทึกการตั้งค่า';
             }
         });
+
 
         document.getElementById('line-test-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -1608,7 +1623,7 @@
                 alert('กรุณาเลือกทีมงานและป้อนข้อความ');
             }
         });
-        
+
         document.getElementById('line-job-select').addEventListener('change', (e) => {
             const jobId = e.target.value;
             const memberSelect = document.getElementById('line-member-select');
@@ -1674,7 +1689,7 @@
                 generateFinancialReport();
             }
         }
-        
+
         function setupFinancialFilters() {
             const monthSelect = document.getElementById('summary-month');
             const yearSelect = document.getElementById('summary-year');
@@ -1713,7 +1728,7 @@
             filterButtons.querySelectorAll('button').forEach(button => {
                 button.addEventListener('click', (e) => {
                     financialFilter = e.target.dataset.period;
-                    
+
                     // Update active state
                     filterButtons.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
                     showCustomRangeBtn.classList.remove('active');
@@ -1722,7 +1737,7 @@
                     // Hide custom selector, show/hide month selector
                     customDateSelector.classList.add('hidden');
                     monthYearSelector.classList.toggle('hidden', financialFilter !== '1m');
-                    
+
                     // Generate report immediately
                     generateFinancialReport();
                 });
@@ -1744,17 +1759,17 @@
                 financialFilter = 'all'; // This tells generateFinancialReport to use the date pickers
                 generateFinancialReport();
             });
-            
+
             monthSelect.addEventListener('change', generateFinancialReport);
             yearSelect.addEventListener('change', generateFinancialReport);
         }
 
         function generateFinancialReport() {
             const monthYearSelector = document.getElementById('month-year-selector');
-            
+
             let startDate, endDate = new Date();
             const today = new Date();
-            
+
             switch (financialFilter) {
                 case '1m':
                     const selectedYear = parseInt(document.getElementById('summary-year').value);
@@ -1783,7 +1798,7 @@
                         endDate.setHours(23, 59, 59);
                     } else {
                         // If 'all' is clicked but no dates are set, show all time
-                        startDate = new Date(2000, 0, 1); 
+                        startDate = new Date(2000, 0, 1);
                         endDate = new Date();
                     }
                     break;
@@ -1853,7 +1868,7 @@
                     }
                 });
             });
-            
+
             document.querySelectorAll('.job-summary-row').forEach(row => {
                 row.addEventListener('click', () => {
                     const jobId = row.dataset.id;
@@ -1890,7 +1905,7 @@
             document.getElementById('total-wage-summary').textContent = totalWages.toLocaleString();
             document.getElementById('total-paid-wage-summary').textContent = totalPaidWages.toLocaleString();
             document.getElementById('total-unpaid-wage-summary').textContent = totalUnpaidWages.toLocaleString();
-            
+
             // Update stats
             document.getElementById('stat-paid-wages').textContent = totalPaidWages.toLocaleString();
             document.getElementById('stat-unpaid-wages').textContent = totalUnpaidWages.toLocaleString();
@@ -1910,11 +1925,11 @@
                     </div>`;
                  }
             });
-            
+
             // Update Chart
             updateFinancialChart(jobs, reportStartDate, reportEndDate);
         }
-        
+
         function updateFinancialChart(jobs, startDate, endDate) {
             const ctx = document.getElementById('financial-chart').getContext('2d');
             const data = {
@@ -1938,7 +1953,7 @@
                 }
                 current.setMonth(current.getMonth() + 1);
             }
-            
+
             jobs.forEach(job => {
                 const monthKey = monthFormatter.format(new Date(job.startDate));
                 if (monthlyData[monthKey]) {
@@ -1996,7 +2011,7 @@
             });
 
             document.getElementById('member-total-wage-summary').textContent = totalWage.toLocaleString();
-            
+
             document.querySelectorAll('.member-job-summary-row').forEach(row => {
                 row.addEventListener('click', () => {
                     const jobId = row.dataset.id;
@@ -2026,16 +2041,16 @@
             }
             return `${startDate} - ${endDate}`;
         }
-        function formatShortDate(dateString) { 
+        function formatShortDate(dateString) {
             if (!dateString) return '';
-            return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); 
+            return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
         }
-        function formatShortDateWithBEYear(dateString) { 
+        function formatShortDateWithBEYear(dateString) {
             if (!dateString) return '';
             const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            return new Date(dateString).toLocaleDateString('th-TH', options); 
+            return new Date(dateString).toLocaleDateString('th-TH', options);
         }
-        
+
         function showModal(title, contentHTML, onSave, showSaveButton = true, onReady = null, saveButtonText = 'บันทึก') {
             const modalId = `modal-${Date.now()}`;
             const tempDiv = document.createElement('div');
@@ -2112,16 +2127,16 @@
                 const startDate = formData.get('startDate'), endDate = formData.get('endDate');
                 let workdays = [];
                 for (let d = new Date(startDate); d <= new Date(endDate); d.setDate(d.getDate() + 1)) { workdays.push(new Date(d).toISOString().split('T')[0]); }
-                await addDoc(collection(db, "jobs"), { 
-                    name: formData.get('name'), 
-                    location: formData.get('location'), 
-                    income: Number(formData.get('income')), 
-                    startDate, 
-                    endDate, 
-                    workdays, 
-                    team: [], 
-                    expenses: [], 
-                    status: 'active', 
+                await addDoc(collection(db, "jobs"), {
+                    name: formData.get('name'),
+                    location: formData.get('location'),
+                    income: Number(formData.get('income')),
+                    startDate,
+                    endDate,
+                    workdays,
+                    team: [],
+                    expenses: [],
+                    status: 'active',
                     teamLeaderId: '',
                     whtEnabled: false,
                     vatEnabled: false,
@@ -2132,7 +2147,7 @@
                 modal.remove();
             });
         }
-        
+
         function showAddMemberModal() {
             const userOptions = allUsers.map(u => `<option value="${u.id}" data-pic="${u.profilePic || ''}">${u.nickname || u.name}</option>`).join('');
             const content = `
@@ -2159,7 +2174,7 @@
                 updatePreview();
             });
         }
-        
+
         function showEditMemberModal(member) {
             const memberData = allUsers.find(u => u.id === member.userId);
             let userOptions = allUsers.map(u => `<option value="${u.id}" data-pic="${u.profilePic || ''}" ${u.id === member.userId ? 'selected' : ''}>${u.nickname || u.name}</option>`).join('');
@@ -2179,12 +2194,12 @@
                 const isLeaderCheckbox = formData.get('isLeader');
                 const teamMemberIndex = currentJobData.team.findIndex(m => m.userId === member.userId);
 
-                if (teamMemberIndex > -1) { 
+                if (teamMemberIndex > -1) {
                     currentJobData.team[teamMemberIndex].userId = newUserId;
-                    currentJobData.team[teamMemberIndex].position = formData.get('position'); 
-                    currentJobData.team[teamMemberIndex].dailyRate = Number(formData.get('dailyRate')); 
+                    currentJobData.team[teamMemberIndex].position = formData.get('position');
+                    currentJobData.team[teamMemberIndex].dailyRate = Number(formData.get('dailyRate'));
                 }
-                
+
                 let newLeaderId = currentJobData.teamLeaderId;
                 if(isLeaderCheckbox) {
                     newLeaderId = newUserId;
@@ -2205,14 +2220,14 @@
                 selectEl.onchange = updatePreview;
             });
         }
-        
+
         function showEditBudgetModal(currentBudget) {
             showModal('แก้ไขงบประมาณ', `<input type="number" name="budget" required class="w-full p-2 border rounded" value="${currentBudget}">`, async (formData, submitButton, modal) => {
                 await updateDoc(doc(db, "jobs", currentJobId), { income: Number(formData.get('income')) });
                 modal.remove();
             });
         }
-        
+
         function showAddDayModal() {
             showModal('เพิ่มวันทำงาน', `<label>เลือกวันที่ต้องการเพิ่ม</label><input type="date" name="newDay" required class="w-full p-2 border rounded">`, async (formData, submitButton, modal) => {
                 const newDay = formData.get('newDay');
@@ -2230,7 +2245,7 @@
                 modal.remove();
             });
         }
-        
+
         function showEditExpenseModal(expense, index) {
             const content = `<input type="text" name="name" placeholder="ชื่อรายการ" required class="w-full p-2 border rounded" value="${expense.name}"><input type="number" name="amount" placeholder="จำนวนเงิน" required class="w-full p-2 border rounded" value="${expense.amount}">`;
             showModal('แก้ไขค่าใช้จ่าย', content, async (formData, submitButton, modal) => {
@@ -2264,7 +2279,7 @@
                 modal.remove();
             });
         }
-        
+
         function showEditWorkdayModal(oldDay) {
             const content = `<label>แก้ไขวันที่จาก ${formatShortDate(oldDay)} เป็น</label><input type="date" name="newDay" required class="w-full p-2 border rounded" value="${oldDay}">`;
             showModal('แก้ไขวันทำงาน', content, async (formData, submitButton, modal) => {
@@ -2297,16 +2312,16 @@
             showModal('การจัดการทีมงานทั้งหมด', userListHTML, null, false, (modal) => {
                 modal.querySelectorAll('.modal-delete-user-btn').forEach(btn => btn.onclick = (e) => {
                     const userIdToDelete = e.currentTarget.dataset.userid;
-                    if (userIdToDelete === currentUser.uid) { 
-                        alert("ไม่สามารถลบตัวเองได้"); 
-                        return; 
+                    if (userIdToDelete === currentUser.uid) {
+                        alert("ไม่สามารถลบตัวเองได้");
+                        return;
                     }
                     const userToDelete = allUsers.find(u => u.id === userIdToDelete);
                     const userName = userToDelete ? (userToDelete.nickname || userToDelete.name) : 'ผู้ใช้คนนี้';
 
                     showConfirmModal(
-                        `ยืนยันการลบ ${userName}`, 
-                        'การกระทำนี้จะลบผู้ใช้ออกจากระบบและคิวงานทั้งหมดที่เกี่ยวข้องอย่างถาวร แต่จะไม่ลบบัญชีล็อกอิน คุณแน่ใจหรือไม่?', 
+                        `ยืนยันการลบ ${userName}`,
+                        'การกระทำนี้จะลบผู้ใช้ออกจากระบบและคิวงานทั้งหมดที่เกี่ยวข้องอย่างถาวร แต่จะไม่ลบบัญชีล็อกอิน คุณแน่ใจหรือไม่?',
                         async () => {
                             try {
                                 const batch = writeBatch(db);
@@ -2320,7 +2335,7 @@
                                 jobsSnapshot.forEach(jobDoc => {
                                     const jobData = jobDoc.data();
                                     const team = jobData.team || [];
-                                    
+
                                     const newTeam = team.filter(member => member.userId !== userIdToDelete);
 
                                     if (newTeam.length < team.length) {
@@ -2394,15 +2409,20 @@
 
                 // Social Linking UI
                 const socialContainer = modal.querySelector('#social-linking-container');
-                if (currentUserData.lineUserId) {
-                    socialContainer.innerHTML = `<div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-700">เชื่อมต่อกับ LINE แล้ว</p>
-                        <button type="button" id="unlink-line-btn" class="text-sm text-red-600 hover:text-red-800">ยกเลิกการเชื่อมต่อ</button>
-                    </div>`;
-                    modal.querySelector('#unlink-line-btn').onclick = () => { handleUnlinkLineAccount(); modal.remove(); };
+                if (appSettings.isLineLoginEnabled) {
+                    socialContainer.classList.remove('hidden');
+                    if (currentUserData.lineUserId) {
+                        socialContainer.innerHTML = `<div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-gray-700">เชื่อมต่อกับ LINE แล้ว</p>
+                            <button type="button" id="unlink-line-btn" class="text-sm text-red-600 hover:text-red-800">ยกเลิกการเชื่อมต่อ</button>
+                        </div>`;
+                        modal.querySelector('#unlink-line-btn').onclick = () => { handleUnlinkLineAccount(); modal.remove(); };
+                    } else {
+                        socialContainer.innerHTML = `<button type="button" id="link-line-btn" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600">เชื่อมต่อบัญชี LINE</button>`;
+                        modal.querySelector('#link-line-btn').onclick = () => { handleLinkLineAccount(); modal.remove(); };
+                    }
                 } else {
-                    socialContainer.innerHTML = `<button type="button" id="link-line-btn" class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600">เชื่อมต่อบัญชี LINE</button>`;
-                    modal.querySelector('#link-line-btn').onclick = () => { handleLinkLineAccount(); modal.remove(); };
+                     socialContainer.classList.add('hidden');
                 }
 
 
@@ -2410,7 +2430,7 @@
                 modal.querySelector('#manage-bank-account-btn').onclick = () => { modal.remove(); showBankAccountModal(); };
             });
         }
-        
+
         function showChangePasswordForCurrentUserModal() {
              const content = `
                 <label>รหัสผ่านปัจจุบัน</label><input type="password" name="oldPassword" required class="w-full p-2 border rounded">
@@ -2421,7 +2441,7 @@
                 const oldPass = formData.get('oldPassword');
                 const newPass = formData.get('newPassword');
                 const confirmPass = formData.get('confirmPassword');
-                
+
                 if (newPass.length < 6) { alert("รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร"); return; }
                 if (newPass !== confirmPass) { alert("รหัสผ่านใหม่และการยืนยันไม่ตรงกัน"); return; }
 
@@ -2489,7 +2509,7 @@
                 modal.remove();
             });
         }
-        
+
         function showForgotPasswordModal() {
             const content = `<label>กรุณากรอกอีเมลของคุณเพื่อรีเซ็ตรหัสผ่าน</label><input type="email" name="email" required class="w-full p-2 border rounded" placeholder="your@email.com">`;
             showModal('ลืมรหัสผ่าน', content, async (formData, submitButton, modal) => {
@@ -2511,7 +2531,7 @@
             const targetUser = allUsers.find(u => u.id === userIdToImpersonate);
             if (targetUser) {
                 originalAdminData = { user: currentUser, data: currentUserData, role: currentUserRole };
-                
+
                 currentUser = { uid: targetUser.id, email: targetUser.email };
                 currentUserData = targetUser;
                 currentUserRole = targetUser.role;
@@ -2522,7 +2542,7 @@
 
         function returnToAdminView() {
             if (!originalAdminData) return;
-            
+
             currentUser = originalAdminData.user;
             currentUserData = originalAdminData.data;
             currentUserRole = originalAdminData.role;
@@ -2541,6 +2561,9 @@
                 // If no settings doc, create one with defaults
                 await setDoc(settingsRef, appSettings).catch(e => console.error("Could not create default settings:", e));
             }
+            // Update live DOM elements after loading
+            document.getElementById('favicon-link').href = appSettings.faviconUrl || '';
+            document.getElementById('og-image-meta').content = appSettings.ogImageUrl || '';
         }
 
         function showSettingsView() {
@@ -2550,12 +2573,32 @@
             document.getElementById('settings-view').classList.remove('hidden');
 
             // Populate form
+            document.getElementById('favicon-preview').src = appSettings.faviconUrl || 'https://placehold.co/64x64/E2E8F0/4A5568?text=Icon';
+            document.getElementById('og-image-preview').src = appSettings.ogImageUrl || 'https://placehold.co/300x157/E2E8F0/4A5568?text=OG+Image';
             document.getElementById('setting-cloudinary-name').value = appSettings.cloudinaryName;
             document.getElementById('setting-cloudinary-preset').value = appSettings.cloudinaryPreset;
             document.getElementById('setting-line-bot-token').value = appSettings.lineBotChannelAccessToken || '';
             document.getElementById('setting-line-bot-secret').value = appSettings.lineBotChannelSecret || '';
             document.getElementById('setting-facebook-app-id').value = appSettings.facebookAppId || '';
             document.getElementById('setting-facebook-app-secret').value = appSettings.facebookAppSecret || '';
+            document.getElementById('setting-line-login-enabled').checked = appSettings.isLineLoginEnabled;
+
+            // Add change listeners for image previews
+            const faviconInput = document.getElementById('setting-favicon-file');
+            const faviconPreview = document.getElementById('favicon-preview');
+            faviconInput.onchange = (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    faviconPreview.src = URL.createObjectURL(e.target.files[0]);
+                }
+            };
+
+            const ogImageInput = document.getElementById('setting-og-image-file');
+            const ogImagePreview = document.getElementById('og-image-preview');
+            ogImageInput.onchange = (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    ogImagePreview.src = URL.createObjectURL(e.target.files[0]);
+                }
+            };
         }
 
         function showLineBotView() {
@@ -2573,7 +2616,7 @@
                 jobSelect.appendChild(option);
             });
         }
-        
+
         function sendLineMessage(userId, message, userName = null) {
             // This is a placeholder function.
             // In a real application, this would trigger a Cloud Function
@@ -2646,11 +2689,11 @@
             if (!currentUser) return;
 
             const q = query(collection(db, "notifications"), where("recipientIds", "array-contains", currentUser.uid));
-            
+
             notificationsUnsubscribe = onSnapshot(q, (snapshot) => {
                 allNotifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const unreadCount = allNotifications.filter(n => !n.isRead).length;
-                
+
                 const badge = document.getElementById('notification-badge');
                 if (unreadCount > 0) {
                     badge.classList.remove('hidden');
@@ -2679,7 +2722,7 @@
                         return;
                     }
 
-                    const existingRequestQuery = query(collection(db, "notifications"), 
+                    const existingRequestQuery = query(collection(db, "notifications"),
                         where("senderId", "==", currentUser.uid),
                         where("jobId", "==", jobId),
                         where("type", "==", "join_request"),
@@ -2729,13 +2772,13 @@
                             <button class="deny-request-btn px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600" data-id="${notification.id}">ปฏิเสธ</button>
                         </div>`;
                 }
-                
+
                 let statusText = '';
                 switch(notification.status) {
                     case 'approved': statusText = `<span class="font-semibold text-green-600"> (อนุมัติแล้ว)</span>`; break;
                     case 'denied': statusText = `<span class="font-semibold text-red-600"> (ถูกปฏิเสธ)</span>`; break;
                 }
-                
+
                 const message = notification.message || `<b>${notification.senderName}</b> ได้ส่งคำขอเข้าร่วมคิวงาน <b>${notification.jobName}</b>`;
 
                 notificationsHTML += `
@@ -2779,19 +2822,19 @@
                 <p>กำหนดตำแหน่งและค่าแรงสำหรับ <b>${notification.senderName}</b> ในคิวงาน <b>${notification.jobName}</b></p>
                 <input type="text" name="position" placeholder="ตำแหน่ง" required class="w-full p-2 border rounded">
                 <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded">`;
-            
+
             showModal('อนุมัติคำขอ', content, async (formData, submitBtn, modal) => {
                 const position = formData.get('position');
                 const dailyRate = Number(formData.get('dailyRate'));
 
-                await updateDoc(doc(db, "jobs", notification.jobId), { 
-                    team: arrayUnion({ 
-                        userId: notification.senderId, 
-                        position: position, 
-                        dailyRate: dailyRate, 
-                        workdays: [], 
-                        dailyOverrides: {}, 
-                        isPaid: false 
+                await updateDoc(doc(db, "jobs", notification.jobId), {
+                    team: arrayUnion({
+                        userId: notification.senderId,
+                        position: position,
+                        dailyRate: dailyRate,
+                        workdays: [],
+                        dailyOverrides: {},
+                        isPaid: false
                     })
                 });
 
@@ -2809,7 +2852,7 @@
                     isRead: false,
                     createdAt: serverTimestamp()
                 });
-                
+
                 alert('อนุมัติคำขอเรียบร้อยแล้ว');
                 modal.remove();
             });
