@@ -21,6 +21,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+    <!-- jsPDF library for exporting summaries to PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -155,6 +158,32 @@
         .job-card.gradient-bg .job-team-status.profit-text {
             color: white !important;
         }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 640px) {
+            /* Collapse job card details for all cards */
+            .job-card.mobile-collapsed p {
+                /* hide all paragraphs (date, location, status) */
+                display: none;
+            }
+            .job-card.mobile-collapsed .job-card-location {
+                display: none;
+            }
+            .job-card.mobile-collapsed .job-team-status {
+                display: none;
+            }
+            /* Hide the job name when collapsed; show it only if .mobile-show-name is present */
+            .job-card.mobile-collapsed h5 {
+                display: none;
+            }
+            .job-card.mobile-collapsed.mobile-show-name h5 {
+                display: block;
+            }
+            /* Ensure header action buttons align to the right by default on mobile (safeguard if not already pushed via ml-auto) */
+            #main-app header .flex.items-center.space-x-2 {
+                margin-left: auto;
+            }
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -172,7 +201,7 @@
                     <h1 class="text-4xl font-bold main-gradient-text">LDB QUEUE</h1>
                     <p class="mt-1 text-gray-500">คิวงานทั้งหมด</p>
                 </div>
-                <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
+            <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
                     <button id="public-login-button" class="px-4 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
                        <i class="ph ph-sign-in mr-1"></i> ลงชื่อเข้าใช้
                     </button>
@@ -271,7 +300,8 @@
                     <p id="user-info" class="mt-1 text-gray-500">สวัสดี, <span id="user-name-display" class="font-medium"></span> (<span id="user-role" class="font-medium"></span>)</p>
                     <p class="text-xs text-gray-400">User ID: <span id="user-id-display"></span></p>
                 </div>
-                <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
+                <!-- Ensure header action icons (menu, notifications, etc.) align to the right on mobile by adding ml-auto -->
+                <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0 ml-auto">
                     <button id="notifications-button" class="relative p-2 text-gray-600 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                         <i class="ph ph-bell text-xl"></i>
                         <span id="notification-badge" class="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs hidden"></span>
@@ -326,7 +356,8 @@
                                 <p id="job-dates" class="text-gray-500"></p>
                                 <p id="job-location" class="flex items-center mt-1 text-gray-500"><i class="ph ph-map-pin mr-2"></i><span id="job-location-text"></span></p>
                             </div>
-                            <div class="text-right mt-4 sm:mt-0">
+                            <!-- Move the budget information to the far right -->
+                            <div class="ml-auto text-right mt-4 sm:mt-0">
                                 <p id="budget-label" class="text-gray-500 font-bold text-lg">งบประมาณ</p>
                                 <div class="flex items-center justify-end">
                                     <div id="member-wage-container" class="text-right">
@@ -395,7 +426,8 @@
             </section>
         </div>
 
-        <div id="financial-summary-view" class="hidden p-4 sm:p-6 lg:p-8">
+        <!-- Increased padding for a cleaner appearance on the summary view. -->
+        <div id="financial-summary-view" class="hidden p-6 sm:p-8 lg:p-12">
             <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">สรุปบัญชีและการเงิน</h1>
@@ -426,13 +458,18 @@
                     <button id="tax-management-button" class="hidden px-4 py-2 text-sm font-semibold rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200">
                         จัดการภาษี
                     </button>
+                    <!-- Button to export financial summary as a PDF (admin only) -->
+                    <button id="export-summary-pdf-button" class="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 admin-only">
+                        <i class="ph ph-download-simple"></i><span class="hidden md:inline ml-1">ส่งออก PDF</span>
+                    </button>
                     <!-- Button for withholding tax summary (member only) -->
                     <button id="withholding-button" class="hidden ml-auto px-4 py-2 text-sm font-semibold rounded-lg bg-red-100 text-red-600 hover:bg-red-200">
                         หัก ณ ที่จ่าย
                     </button>
                 </div>
                 <div id="custom-date-range-selector" class="hidden flex-wrap items-end gap-4 mt-4">
-                    <div class="flex items-end gap-4">
+                    <!-- Adjust layout for mobile: stack fields and center the search button -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 w-full">
                         <div>
                             <label for="summary-start-date" class="text-sm font-medium text-gray-700">ตั้งแต่</label>
                             <input type="date" id="summary-start-date" class="p-2 border rounded-lg">
@@ -441,7 +478,7 @@
                             <label for="summary-end-date" class="text-sm font-medium text-gray-700">ถึง</label>
                             <input type="date" id="summary-end-date" class="p-2 border rounded-lg">
                         </div>
-                        <button id="summary-search-button" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                        <button id="summary-search-button" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90 w-full sm:w-auto mx-auto sm:mx-0 mt-2 sm:mt-0">
                             ค้นหา
                         </button>
                     </div>
@@ -566,8 +603,10 @@
                 <!-- Summary statistics for member financial overview -->
                 <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
                     <div id="member-summary-stats" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <div class="text-center">
-                            <p class="text-sm text-gray-500">BG ทั้งหมด</p>
+                        <!-- Align BG summary to the right for members -->
+                        <div class="text-right">
+                            <!-- Display remaining BG after withholding instead of gross BG -->
+                            <p class="text-sm text-gray-500">BG คงเหลือ</p>
                             <p id="member-total-wage-stat" class="mt-1 text-lg font-bold text-gray-700">0</p>
                         </div>
                         <div class="text-center">
@@ -591,7 +630,8 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">BG</th>
+                                    <!-- Column displays net BG (remaining after withholding) -->
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">BG คงเหลือ</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รับเงินแล้ว</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ยังไม่ได้รับเงิน</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
@@ -772,54 +812,7 @@
 
     </div>
 
-    <!-- Withholding tax view for team members -->
-    <div id="withholding-view" class="hidden p-4 sm:p-6 lg:p-8">
-         <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">หัก ณ ที่จ่าย</h1>
-                <p class="mt-1 text-gray-500">รายละเอียดการหัก ณ ที่จ่ายของคุณ</p>
-            </div>
-            <button id="back-to-financial-from-wht-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
-                <i class="ph ph-arrow-left mr-1"></i> กลับ
-            </button>
-         </header>
-         <!-- Filter and ID card upload -->
-         <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
-                <div class="flex flex-wrap items-end gap-4">
-                    <div>
-                        <label for="wht-month" class="text-sm font-medium text-gray-700">เดือน</label>
-                        <select id="wht-month" class="p-2 border rounded-lg"></select>
-                    </div>
-                    <div>
-                        <label for="wht-year" class="text-sm font-medium text-gray-700">ปี</label>
-                        <select id="wht-year" class="p-2 border rounded-lg"></select>
-                    </div>
-                    <button id="wht-search-btn" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
-                        ค้นหา
-                    </button>
-                </div>
-         </section>
-         <!-- Table -->
-         <section>
-            <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
-                <table class="min-w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">BG</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ดาวน์โหลด</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wht-report-body" class="bg-white divide-y divide-gray-200"></tbody>
-                </table>
-            </div>
-            <div class="mt-4 text-center">
-                <button id="wht-expand-btn" class="hidden px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">ขยายเพิ่มเติม</button>
-            </div>
-         </section>
-    </div>
+    <!-- Withholding tax view removed per requirements; button is retained but no view will be displayed -->
 
     <!-- Tax management view for admin -->
     <div id="tax-management-view" class="hidden p-4 sm:p-6 lg:p-8">
@@ -1383,6 +1376,9 @@
                          }
                     })
                     card.querySelector('.job-team-status')?.classList.remove('text-white');
+                    // Remove any mobile-collapsed and mobile-show-name classes on deselection
+                    card.classList.remove('mobile-collapsed');
+                    card.classList.remove('mobile-show-name');
                 });
                 return; // Stop execution here
             }
@@ -1401,6 +1397,20 @@
                      p.classList.toggle('text-gray-400', !isSelected && p.classList.contains('job-card-location'));
                 })
                 card.querySelector('.job-team-status')?.classList.toggle('text-white', isSelected);
+                // On small screens, collapse all job cards. Only the selected card will show its name.
+                if (window.innerWidth <= 640) {
+                    // Always collapse the card on mobile
+                    card.classList.add('mobile-collapsed');
+                    if (isSelected) {
+                        card.classList.add('mobile-show-name');
+                    } else {
+                        card.classList.remove('mobile-show-name');
+                    }
+                } else {
+                    // On larger screens, ensure the mobile collapse classes are removed
+                    card.classList.remove('mobile-collapsed');
+                    card.classList.remove('mobile-show-name');
+                }
             });
 
             // Set up the new listener
@@ -1439,8 +1449,12 @@
                 budgetLabel.textContent = 'BG';
                 const myTeamData = job.team.find(m => m.userId === currentUser.uid);
                 let myTotalWage = 0;
+                let myNetWage = 0;
                 if (myTeamData) {
+                    // Gross wage based on assigned workdays
                     myTotalWage = calculateTeamCostForMember(myTeamData, job.workdays);
+                    // Initialize net wage with gross value; will be adjusted below if withholding applies
+                    myNetWage = myTotalWage;
                     if (myTeamData.isPaid) {
                         jobIncomeEl.classList.add('profit-text');
                         memberPaidStatusEl.textContent = `ได้รับเงินแล้ว (${formatShortDateWithBEYear(myTeamData.paymentDate)})`;
@@ -1451,14 +1465,19 @@
                     memberPaidStatusEl.classList.toggle('hidden', !myTeamData.isPaid);
 
                     if(myTeamData.whtEnabled) {
+                        // Calculate withholding amount based on global percentage
                         const whtAmount = myTotalWage * (appSettings.whtPercent / 100);
+                        // Adjust net wage to reflect actual take-home after withholding
+                        myNetWage = myTotalWage - whtAmount;
                         memberWhtDisplay.textContent = `(หัก ณ ที่จ่าย ${appSettings.whtPercent}% : ${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท)`;
                     }
 
                 } else {
                     jobIncomeEl.classList.add('text-blue-600');
                 }
-                jobIncomeEl.textContent = `${myTotalWage.toLocaleString()} บาท`;
+                // Display net wage (remaining after withholding) instead of gross wage
+                const displayWage = myTeamData ? myNetWage : myTotalWage;
+                jobIncomeEl.textContent = `${displayWage.toLocaleString()} บาท`;
             } else { // admin
                 budgetLabel.textContent = 'งบประมาณ';
                 jobIncomeEl.textContent = `${job.income.toLocaleString()} บาท`;
@@ -3452,6 +3471,11 @@
          * Show the withholding tax view and generate the report
          */
         function showWithholdingView() {
+            // If the withholding view is not present (it has been removed), do nothing
+            const whtViewEl = document.getElementById('withholding-view');
+            if (!whtViewEl) {
+                return;
+            }
             // Hide other views
             document.getElementById('financial-summary-view').classList.add('hidden');
             const taxView = document.getElementById('tax-management-view');
@@ -3460,7 +3484,7 @@
             populateWhtMonthYearSelect();
             generateWithholdingReport();
             // Show the withholding view
-            document.getElementById('withholding-view').classList.remove('hidden');
+            whtViewEl.classList.remove('hidden');
         }
 
         /**
@@ -3479,51 +3503,239 @@
             const selectedYear = yearSel ? parseInt(yearSel.value) : NaN;
             // Filter jobs where current user is on the team
             const memberJobs = Array.isArray(allJobs) ? allJobs.filter(job => job.team && job.team.some(m => m.userId === currentUser.uid)) : [];
-            const rows = [];
+            // Determine if the user has selected a specific month/year; if not, we'll default to the last 6 months
+            const defaultNoFilter = isNaN(selectedMonth) && isNaN(selectedYear);
+            const now = new Date();
+            // Group rows by month label and accumulate totals for each month
+            const groups = {};
             memberJobs.forEach(job => {
                 if (!job.startDate) return;
                 const date = new Date(job.startDate);
-                if (!isNaN(date)) {
+                if (isNaN(date)) return;
+                let include = false;
+                if (defaultNoFilter) {
+                    // Show only jobs within the last 6 months (inclusive of current month) when no filter is selected
+                    const monthsDiff = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+                    include = monthsDiff < 6;
+                } else {
                     const monthOk = isNaN(selectedMonth) || (date.getMonth() + 1) === selectedMonth;
                     const yearOk = isNaN(selectedYear) || date.getFullYear() === selectedYear;
-                    if (monthOk && yearOk) {
-                        const myTeam = job.team.find(m => m.userId === currentUser.uid);
-                        if (!myTeam) return;
-                        const wage = calculateTeamCostForMember(myTeam, job.workdays);
-                        const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
-                        const whtAmount = myTeam.whtEnabled ? (wage * (whtPercentValue / 100)) : 0;
-                        const net = wage - whtAmount;
-                        // Format row HTML
-                        const rowHTML = `
+                    include = monthOk && yearOk;
+                }
+                if (!include) return;
+                const myTeam = job.team.find(m => m.userId === currentUser.uid);
+                if (!myTeam) return;
+                const wage = calculateTeamCostForMember(myTeam, job.workdays);
+                const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
+                const whtAmount = myTeam.whtEnabled ? (wage * (whtPercentValue / 100)) : 0;
+                const net = wage - whtAmount;
+                // Month label in Thai (short month name with year)
+                const monthLabel = date.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' });
+                // Create job row with month label appended to job name for clarity
+                const rowHTML = `
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right">${net.toLocaleString()}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${job.name} <span class="text-xs text-gray-400">(${monthLabel})</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">${wage.toLocaleString()}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount > 0 ? whtAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right">${net.toLocaleString()}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center"><i class="ph ph-download-simple cursor-pointer text-blue-500"></i></td>
                             </tr>
                         `;
-                        rows.push(rowHTML);
-                    }
+                // Initialize group if not exists
+                if (!groups[monthLabel]) {
+                    groups[monthLabel] = { rows: [], totals: { wage: 0, wht: 0, net: 0 } };
                 }
+                groups[monthLabel].rows.push(rowHTML);
+                groups[monthLabel].totals.wage += wage;
+                groups[monthLabel].totals.wht += whtAmount;
+                groups[monthLabel].totals.net += net;
+            });
+            const monthKeys = Object.keys(groups);
+            // If no data groups, show a friendly message instead of an empty table
+            if (monthKeys.length === 0) {
+                bodyEl.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูล</td></tr>`;
+                if (expandBtn) expandBtn.classList.add('hidden');
+                return;
+            }
+            // Sort month keys in descending order (most recent first)
+            monthKeys.sort((a, b) => {
+                const [aMonthStr, aYearStr] = a.split(' ');
+                const [bMonthStr, bYearStr] = b.split(' ');
+                // Convert Thai short month names to month numbers for sorting
+                const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                const aMonth = thaiMonths.indexOf(aMonthStr);
+                const bMonth = thaiMonths.indexOf(bMonthStr);
+                const aYear = parseInt(aYearStr);
+                const bYear = parseInt(bYearStr);
+                if (aYear === bYear) {
+                    return bMonth - aMonth;
+                }
+                return bYear - aYear;
+            });
+            // Build final row list with summary rows for each month
+            const finalRows = [];
+            monthKeys.forEach(key => {
+                const group = groups[key];
+                // Append each job row
+                group.rows.forEach(r => finalRows.push(r));
+                // Append summary row for the month
+                finalRows.push(`
+                    <tr class="bg-gray-50 font-semibold">
+                        <td class="px-6 py-4 whitespace-nowrap">รวมเดือน ${key}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">${group.totals.wage.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">${group.totals.wht > 0 ? group.totals.wht.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">${group.totals.net.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap"></td>
+                    </tr>
+                `);
             });
             // Determine if we need to limit rows and show expand button
-            if (rows.length > 20) {
-                // Show only first 20 rows initially
-                bodyEl.innerHTML = rows.slice(0, 20).join('');
+            if (finalRows.length > 20) {
+                bodyEl.innerHTML = finalRows.slice(0, 20).join('');
                 if (expandBtn) {
                     expandBtn.classList.remove('hidden');
                     expandBtn.onclick = () => {
-                        bodyEl.innerHTML = rows.join('');
+                        bodyEl.innerHTML = finalRows.join('');
                         expandBtn.classList.add('hidden');
                     };
                 }
             } else {
-                bodyEl.innerHTML = rows.join('');
+                bodyEl.innerHTML = finalRows.join('');
                 if (expandBtn) expandBtn.classList.add('hidden');
             }
         }
 
+        // Export financial summary (admin) to PDF
+        const exportSummaryBtn = document.getElementById('export-summary-pdf-button');
+        if (exportSummaryBtn) {
+            exportSummaryBtn.addEventListener('click', async () => {
+                // Build PDF from the financial summary view, excluding filters, navigation and profile image.
+                const summaryContainer = document.getElementById('financial-summary-view');
+                if (!summaryContainer) return;
+                // Disable the button while exporting
+                exportSummaryBtn.disabled = true;
+                try {
+                    const { jsPDF } = window.jspdf || {};
+                    if (!jsPDF) {
+                        alert('ไม่พบไลบรารี jsPDF');
+                        exportSummaryBtn.disabled = false;
+                        return;
+                    }
+                    // Determine month label based on current filter and selections
+                    let monthLabel = '';
+                    try {
+                        const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                        if (typeof financialFilter !== 'undefined' && financialFilter === '1m') {
+                            const monthIndex = parseInt(document.getElementById('summary-month').value);
+                            const yearValue = parseInt(document.getElementById('summary-year').value);
+                            monthLabel = `${months[monthIndex]} ${yearValue + 543}`;
+                        } else if (typeof financialFilter !== 'undefined') {
+                            switch (financialFilter) {
+                                case '2m': monthLabel = 'ย้อนหลัง 2 เดือน'; break;
+                                case '3m': monthLabel = 'ย้อนหลัง 3 เดือน'; break;
+                                case '6m': monthLabel = 'ย้อนหลัง 6 เดือน'; break;
+                                case '1y': monthLabel = 'ย้อนหลัง 1 ปี'; break;
+                                case 'all':
+                                    // For a custom date range, display the start and end dates (Thai format)
+                                    {
+                                        const startInput = document.getElementById('summary-start-date').value;
+                                        const endInput = document.getElementById('summary-end-date').value;
+                                        if (startInput && endInput) {
+                                            const startDateObj = new Date(startInput);
+                                            const endDateObj = new Date(endInput);
+                                            const startLabel = startDateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+                                            const endLabel = endDateObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+                                            monthLabel = `จาก ${startLabel} ถึง ${endLabel}`;
+                                        } else {
+                                            monthLabel = 'ช่วงเวลา';
+                                        }
+                                    }
+                                    break;
+                                default: monthLabel = '';
+                            }
+                        } else {
+                            const monthIndex = parseInt(document.getElementById('summary-month').value);
+                            const yearValue = parseInt(document.getElementById('summary-year').value);
+                            monthLabel = `${months[monthIndex]} ${yearValue + 543}`;
+                        }
+                    } catch (err) {
+                        monthLabel = '';
+                    }
+                    // Temporarily update the header text to include the web app name and selected month
+                    const headerTitleEl = summaryContainer.querySelector('h1');
+                    // Extract the app name from the page title (before the dash)
+                    const appName = (document.title || '').split(' - ')[0] || '';
+                    // Save the original header HTML and text content for later restoration
+                    const originalHeaderHTML = headerTitleEl ? headerTitleEl.innerHTML : '';
+                    const originalHeaderText = headerTitleEl ? headerTitleEl.textContent : '';
+                    if (headerTitleEl) {
+                        // Build the new header for the PDF: app name on its own line and page title on the next line
+                        // Combine the original header text with the month label if present
+                        let secondLine = originalHeaderText ? originalHeaderText.trim() : '';
+                        if (monthLabel) {
+                            secondLine = secondLine ? `${secondLine} - ${monthLabel.trim()}` : monthLabel.trim();
+                        }
+                        // Do not apply any gradient/color classes to the app name; use plain text
+                        headerTitleEl.innerHTML = `${appName}<br>${secondLine}`;
+                    }
+                    // Hide elements that shouldn't appear in the PDF
+                    const backBtn = document.getElementById('back-to-main-app-btn');
+                    const filterSection = summaryContainer.querySelector('section');
+                    const originalBackDisplay = backBtn ? backBtn.style.display : '';
+                    const originalFilterDisplay = filterSection ? filterSection.style.display : '';
+                    if (backBtn) backBtn.style.display = 'none';
+                    if (filterSection) filterSection.style.display = 'none';
+                    // Hide the first column (selection checkbox) in the job summary table before capturing
+                    const jobSummaryTable = document.getElementById('job-summary-table-body')?.closest('table');
+                    const firstColCells = [];
+                    const firstColDisplays = [];
+                    if (jobSummaryTable) {
+                        jobSummaryTable.querySelectorAll('thead tr th:first-child, tbody tr td:first-child, tfoot tr td:first-child').forEach((cell) => {
+                            firstColCells.push(cell);
+                            firstColDisplays.push(cell.style.display);
+                            cell.style.display = 'none';
+                        });
+                    }
+                    // Hide the export button itself if it is inside the summary
+                    const originalExportDisplay = exportSummaryBtn.style.display;
+                    exportSummaryBtn.style.display = 'none';
+                    // Capture the view as canvas
+                    const canvas = await html2canvas(summaryContainer, { useCORS: true, scale: 2 });
+                    const imgData = canvas.toDataURL('image/png');
+                    // Restore hidden elements before creating the PDF
+                    if (filterSection) filterSection.style.display = originalFilterDisplay;
+                    if (backBtn) backBtn.style.display = originalBackDisplay;
+                    if (headerTitleEl) headerTitleEl.innerHTML = originalHeaderHTML;
+                    exportSummaryBtn.style.display = originalExportDisplay;
+                    // Restore the first column cells
+                    if (firstColCells.length) {
+                        firstColCells.forEach((cell, idx) => {
+                            cell.style.display = firstColDisplays[idx];
+                        });
+                    }
+                    // Create the PDF without header/profile image
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 10;
+                    let imgWidth = pageWidth - 2 * margin;
+                    let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    const maxHeight = pageHeight - 2 * margin;
+                    if (imgHeight > maxHeight) {
+                        imgHeight = maxHeight;
+                        imgWidth = (canvas.width * imgHeight) / canvas.height;
+                    }
+                    const imgX = margin + ((pageWidth - 2 * margin - imgWidth) / 2);
+                    const imgY = margin;
+                    pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth, imgHeight);
+                    pdf.save('financial-summary.pdf');
+                } catch (err) {
+                    console.error('Error exporting PDF:', err);
+                } finally {
+                    exportSummaryBtn.disabled = false;
+                }
+            });
+        }
     </script>
 </body>
 </html>
