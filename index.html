@@ -172,12 +172,13 @@
             .job-card.mobile-collapsed .job-team-status {
                 display: none;
             }
-            /* Hide the job name when collapsed; show it only if .mobile-show-name is present */
+            /* On mobile, always display the job name when collapsed.  Unselected cards will show the name in a very small font.  The selected card (mobile-show-name) will have a slightly larger font to stand out. */
             .job-card.mobile-collapsed h5 {
-                display: none;
+                display: block !important;
+                font-size: 0.5rem !important;
             }
             .job-card.mobile-collapsed.mobile-show-name h5 {
-                display: block;
+                font-size: 0.8rem !important;
             }
             /* Ensure header action buttons align to the right by default on mobile (safeguard if not already pushed via ml-auto) */
             #main-app header .flex.items-center.space-x-2 {
@@ -1865,15 +1866,65 @@
                             case 'tax-management-button': showTaxManagementView(); break;
                             case 'withholding-button': showWithholdingView(); break;
                             case 'save-image-btn':
-                                const captureArea = document.getElementById('capture-area');
-                                if (captureArea) {
-                                    html2canvas(captureArea, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-                                        const link = document.createElement('a');
-                                        link.download = `job-summary-${currentJobId}.png`;
-                                        link.href = canvas.toDataURL();
-                                        link.click();
-                                    });
+                                // Build a custom summary for the screenshot that omits monetary values.
+                                if (!currentJobData) return;
+                                // Create a temporary container for the summary
+                                const tempContainer = document.createElement('div');
+                                tempContainer.style.padding = '24px';
+                                tempContainer.style.backgroundColor = '#ffffff';
+                                tempContainer.style.color = '#1f2937'; // Tailwind gray-800
+                                tempContainer.style.fontFamily = "'Kanit', sans-serif";
+                                // Gather data: job name, date range, location, team names, workdays
+                                const jobName = currentJobData.name || '';
+                                // Format date range using existing helper
+                                const dateRange = formatDateRange(currentJobData.startDate, currentJobData.endDate);
+                                const location = currentJobData.location || '';
+                                // Build a header row for workdays and create a table showing each member's schedule.
+                                const workdays = currentJobData.workdays || [];
+                                // Construct header cells for each workday
+                                const headerCells = workdays.map(day => `<th style="padding:6px;text-align:center;font-size:0.75rem;font-weight:500;color:#374151;border:1px dotted #e5e7eb;">${formatShortDate(day)}</th>`).join('');
+                                // Build rows: first cell contains profile + name + position, subsequent cells contain green check marks if working
+                                const teamTableRows = currentJobData.team.map(m => {
+                                    const userData = allUsers.find(u => u.id === m.userId);
+                                    const displayName = userData ? (userData.nickname || userData.name) : '';
+                                    const profilePic = (userData && userData.profilePic) ? userData.profilePic : 'https://placehold.co/40x40/E2E8F0/4A5568?text=??';
+                                    const position = m.position || '';
+                                    // Build cells for each workday: green check if member works on that day
+                                    const dayCells = workdays.map(day => {
+                                        const isWorking = (m.workdays || []).includes(day);
+                                        return `<td style="padding:6px;text-align:center;vertical-align:middle;font-size:1rem;border:1px dotted #d1d5db;background-color:#f9fafb;border-radius:6px;">${isWorking ? '<span style="color:#22c55e;">✔</span>' : ''}</td>`;
+                                    }).join('');
+                                    return `<tr><td style="display:flex;align-items:center;padding:6px;border:1px dotted #d1d5db;background-color:#f9fafb;border-radius:6px;"><img src="${profilePic}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px;"><div><div style="font-weight:500;">${displayName}</div><div style="font-size:0.7rem;color:#6b7280;">${position}</div></div></td>${dayCells}</tr>`;
+                                }).join('');
+                                const teamTableHTML = `<table style="width:100%;border-collapse:collapse;border:1px dotted #e5e7eb;border-radius:8px;overflow:hidden;"><thead><tr><th style="padding:6px;text-align:left;font-size:0.8rem;font-weight:600;color:#374151;border:1px dotted #e5e7eb;">ทีมงาน</th>${headerCells}</tr></thead><tbody>${teamTableRows}</tbody></table>`;
+                                // Prepare optional notes
+                                let notesHTML = '';
+                                if (currentJobData.notes) {
+                                    notesHTML += `<p style="margin-top:0.5rem;">หมายเหตุ: ${currentJobData.notes}</p>`;
                                 }
+                                if (currentJobData.teamNotes) {
+                                    notesHTML += `<p style="margin-top:0.25rem;">โน้ต: ${currentJobData.teamNotes}</p>`;
+                                }
+                                // Assemble HTML for the summary without the separate workdays line
+                                tempContainer.innerHTML = `
+                                    <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">${jobName}</h3>
+                                    <p style="margin-bottom: 0.25rem;">วันที่: ${dateRange}</p>
+                                    <p style="margin-bottom: 0.25rem;">สถานที่: ${location}</p>
+                                    <div style="margin-top:0.75rem;">${teamTableHTML}</div>
+                                    ${notesHTML}
+                                `;
+                                // Position the container off-screen to avoid disrupting layout
+                                tempContainer.style.position = 'absolute';
+                                tempContainer.style.left = '-9999px';
+                                document.body.appendChild(tempContainer);
+                                html2canvas(tempContainer, { scale: 2, backgroundColor: '#ffffff' , useCORS: true }).then(canvas => {
+                                    const link = document.createElement('a');
+                                    link.download = `job-summary-${currentJobId}.png`;
+                                    link.href = canvas.toDataURL();
+                                    link.click();
+                                    // Clean up
+                                    document.body.removeChild(tempContainer);
+                                });
                                 break;
                             case 'notifications-button':
                                 showNotificationsModal();
@@ -3700,7 +3751,7 @@
                     const originalExportDisplay = exportSummaryBtn.style.display;
                     exportSummaryBtn.style.display = 'none';
                     // Capture the view as canvas
-                    const canvas = await html2canvas(summaryContainer, { useCORS: true, scale: 2 });
+                    const canvas = await html2canvas(summaryContainer, { useCORS: true, scale: 2 , useCORS: true });
                     const imgData = canvas.toDataURL('image/png');
                     // Restore hidden elements before creating the PDF
                     if (filterSection) filterSection.style.display = originalFilterDisplay;
