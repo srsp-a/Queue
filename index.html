@@ -210,7 +210,6 @@
                         ลงชื่อเข้าใช้
                     </button>
                 </form>
-                <!-- ปุ่มจัดการ Line Bot จะถูกย้ายไปอยู่ภายในหน้าตั้งค่าระบบ -->
                 <p class="text-center text-sm text-gray-600">
                     ยังไม่มีบัญชี? <a href="#" id="show-signup-modal-btn" class="font-medium text-red-600 hover:text-red-500">สมัครสมาชิกที่นี่</a>
                 </p>
@@ -273,34 +272,28 @@
                     <p class="text-xs text-gray-400">User ID: <span id="user-id-display"></span></p>
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4 mt-4 sm:mt-0">
-                    <!-- Notifications button remains unchanged -->
                     <button id="notifications-button" class="relative p-2 text-gray-600 bg-gray-200 rounded-full hover:bg-gray-300 focus:outline-none">
                         <i class="ph ph-bell text-xl"></i>
                         <span id="notification-badge" class="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs hidden"></span>
                     </button>
-                    <!-- Hide original Line Bot button on the main nav; it will be placed in settings instead -->
+                    <!-- Hide the original line-bot button in nav; a new one will appear in settings -->
                     <button id="line-bot-button-old" class="hidden px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors admin-only">
-                        <i class="ph ph-robot mr-1"></i><span class="hidden md:inline"> แชทบอทไลน์</span>
+                        <i class="ph ph-robot"></i><span class="hidden md:inline ml-1">แชทบอทไลน์</span>
                     </button>
-                    <!-- System settings button: show icon only on small screens -->
                     <button id="system-settings-button" class="px-4 py-2 font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors admin-only">
-                        <i class="ph ph-wrench mr-1"></i><span class="hidden md:inline"> ตั้งค่าระบบ</span>
+                        <i class="ph ph-wrench"></i><span class="hidden md:inline ml-1">ตั้งค่าระบบ</span>
                     </button>
-                    <!-- Manage all users button: show icon only on small screens -->
                     <button id="manage-all-users-button" class="px-4 py-2 font-semibold text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 transition-colors admin-only">
-                        <i class="ph ph-users-three mr-1"></i><span class="hidden md:inline"> จัดการทีมงาน</span>
+                        <i class="ph ph-users-three"></i><span class="hidden md:inline ml-1">จัดการทีมงาน</span>
                     </button>
-                    <!-- Financial summary button: show icon only on small screens -->
                     <button id="financial-summary-button" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
-                        <i class="ph ph-chart-bar mr-1"></i><span class="hidden md:inline"> สรุปบัญชีการเงิน</span>
+                        <i class="ph ph-chart-bar"></i><span class="hidden md:inline ml-1">สรุปบัญชีการเงิน</span>
                     </button>
-                    <!-- Manage profile button: show icon only on small screens -->
                     <button id="manage-profile-button" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
-                        <i class="ph ph-gear mr-1"></i><span class="hidden md:inline"> จัดการโปรไฟล์</span>
+                        <i class="ph ph-gear"></i><span class="hidden md:inline ml-1">จัดการโปรไฟล์</span>
                     </button>
-                    <!-- Logout button: show icon only on small screens -->
                     <button id="logout-button" class="px-4 py-2 font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors">
-                        <i class="ph ph-sign-out mr-1"></i><span class="hidden md:inline"> Logout</span>
+                        <i class="ph ph-sign-out"></i><span class="hidden md:inline ml-1">Logout</span>
                     </button>
                 </div>
             </header>
@@ -334,7 +327,7 @@
                                 <p id="job-location" class="flex items-center mt-1 text-gray-500"><i class="ph ph-map-pin mr-2"></i><span id="job-location-text"></span></p>
                             </div>
                             <div class="text-right mt-4 sm:mt-0">
-                                <p id="budget-label" class="text-gray-500 font-bold text-lg text-right">งบประมาณ</p>
+                                <p id="budget-label" class="text-gray-500 font-bold text-lg">งบประมาณ</p>
                                 <div class="flex items-center justify-end">
                                     <div id="member-wage-container" class="text-right">
                                         <p id="job-income" class="text-3xl font-bold"></p>
@@ -429,16 +422,13 @@
                     <button id="show-custom-range-btn" class="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-200 hover:bg-gray-300">
                         ค้นหาตามช่วงเวลา
                     </button>
-
-                    <!-- Button to open the tax management view (admin only) -->
-                    <button id="tax-management-button" class="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 admin-only">
-                        <i class="ph ph-file-text mr-1"></i><span class="hidden md:inline"> จัดการภาษี</span>
+                    <!-- Button for managing taxes (admin only) -->
+                    <button id="tax-management-button" class="hidden px-4 py-2 text-sm font-semibold rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200">
+                        จัดการภาษี
                     </button>
-
-                    <!-- Button to open the withholding tax view (members) -->
-                    <button id="withholding-button" class="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-200 hover:bg-gray-300 hidden">
-                        <span class="hidden md:inline">หัก ณ ที่จ่าย</span>
-                        <span class="md:hidden">WHT</span>
+                    <!-- Button for withholding tax summary (member only) -->
+                    <button id="withholding-button" class="hidden ml-auto px-4 py-2 text-sm font-semibold rounded-lg bg-red-100 text-red-600 hover:bg-red-200">
+                        หัก ณ ที่จ่าย
                     </button>
                 </div>
                 <div id="custom-date-range-selector" class="hidden flex-wrap items-end gap-4 mt-4">
@@ -490,27 +480,29 @@
                 </section>
                 <section>
                     <h2 class="text-2xl font-semibold mb-4">สรุปรายรับ-รายจ่าย</h2>
-                    <!-- Container for displaying totals of selected jobs in the financial summary -->
-                    <div id="selected-job-totals" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4 hidden">
-                        <div class="text-center">
-                            <p class="text-gray-500 text-sm">รายรับ</p>
-                            <p id="selected-total-income" class="text-2xl font-bold"></p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-gray-500 text-sm">VAT (7%)</p>
-                            <p id="selected-total-vat" class="text-2xl font-bold"></p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-gray-500 text-sm">หัก ณ ที่จ่าย</p>
-                            <p id="selected-total-wht" class="text-2xl font-bold"></p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-gray-500 text-sm">รายจ่ายทั้งหมด</p>
-                            <p id="selected-total-expenses" class="text-2xl font-bold text-red-500"></p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-gray-500 text-sm">กำไร/ขาดทุน</p>
-                            <p id="selected-total-profit" class="text-2xl font-bold"></p>
+                    <!-- Container to display totals of selected jobs (admin only) -->
+                    <div id="selected-job-totals" class="hidden mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 bg-gray-50 p-4 rounded-lg">
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">รายรับ</p>
+                                <p id="selected-total-income" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">VAT (7%)</p>
+                                <p id="selected-total-vat" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">หัก ณ ที่จ่าย</p>
+                                <p id="selected-total-wht" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">รายจ่ายทั้งหมด</p>
+                                <p id="selected-total-expense" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-500">กำไร/ขาดทุน</p>
+                                <p id="selected-total-profit" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                            </div>
                         </div>
                     </div>
                     <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
@@ -571,11 +563,25 @@
             </div>
 
             <div id="member-summary-container" class="hidden">
-                 <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
-                    <div id="member-financial-filters" class="flex items-center p-1 bg-gray-200 rounded-lg">
-                        <button data-status="all" class="px-4 py-1 text-sm font-semibold rounded-md active">รายการทั้งหมด</button>
-                        <button data-status="paid" class="px-4 py-1 text-sm font-semibold rounded-md">รับเงินแล้ว</button>
-                        <button data-status="unpaid" class="px-4 py-1 text-sm font-semibold rounded-md">ยังไม่ได้รับเงิน</button>
+                <!-- Summary statistics for member financial overview -->
+                <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
+                    <div id="member-summary-stats" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-500">BG ทั้งหมด</p>
+                            <p id="member-total-wage-stat" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-500">รับเงินแล้ว</p>
+                            <p id="member-total-paid-stat" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-500">ยังไม่ได้รับเงิน</p>
+                            <p id="member-total-unpaid-stat" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-500">หัก ณ ที่จ่าย</p>
+                            <p id="member-total-wht-stat" class="mt-1 text-lg font-bold text-gray-700">0</p>
+                        </div>
                     </div>
                 </section>
                 <section>
@@ -695,13 +701,13 @@
                         </button>
                     </div>
                 </form>
+                <!-- Button to access the Line Bot management page (moved from nav) -->
+                <div class="mt-6">
+                    <button id="line-bot-button" class="px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors flex items-center">
+                        <i class="ph ph-robot"></i><span class="hidden md:inline ml-1">แชทบอทไลน์</span>
+                    </button>
+                </div>
             </section>
-            <!-- ปุ่มสำหรับเปิดหน้าแชทบอทไลน์ ซึ่งย้ายมาจากเมนูหลัก -->
-            <div class="flex justify-end mt-6">
-                <button id="line-bot-button" type="button" class="px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors admin-only">
-                    <i class="ph ph-robot mr-1"></i><span class="hidden md:inline"> แชทบอทไลน์</span>
-                </button>
-            </div>
         </div>
 
         <div id="line-bot-view" class="hidden p-4 sm:p-6 lg:p-8">
@@ -764,99 +770,100 @@
             </div>
         </div>
 
-        <!-- Tax management view for admins -->
-        <div id="tax-management-view" class="hidden p-4 sm:p-6 lg:p-8">
-            <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">จัดการภาษี</h1>
-                    <p class="mt-1 text-gray-500">ดูและจัดการภาษีสำหรับคิวงาน</p>
-                </div>
-                <button id="back-to-financial-from-tax-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
-                    <i class="ph ph-arrow-left mr-1"></i> กลับ
-                </button>
-            </header>
-            <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div id="tax-filter" class="flex items-center gap-2">
-                        <select id="tax-month" class="p-2 border rounded-lg"></select>
-                        <select id="tax-year" class="p-2 border rounded-lg"></select>
-                    </div>
-                    <button id="tax-search-button" class="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-200 hover:bg-gray-300">
-                        ค้นหา
-                    </button>
-                </div>
-            </section>
-            <section>
-                <h2 class="text-2xl font-semibold mb-4">รายการคิวงาน</h2>
-                <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายรับ</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">แนบไฟล์ (50 ทวิ)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tax-management-table-body" class="bg-white divide-y divide-gray-200">
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
+    </div>
 
-        <!-- Withholding tax view for team members -->
-        <div id="withholding-view" class="hidden p-4 sm:p-6 lg:p-8">
-            <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">หัก ณ ที่จ่าย</h1>
-                    <p class="mt-1 text-gray-500">ข้อมูลการหักภาษี ณ ที่จ่ายของคุณ</p>
-                </div>
-                <button id="back-to-financial-from-wht-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
-                    <i class="ph ph-arrow-left mr-1"></i> กลับ
-                </button>
-            </header>
-            <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div id="wht-filter" class="flex items-center gap-2">
+    <!-- Withholding tax view for team members -->
+    <div id="withholding-view" class="hidden p-4 sm:p-6 lg:p-8">
+         <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">หัก ณ ที่จ่าย</h1>
+                <p class="mt-1 text-gray-500">รายละเอียดการหัก ณ ที่จ่ายของคุณ</p>
+            </div>
+            <button id="back-to-financial-from-wht-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="ph ph-arrow-left mr-1"></i> กลับ
+            </button>
+         </header>
+         <!-- Filter and ID card upload -->
+         <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
+                <div class="flex flex-wrap items-end gap-4">
+                    <div>
+                        <label for="wht-month" class="text-sm font-medium text-gray-700">เดือน</label>
                         <select id="wht-month" class="p-2 border rounded-lg"></select>
+                    </div>
+                    <div>
+                        <label for="wht-year" class="text-sm font-medium text-gray-700">ปี</label>
                         <select id="wht-year" class="p-2 border rounded-lg"></select>
                     </div>
-                    <button id="wht-search-button" class="px-4 py-2 text-sm font-semibold rounded-lg bg-gray-200 hover:bg-gray-300">
+                    <button id="wht-search-btn" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
                         ค้นหา
                     </button>
                 </div>
-            </section>
-            <section>
-                <h2 class="text-2xl font-semibold mb-4">รายละเอียด</h2>
-                <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">BG</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">50 ทวิ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="wht-table-body" class="bg-white divide-y divide-gray-200"></tbody>
-                    </table>
-                </div>
-            </section>
-            <section class="mt-6 p-4 bg-white rounded-2xl shadow-lg">
-                <h2 class="text-xl font-semibold mb-4">อัปโหลดสำเนาบัตรประชาชน (สำหรับหัก ณ ที่จ่าย)</h2>
-                <div class="flex items-center space-x-4">
-                    <img id="wht-idcard-preview" src="https://placehold.co/120x80/E2E8F0/4A5568?text=ID+Card" class="w-32 h-20 rounded-md object-cover border-2 border-gray-200">
-                    <div>
-                        <label for="wht-idcard-file" class="cursor-pointer text-sm text-indigo-600 font-semibold hover:text-indigo-800">เลือกไฟล์รูปภาพ</label>
-                        <input type="file" id="wht-idcard-file" accept="image/*" class="hidden"/>
-                        <p id="wht-idcard-filename" class="text-xs text-gray-500 mt-1"></p>
-                    </div>
-                </div>
-            </section>
-        </div>
+         </section>
+         <!-- Table -->
+         <section>
+            <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">BG</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ดาวน์โหลด</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wht-report-body" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-center">
+                <button id="wht-expand-btn" class="hidden px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">ขยายเพิ่มเติม</button>
+            </div>
+         </section>
+    </div>
 
+    <!-- Tax management view for admin -->
+    <div id="tax-management-view" class="hidden p-4 sm:p-6 lg:p-8">
+         <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">จัดการภาษี</h1>
+                <p class="mt-1 text-gray-500">รายงานภาษีหัก ณ ที่จ่าย</p>
+            </div>
+            <button id="back-to-financial-from-tax-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="ph ph-arrow-left mr-1"></i> กลับ
+            </button>
+         </header>
+         <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
+            <div class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label for="tax-month" class="text-sm font-medium text-gray-700">เดือน</label>
+                    <select id="tax-month" class="p-2 border rounded-lg"></select>
+                </div>
+                <div>
+                    <label for="tax-year" class="text-sm font-medium text-gray-700">ปี</label>
+                    <select id="tax-year" class="p-2 border rounded-lg"></select>
+                </div>
+                <button id="tax-search-btn" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                    ค้นหา
+                </button>
+            </div>
+         </section>
+         <section>
+            <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายรับ</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">VAT</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายจ่าย</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">กำไร/ขาดทุน</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tax-report-body" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+         </section>
     </div>
 
     <footer class="text-center p-4 text-xs text-gray-500 mt-auto">
@@ -1600,8 +1607,9 @@
             document.getElementById('summary-total-cost').textContent = `${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} บาท`;
             
             const profitLossEl = document.getElementById('summary-profit-loss');
-            // Display profit/loss with the currency on a new line for better readability
-            profitLossEl.innerHTML = `${profitLoss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br><span>บาท</span>`;
+            // Display profit/loss with "บาท" on a new line and center-align
+            profitLossEl.innerHTML = `<span class="block">${profitLoss.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span><span class="block text-base">บาท</span>`;
+            profitLossEl.style.textAlign = 'center';
             profitLossEl.className = `font-bold mt-2 ${profitLoss >= 0 ? 'text-5xl profit-text' : 'text-4xl loss-text'}`;
             document.getElementById('profit-loss-label').textContent = profitLoss >= 0 ? 'กำไร' : 'ขาดทุน';
         }
@@ -1808,7 +1816,7 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
-        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-bot-button', 'tax-management-button', 'withholding-button', 'back-to-financial-from-tax-btn', 'back-to-financial-from-wht-btn'].forEach(id => {
+        ['add-job-button', 'add-member-button', 'add-day-button', 'add-expense-button', 'edit-budget-btn', 'edit-job-details-btn', 'manage-profile-button', 'manage-all-users-button', 'save-image-btn', 'financial-summary-button', 'back-to-main-app-btn', 'notifications-button', 'filter-my-jobs', 'filter-all-jobs', 'system-settings-button', 'line-bot-button', 'tax-management-button', 'withholding-button'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (id === 'filter-my-jobs') {
@@ -1835,6 +1843,8 @@
                             case 'manage-all-users-button': showUserManagementModal(); break;
                             case 'system-settings-button': showSettingsView(); break;
                             case 'line-bot-button': showLineBotView(); break;
+                            case 'tax-management-button': showTaxManagementView(); break;
+                            case 'withholding-button': showWithholdingView(); break;
                             case 'save-image-btn':
                                 const captureArea = document.getElementById('capture-area');
                                 if (captureArea) {
@@ -1848,22 +1858,6 @@
                                 break;
                             case 'notifications-button':
                                 showNotificationsModal();
-                                break;
-                            case 'tax-management-button':
-                                showTaxManagementView();
-                                break;
-                            case 'withholding-button':
-                                showWithholdingView();
-                                break;
-                            case 'back-to-financial-from-tax-btn':
-                                // Hide tax management view and return to financial summary
-                                document.getElementById('tax-management-view').classList.add('hidden');
-                                showFinancialSummaryView();
-                                break;
-                            case 'back-to-financial-from-wht-btn':
-                                // Hide withholding view and return to financial summary
-                                document.getElementById('withholding-view').classList.add('hidden');
-                                showFinancialSummaryView();
                                 break;
                         }
                     });
@@ -1880,6 +1874,30 @@
             document.getElementById('line-bot-view').classList.add('hidden');
             mainApp.classList.remove('hidden');
         });
+
+        // Back buttons for withholding and tax management views
+        const backWhtBtn = document.getElementById('back-to-financial-from-wht-btn');
+        if (backWhtBtn) {
+            backWhtBtn.addEventListener('click', () => {
+                document.getElementById('withholding-view').classList.add('hidden');
+                document.getElementById('financial-summary-view').classList.remove('hidden');
+            });
+        }
+
+        // Attach search button listener for withholding view
+        const whtSearchBtn = document.getElementById('wht-search-btn');
+        if (whtSearchBtn) {
+            whtSearchBtn.addEventListener('click', () => {
+                generateWithholdingReport();
+            });
+        }
+        const backTaxBtn = document.getElementById('back-to-financial-from-tax-btn');
+        if (backTaxBtn) {
+            backTaxBtn.addEventListener('click', () => {
+                document.getElementById('tax-management-view').classList.add('hidden');
+                document.getElementById('financial-summary-view').classList.remove('hidden');
+            });
+        }
 
         document.getElementById('settings-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -2007,23 +2025,34 @@
             document.getElementById('line-bot-view').classList.add('hidden');
             document.getElementById('financial-summary-view').classList.remove('hidden');
 
+            // Show the appropriate summary containers based on role and generate report
             if (currentUserRole === 'admin') {
                 document.getElementById('admin-summary-container').classList.remove('hidden');
                 document.getElementById('member-summary-container').classList.add('hidden');
-                setupFinancialFilters();
-                generateFinancialReport();
-                // Hide WHT button for admins
-                const whtBtn = document.getElementById('withholding-button');
-                if (whtBtn) whtBtn.classList.add('hidden');
             } else {
                 document.getElementById('admin-summary-container').classList.add('hidden');
                 document.getElementById('member-summary-container').classList.remove('hidden');
-                setupFinancialFilters(); // Also setup for members
-                setupMemberFinancialFilters();
-                generateFinancialReport();
-                // Show WHT button for members
-                const whtBtn = document.getElementById('withholding-button');
-                if (whtBtn) whtBtn.classList.remove('hidden');
+            }
+            // Always set up month/year filters
+            setupFinancialFilters();
+            // Do not set up member financial filters as the filter bar has been removed
+            generateFinancialReport();
+            // Toggle visibility of withholding and tax management buttons based on user role
+            const whtButtonEl = document.getElementById('withholding-button');
+            const taxButtonEl = document.getElementById('tax-management-button');
+            if (whtButtonEl) {
+                if (currentUserRole === 'admin') {
+                    whtButtonEl.classList.add('hidden');
+                } else {
+                    whtButtonEl.classList.remove('hidden');
+                }
+            }
+            if (taxButtonEl) {
+                if (currentUserRole === 'admin') {
+                    taxButtonEl.classList.remove('hidden');
+                } else {
+                    taxButtonEl.classList.add('hidden');
+                }
             }
         }
         
@@ -2215,7 +2244,10 @@
                            ${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-red-500">${jobTotalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right ${profit >= 0 ? 'profit-text' : 'loss-text'}">${profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right ${profit >= 0 ? 'profit-text' : 'loss-text'}">
+                            <span class="block">${profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span class="block text-xs">บาท</span>
+                        </td>
                     </tr>
                 `;
 
@@ -2235,6 +2267,22 @@
                     }
                 });
             });
+
+            // Attach change listeners to job selection checkboxes to update the selected job totals
+            document.querySelectorAll('.job-select-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateSelectedJobTotals);
+            });
+            // Attach change listener for the select-all checkbox
+            const selectAllCb = document.getElementById('select-all-jobs-checkbox');
+            if (selectAllCb) {
+                selectAllCb.addEventListener('change', (e) => {
+                    const checked = e.target.checked;
+                    document.querySelectorAll('.job-select-checkbox').forEach(cb => {
+                        cb.checked = checked;
+                    });
+                    updateSelectedJobTotals();
+                });
+            }
 
             document.querySelectorAll('.job-summary-row').forEach(row => {
                  // Clicking anywhere on the row except the checkbox
@@ -2257,17 +2305,6 @@
             document.getElementById('total-expense-summary').textContent = totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('total-profit-summary').textContent = totalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('total-profit-summary').className = `px-6 py-4 text-right font-bold ${totalProfit >= 0 ? 'profit-text' : 'loss-text'}`;
-
-            // Attach change events for job selection to update selected totals
-            document.querySelectorAll('.job-select-checkbox').forEach(cb => {
-                cb.addEventListener('change', updateSelectedJobTotals);
-            });
-            const selectAllCb = document.getElementById('select-all-jobs-checkbox');
-            if (selectAllCb) {
-                selectAllCb.addEventListener('change', updateSelectedJobTotals);
-            }
-            // Initialize selected totals on page load
-            updateSelectedJobTotals();
 
             let totalWages = 0;
             const sortedUsers = Object.keys(userWages).sort((a,b) => userWages[b].total - userWages[a].total);
@@ -2379,57 +2416,64 @@
         function generateMemberReport(jobs) {
             const memberWageBody = document.getElementById('member-wage-table-body');
             memberWageBody.innerHTML = '';
-            let totalWage = 0, totalPaid = 0, totalUnpaid = 0, totalWht = 0;
+            // Totals for net wages (after withholding), paid, unpaid and withholding tax
+            let totalNetWage = 0, totalPaid = 0, totalUnpaid = 0, totalWht = 0;
 
-            let memberJobs = jobs.filter(job => job.team.some(m => m.userId === currentUser.uid));
-            
-            // Apply status filter
-            if (memberFinancialFilter === 'paid') {
-                memberJobs = memberJobs.filter(job => {
-                    const myTeamData = job.team.find(m => m.userId === currentUser.uid);
-                    return myTeamData && myTeamData.isPaid;
-                });
-            } else if (memberFinancialFilter === 'unpaid') {
-                 memberJobs = memberJobs.filter(job => {
-                    const myTeamData = job.team.find(m => m.userId === currentUser.uid);
-                    return myTeamData && !myTeamData.isPaid;
-                });
-            }
-
+            // Get only jobs where the current user is part of the team
+            const memberJobs = jobs.filter(job => job.team.some(m => m.userId === currentUser.uid));
 
             memberJobs.forEach(job => {
                 const myTeamData = job.team.find(m => m.userId === currentUser.uid);
                 if (myTeamData) {
+                    // Calculate gross wage based on workdays
                     const wage = calculateTeamCostForMember(myTeamData, job.workdays);
-                    const whtAmount = myTeamData.whtEnabled ? (wage * (appSettings.whtPercent / 100)) : 0;
-                    const paidAmount = myTeamData.isPaid ? wage : 0;
-                    const unpaidAmount = !myTeamData.isPaid ? wage : 0;
-                    
-                    totalWage += wage;
+                    // Determine withholding percentage: use job-specific whtPercent if set, otherwise global setting
+                    const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
+                    const whtAmount = myTeamData.whtEnabled ? (wage * (whtPercentValue / 100)) : 0;
+                    // Net wage after withholding
+                    const netWage = wage - whtAmount;
+                    // Determine amounts that have been paid/unpaid to the member
+                    const paidAmount = myTeamData.isPaid ? netWage : 0;
+                    const unpaidAmount = !myTeamData.isPaid ? netWage : 0;
+
+                    // Accumulate totals
+                    totalNetWage += netWage;
                     totalPaid += paidAmount;
                     totalUnpaid += unpaidAmount;
                     totalWht += whtAmount;
 
                     const jobMonth = new Date(job.startDate).toLocaleDateString('th-TH', { month: 'short' });
-                    
+
+                    // Append table row with net wage and withholding information
                     memberWageBody.innerHTML += `
                         <tr class="cursor-pointer hover:bg-gray-100 member-job-summary-row" data-id="${job.id}">
                             <td class="px-6 py-4 whitespace-nowrap">${job.name} <span class="text-xs text-gray-400">(${jobMonth})</span></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${wage.toLocaleString()}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right font-semibold">${netWage.toLocaleString()}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right profit-text">${paidAmount > 0 ? paidAmount.toLocaleString() : '-'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right loss-text">${unpaidAmount > 0 ? unpaidAmount.toLocaleString() : '-'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount > 0 ? whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount > 0 ? whtAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
                         </tr>
                     `;
                 }
             });
 
-            document.getElementById('member-total-wage-summary').textContent = totalWage.toLocaleString();
-            document.getElementById('member-total-paid-summary').textContent = totalPaid.toLocaleString();
-            document.getElementById('member-total-unpaid-summary').textContent = totalUnpaid.toLocaleString();
-            document.getElementById('member-total-wht-summary').textContent = totalWht.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            // Update summary totals in the new stats bar
+            document.getElementById('member-total-wage-stat').textContent = totalNetWage.toLocaleString();
+            document.getElementById('member-total-paid-stat').textContent = totalPaid.toLocaleString();
+            document.getElementById('member-total-unpaid-stat').textContent = totalUnpaid.toLocaleString();
+            document.getElementById('member-total-wht-stat').textContent = totalWht.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+            // Update summary totals in the table footer (for compatibility)
+            const wageSummaryEl = document.getElementById('member-total-wage-summary');
+            const paidSummaryEl = document.getElementById('member-total-paid-summary');
+            const unpaidSummaryEl = document.getElementById('member-total-unpaid-summary');
+            const whtSummaryEl = document.getElementById('member-total-wht-summary');
+            if (wageSummaryEl) wageSummaryEl.textContent = totalNetWage.toLocaleString();
+            if (paidSummaryEl) paidSummaryEl.textContent = totalPaid.toLocaleString();
+            if (unpaidSummaryEl) unpaidSummaryEl.textContent = totalUnpaid.toLocaleString();
+            if (whtSummaryEl) whtSummaryEl.textContent = totalWht.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+            // Attach click listeners to rows to navigate to job details
             document.querySelectorAll('.member-job-summary-row').forEach(row => {
                 row.addEventListener('click', () => {
                     const jobId = row.dataset.id;
@@ -2438,6 +2482,58 @@
                     selectJob(jobId);
                 });
             });
+        }
+
+        /**
+         * Update the totals summary displayed above the admin job summary table based on selected jobs.
+         */
+        function updateSelectedJobTotals() {
+            const selectedCbs = document.querySelectorAll('.job-select-checkbox:checked');
+            const totalsContainer = document.getElementById('selected-job-totals');
+            if (!totalsContainer) return;
+            // If no jobs are selected, hide the container and reset values
+            if (selectedCbs.length === 0) {
+                totalsContainer.classList.add('hidden');
+                document.getElementById('selected-total-income').textContent = '0';
+                document.getElementById('selected-total-vat').textContent = '0';
+                document.getElementById('selected-total-wht').textContent = '0';
+                document.getElementById('selected-total-expense').textContent = '0';
+                document.getElementById('selected-total-profit').textContent = '0';
+                return;
+            }
+            // Initialize sums
+            let sumIncome = 0;
+            let sumVat = 0;
+            let sumWht = 0;
+            let sumExpense = 0;
+            let sumProfit = 0;
+            // Compute totals for each selected job
+            selectedCbs.forEach(cb => {
+                const jobId = cb.dataset.id;
+                const job = allJobs.find(j => j.id === jobId);
+                if (job) {
+                    const teamCost = job.team.reduce((total, member) => total + calculateTeamCostForMember(member, job.workdays), 0);
+                    const otherExpenses = (job.expenses || []).reduce((total, expense) => total + expense.amount, 0);
+                    const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
+                    const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
+                    const vatAmount = job.vatEnabled ? (job.income * 0.07) : 0;
+                    const jobExpenses = teamCost + otherExpenses;
+                    const profit = (job.income - vatAmount) - jobExpenses - whtAmount;
+                    sumIncome += job.income;
+                    sumVat += vatAmount;
+                    sumWht += whtAmount;
+                    sumExpense += jobExpenses;
+                    sumProfit += profit;
+                }
+            });
+            // Update DOM
+            document.getElementById('selected-total-income').textContent = sumIncome.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('selected-total-vat').textContent = sumVat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('selected-total-wht').textContent = sumWht.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('selected-total-expense').textContent = sumExpense.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('selected-total-profit').textContent = sumProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            // Show container
+            totalsContainer.classList.remove('hidden');
         }
 
         function calculateTeamCostForMember(member, workdays) {
@@ -2912,49 +3008,29 @@
             const idCardUrl = currentUserData.idCardCopyUrl || '';
             const banks = ['พร้อมเพย์', 'ธนาคารกรุงเทพ', 'ธนาคารกสิกรไทย', 'ธนาคารกรุงไทย', 'ธนาคารไทยพาณิชย์', 'ธนาคารกรุงศรีอยุธยา', 'ธนาคารทหารไทยธนชาต', 'ธนาคารออมสิน', 'ธ.ก.ส.', 'ธนาคารยูโอบี', 'ธนาคารซีไอเอ็มบีไทย'];
             const bankOptions = banks.map(b => `<option value="${b}" ${b === bankInfo.bank ? 'selected' : ''}>${b}</option>`).join('');
+            // Create the modal content without the ID card upload section (moved to the withholding page)
             const content = `
                 <label>ชื่อบัญชี</label><input type="text" name="accountName" class="w-full p-2 border rounded" value="${bankInfo.name || ''}">
                 <label>ธนาคาร</label><select name="bankName" class="w-full p-2 border rounded">${bankOptions}</select>
                 <label>หมายเลขบัญชี</label><input type="text" name="accountNumber" class="w-full p-2 border rounded" value="${bankInfo.number || ''}">
-                <!-- Upload of ID card for withholding tax has been moved to the dedicated WHT page -->
             `;
             showModal('ข้อมูลบัญชีธนาคาร', content, async (formData, submitButton, modal) => {
                 submitButton.disabled = true;
                 submitButton.textContent = 'กำลังบันทึก...';
-
-                const idCardFile = formData.get('idCardFile');
-                let newIdCardUrl = idCardUrl;
-                if (idCardFile && idCardFile.size > 0) {
-                    newIdCardUrl = await uploadToCloudinary(idCardFile) || newIdCardUrl;
-                }
 
                 const updatedBankAccount = {
                     name: formData.get('accountName'),
                     bank: formData.get('bankName'),
                     number: formData.get('accountNumber')
                 };
+                // Save only the bank account information; ID card upload handled elsewhere
                 await updateDoc(doc(db, "users", currentUser.uid), { 
-                    bankAccount: updatedBankAccount,
-                    idCardCopyUrl: newIdCardUrl
+                    bankAccount: updatedBankAccount
                 });
                 currentUserData.bankAccount = updatedBankAccount;
-                currentUserData.idCardCopyUrl = newIdCardUrl;
                 alert('บันทึกข้อมูลบัญชีธนาคารเรียบร้อยแล้ว');
                 modal.remove();
-            }, true, (modal) => {
-                // If the ID card upload field exists (it has been moved to the WHT page), set up preview handling
-                const fileInput = modal.querySelector('#idCardFile');
-                if (fileInput) {
-                    const previewImg = modal.querySelector('#id-card-preview');
-                    const filenameP = modal.querySelector('#id-card-filename');
-                    fileInput.onchange = (e) => {
-                        if (e.target.files && e.target.files[0]) {
-                            previewImg.src = URL.createObjectURL(e.target.files[0]);
-                            filenameP.textContent = e.target.files[0].name;
-                        }
-                    };
-                }
-            });
+            }, true, () => {});
         }
 
 
@@ -3062,222 +3138,6 @@
                 option.value = job.id;
                 option.textContent = job.name;
                 jobSelect.appendChild(option);
-            });
-        }
-
-        /**
-         * Update the totals displayed above the job summary table based on selected jobs.
-         * Computes total income, VAT, withholding tax, total expenses and profit for the selected jobs.
-         * Shows the totals container when at least one job is selected; hides it otherwise.
-         */
-        function updateSelectedJobTotals() {
-            const selectedCbs = document.querySelectorAll('.job-select-checkbox:checked');
-            const container = document.getElementById('selected-job-totals');
-            if (!container) return;
-            if (selectedCbs.length === 0) {
-                container.classList.add('hidden');
-                return;
-            }
-            let totalIncome = 0;
-            let totalVat = 0;
-            let totalWht = 0;
-            let totalExpenses = 0;
-            let totalProfit = 0;
-            selectedCbs.forEach(cb => {
-                const jobId = cb.dataset.id;
-                const job = allJobs.find(j => j.id === jobId);
-                if (!job) return;
-                // Calculate team cost
-                const teamCost = job.team.reduce((sum, member) => {
-                    return sum + calculateTeamCostForMember(member, job.workdays);
-                }, 0);
-                const otherExpenses = (job.expenses || []).reduce((sum, exp) => sum + exp.amount, 0);
-                const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
-                const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
-                const vatAmount = job.vatEnabled ? (job.income * 0.07) : 0;
-                const jobTotalExpenses = teamCost + otherExpenses;
-                const profit = (job.income - vatAmount) - jobTotalExpenses - whtAmount;
-                totalIncome += job.income;
-                totalVat += vatAmount;
-                totalWht += whtAmount;
-                totalExpenses += jobTotalExpenses;
-                totalProfit += profit;
-            });
-            // Update fields
-            const incomeEl = document.getElementById('selected-total-income');
-            const vatEl = document.getElementById('selected-total-vat');
-            const whtEl = document.getElementById('selected-total-wht');
-            const expensesEl = document.getElementById('selected-total-expenses');
-            const profitEl = document.getElementById('selected-total-profit');
-            if (incomeEl) incomeEl.textContent = totalIncome.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            if (vatEl) vatEl.textContent = totalVat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            if (whtEl) whtEl.textContent = totalWht.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            if (expensesEl) expensesEl.textContent = totalExpenses.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            if (profitEl) {
-                profitEl.textContent = totalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                profitEl.className = `text-2xl font-bold ${totalProfit >= 0 ? 'profit-text' : 'loss-text'}`;
-            }
-            container.classList.remove('hidden');
-        }
-
-        /**
-         * Populate month and year selects for tax and WHT views.
-         * @param {HTMLElement} monthSelect - the select element for months
-         * @param {HTMLElement} yearSelect - the select element for years
-         */
-        function populateMonthYearSelects(monthSelect, yearSelect) {
-            if (!monthSelect || !yearSelect) return;
-            // Populate months in Thai
-            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            monthSelect.innerHTML = '';
-            months.forEach((month, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = month;
-                monthSelect.appendChild(option);
-            });
-            // Populate years from current year down to 3 years ago
-            yearSelect.innerHTML = '';
-            const currentYear = new Date().getFullYear();
-            for (let y = currentYear; y >= currentYear - 3; y--) {
-                const option = document.createElement('option');
-                option.value = y;
-                option.textContent = y.toString();
-                yearSelect.appendChild(option);
-            }
-            // Default to current month/year
-            monthSelect.value = new Date().getMonth();
-            yearSelect.value = currentYear;
-        }
-
-        /**
-         * Show the tax management view. Hides other views and populates the tax table.
-         */
-        function showTaxManagementView() {
-            mainApp.classList.add('hidden');
-            document.getElementById('financial-summary-view').classList.add('hidden');
-            document.getElementById('settings-view').classList.add('hidden');
-            document.getElementById('line-bot-view').classList.add('hidden');
-            document.getElementById('withholding-view').classList.add('hidden');
-            const taxView = document.getElementById('tax-management-view');
-            taxView.classList.remove('hidden');
-            // Populate month/year filters
-            populateMonthYearSelects(document.getElementById('tax-month'), document.getElementById('tax-year'));
-            // Generate report initially
-            generateTaxManagementReport();
-            // Set up search button
-            const searchBtn = document.getElementById('tax-search-button');
-            if (searchBtn) {
-                searchBtn.onclick = () => generateTaxManagementReport();
-            }
-        }
-
-        /**
-         * Generate the tax management report table for admins.
-         * Filters jobs by selected month and year, computes withheld amounts and populates the table.
-         */
-        function generateTaxManagementReport() {
-            const monthSelect = document.getElementById('tax-month');
-            const yearSelect = document.getElementById('tax-year');
-            const tableBody = document.getElementById('tax-management-table-body');
-            if (!tableBody) return;
-            tableBody.innerHTML = '';
-            const selectedMonth = parseInt(monthSelect.value);
-            const selectedYear = parseInt(yearSelect.value);
-            // Filter jobs by month/year of startDate
-            const filteredJobs = allJobs.filter(job => {
-                const jobDate = new Date(job.startDate);
-                return jobDate.getMonth() === selectedMonth && jobDate.getFullYear() === selectedYear;
-            });
-            filteredJobs.forEach(job => {
-                const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
-                const whtAmount = job.whtEnabled ? (job.income * whtPercentValue / 100) : 0;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">${job.income.toLocaleString()}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <button class="text-indigo-600 hover:underline" onclick="alert('ฟังก์ชันแนบไฟล์อยู่ระหว่างพัฒนา');">
-                            <i class="ph ph-paperclip"></i>
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        /**
-         * Show the withholding tax view for the current user. Hides other views and populates the table.
-         */
-        function showWithholdingView() {
-            mainApp.classList.add('hidden');
-            document.getElementById('financial-summary-view').classList.add('hidden');
-            document.getElementById('settings-view').classList.add('hidden');
-            document.getElementById('line-bot-view').classList.add('hidden');
-            document.getElementById('tax-management-view').classList.add('hidden');
-            const view = document.getElementById('withholding-view');
-            view.classList.remove('hidden');
-            // Populate month/year filters
-            populateMonthYearSelects(document.getElementById('wht-month'), document.getElementById('wht-year'));
-            generateWithholdingReport();
-            const searchBtn = document.getElementById('wht-search-button');
-            if (searchBtn) {
-                searchBtn.onclick = () => generateWithholdingReport();
-            }
-            // Set up id card upload preview
-            const fileInput = document.getElementById('wht-idcard-file');
-            if (fileInput) {
-                fileInput.onchange = (e) => {
-                    const preview = document.getElementById('wht-idcard-preview');
-                    const fname = document.getElementById('wht-idcard-filename');
-                    if (e.target.files && e.target.files[0]) {
-                        preview.src = URL.createObjectURL(e.target.files[0]);
-                        fname.textContent = e.target.files[0].name;
-                    }
-                };
-            }
-        }
-
-        /**
-         * Generate the withholding tax table for the current member.
-         * Filters jobs by selected month/year and calculates BG, withholding and remaining amounts for the user.
-         */
-        function generateWithholdingReport() {
-            const monthSelect = document.getElementById('wht-month');
-            const yearSelect = document.getElementById('wht-year');
-            const tableBody = document.getElementById('wht-table-body');
-            if (!tableBody) return;
-            tableBody.innerHTML = '';
-            const selectedMonth = parseInt(monthSelect.value);
-            const selectedYear = parseInt(yearSelect.value);
-            // Filter jobs by month/year where current user is a team member
-            const userId = currentUser.uid;
-            const relevantJobs = allJobs.filter(job => {
-                const jobDate = new Date(job.startDate);
-                const isMember = job.team.some(m => m.userId === userId);
-                return isMember && jobDate.getMonth() === selectedMonth && jobDate.getFullYear() === selectedYear;
-            });
-            relevantJobs.forEach(job => {
-                const member = job.team.find(m => m.userId === userId);
-                if (!member) return;
-                const wage = calculateTeamCostForMember(member, job.workdays);
-                const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
-                const whtAmount = job.whtEnabled ? (wage * whtPercentValue / 100) : 0;
-                const remaining = wage - whtAmount;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">${wage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">${remaining.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <button class="text-indigo-600 hover:underline" onclick="alert('ดาวน์โหลดไฟล์ 50 ทวิ อยู่ระหว่างพัฒนา');">
-                            <i class="ph ph-download"></i>
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
             });
         }
 
@@ -3544,6 +3404,124 @@
             });
 
             alert('ปฏิเสธคำขอเรียบร้อยแล้ว');
+        }
+
+        /**
+         * Populate the month and year select inputs on the withholding view
+         */
+        function populateWhtMonthYearSelect() {
+            const monthSelect = document.getElementById('wht-month');
+            const yearSelect = document.getElementById('wht-year');
+            if (!monthSelect || !yearSelect) return;
+            // Clear existing options
+            monthSelect.innerHTML = '';
+            yearSelect.innerHTML = '';
+            // Month names in Thai short form
+            const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            monthNames.forEach((name, index) => {
+                const opt = document.createElement('option');
+                opt.value = index + 1;
+                opt.textContent = name;
+                monthSelect.appendChild(opt);
+            });
+            // Collect years from allJobs startDate; fallback to current year
+            const yearsSet = new Set();
+            if (Array.isArray(allJobs)) {
+                allJobs.forEach(job => {
+                    if (job.startDate) {
+                        const d = new Date(job.startDate);
+                        if (!isNaN(d)) yearsSet.add(d.getFullYear());
+                    }
+                });
+            }
+            if (yearsSet.size === 0) yearsSet.add(new Date().getFullYear());
+            const years = Array.from(yearsSet).sort((a, b) => b - a);
+            years.forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = year;
+                yearSelect.appendChild(opt);
+            });
+            // Default to current month/year
+            const now = new Date();
+            monthSelect.value = now.getMonth() + 1;
+            yearSelect.value = now.getFullYear();
+        }
+
+        /**
+         * Show the withholding tax view and generate the report
+         */
+        function showWithholdingView() {
+            // Hide other views
+            document.getElementById('financial-summary-view').classList.add('hidden');
+            const taxView = document.getElementById('tax-management-view');
+            if (taxView) taxView.classList.add('hidden');
+            // Populate month/year selects and generate report
+            populateWhtMonthYearSelect();
+            generateWithholdingReport();
+            // Show the withholding view
+            document.getElementById('withholding-view').classList.remove('hidden');
+        }
+
+        /**
+         * Generate the withholding tax report for the current user
+         * Displays a limited number of rows (20) initially and provides an expand button
+         */
+        function generateWithholdingReport() {
+            const bodyEl = document.getElementById('wht-report-body');
+            const expandBtn = document.getElementById('wht-expand-btn');
+            if (!bodyEl) return;
+            bodyEl.innerHTML = '';
+            // Get selected month/year values; convert to integers
+            const monthSel = document.getElementById('wht-month');
+            const yearSel = document.getElementById('wht-year');
+            const selectedMonth = monthSel ? parseInt(monthSel.value) : NaN;
+            const selectedYear = yearSel ? parseInt(yearSel.value) : NaN;
+            // Filter jobs where current user is on the team
+            const memberJobs = Array.isArray(allJobs) ? allJobs.filter(job => job.team && job.team.some(m => m.userId === currentUser.uid)) : [];
+            const rows = [];
+            memberJobs.forEach(job => {
+                if (!job.startDate) return;
+                const date = new Date(job.startDate);
+                if (!isNaN(date)) {
+                    const monthOk = isNaN(selectedMonth) || (date.getMonth() + 1) === selectedMonth;
+                    const yearOk = isNaN(selectedYear) || date.getFullYear() === selectedYear;
+                    if (monthOk && yearOk) {
+                        const myTeam = job.team.find(m => m.userId === currentUser.uid);
+                        if (!myTeam) return;
+                        const wage = calculateTeamCostForMember(myTeam, job.workdays);
+                        const whtPercentValue = job.whtPercent === undefined ? appSettings.whtPercent : job.whtPercent;
+                        const whtAmount = myTeam.whtEnabled ? (wage * (whtPercentValue / 100)) : 0;
+                        const net = wage - whtAmount;
+                        // Format row HTML
+                        const rowHTML = `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">${net.toLocaleString()}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount > 0 ? whtAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">${net.toLocaleString()}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center"><i class="ph ph-download-simple cursor-pointer text-blue-500"></i></td>
+                            </tr>
+                        `;
+                        rows.push(rowHTML);
+                    }
+                }
+            });
+            // Determine if we need to limit rows and show expand button
+            if (rows.length > 20) {
+                // Show only first 20 rows initially
+                bodyEl.innerHTML = rows.slice(0, 20).join('');
+                if (expandBtn) {
+                    expandBtn.classList.remove('hidden');
+                    expandBtn.onclick = () => {
+                        bodyEl.innerHTML = rows.join('');
+                        expandBtn.classList.add('hidden');
+                    };
+                }
+            } else {
+                bodyEl.innerHTML = rows.join('');
+                if (expandBtn) expandBtn.classList.add('hidden');
+            }
         }
 
     </script>
