@@ -217,6 +217,103 @@
             </section>
         </div>
 
+    <!-- Withholding tax list view for members -->
+    <div id="withholding-list-view" class="hidden p-4 sm:p-6 lg:p-8">
+        <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">รายการ หัก ณ ที่จ่าย (50 ทวิ)</h1>
+                <p class="mt-1 text-gray-500">สรุปคิวงานและภาษีหัก ณ ที่จ่ายของคุณ</p>
+            </div>
+            <button id="back-to-financial-from-wht-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="ph ph-arrow-left mr-1"></i> กลับ
+            </button>
+        </header>
+        <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
+            <div class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label for="member-wht-month" class="text-sm font-medium text-gray-700">เดือน</label>
+                    <select id="member-wht-month" class="p-2 border rounded-lg"></select>
+                </div>
+                <div>
+                    <label for="member-wht-year" class="text-sm font-medium text-gray-700">ปี</label>
+                    <select id="member-wht-year" class="p-2 border rounded-lg"></select>
+                </div>
+                <button id="member-wht-search-btn" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                    ค้นหา
+                </button>
+            </div>
+        </section>
+        <section>
+            <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายรับ (BG)</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">คงเหลือ</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ดาวน์โหลด</th>
+                        </tr>
+                    </thead>
+                    <tbody id="member-wht-table-body" class="bg-white divide-y divide-gray-200">
+                        <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูล</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Withholding tax management view for admin -->
+    <div id="wht-management-view" class="hidden p-4 sm:p-6 lg:p-8">
+         <header class="flex items-center justify-between pb-6 mb-6 border-b-2 border-gray-200">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">จัดการภาษี หัก ณ ที่จ่าย</h1>
+                <p class="mt-1 text-gray-500">รายการคิวงานที่มีการหักภาษี ณ ที่จ่าย</p>
+            </div>
+            <button id="back-to-financial-from-tax-btn" class="px-4 py-2 font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="ph ph-arrow-left mr-1"></i> กลับ
+            </button>
+         </header>
+         <section class="p-4 mb-6 bg-white rounded-2xl shadow-lg">
+            <div class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label for="admin-wht-month" class="text-sm font-medium text-gray-700">เดือน</label>
+                    <select id="admin-wht-month" class="p-2 border rounded-lg"></select>
+                </div>
+                <div>
+                    <label for="admin-wht-year" class="text-sm font-medium text-gray-700">ปี</label>
+                    <select id="admin-wht-year" class="p-2 border rounded-lg"></select>
+                </div>
+                <button id="admin-wht-search-btn" class="px-6 py-2 font-semibold text-white gradient-bg rounded-lg hover:opacity-90">
+                    ค้นหา
+                </button>
+                <button id="admin-wht-export-csv-btn" class="px-6 py-2 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    <i class="ph ph-download-simple"></i><span class="hidden md:inline ml-1">Export CSV</span>
+                </button>
+                <button id="admin-wht-export-pdf-btn" class="px-6 py-2 font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700">
+                    <i class="ph ph-file-pdf"></i><span class="hidden md:inline ml-1">Export PDF</span>
+                </button>
+            </div>
+         </section>
+         <section>
+            <div class="overflow-x-auto bg-white rounded-2xl shadow-lg">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่องาน</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">รายรับ (BG)</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">หัก ณ ที่จ่าย</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ดูหนังสือ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-wht-table-body" class="bg-white divide-y divide-gray-200">
+                        <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูล</td></tr>
+                    </tbody>
+                </table>
+            </div>
+         </section>
+    </div>
+
         <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-backdrop">
             <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-xl modal-content">
                 <div class="text-center">
@@ -665,9 +762,9 @@
                     <i class="ph ph-arrow-left mr-1"></i> กลับหน้าหลัก
                 </button>
             </header>
-            <section class="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
+            <section class="max-w-3xl mx-auto">
                 <form id="settings-form" class="space-y-6">
-                    <div>
+                    <div class="p-6 bg-gray-50 rounded-xl shadow border border-gray-200 mb-6">
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Favicon & OG Image</h3>
                         <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
                             <div class="flex flex-col items-center">
@@ -685,8 +782,8 @@
                         </div>
                     </div>
 
-                    <div>
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Cloudinary (สำหรับอัปโหลดรูป)</h3>
+                    <div class="p-6 bg-gray-50 rounded-xl shadow border border-gray-200 mb-6">
+                        <h3 class="text-lg font-medium text-gray-900">Cloudinary (สำหรับอัปโหลดรูป)</h3>
                          <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
                             <div>
                                 <label for="setting-cloudinary-name" class="block text-sm font-medium text-gray-700">Cloud Name</label>
@@ -698,7 +795,7 @@
                             </div>
                         </div>
                     </div>
-                     <div>
+                     <div class="p-6 bg-gray-50 rounded-xl shadow border border-gray-200 mb-6">
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Line Bot (Line OA)</h3>
                         <p class="mt-1 text-sm text-gray-500">ตั้งค่าสำหรับเชื่อมต่อ Line Official Account เพื่อส่งการแจ้งเตือน</p>
                         <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
@@ -716,11 +813,11 @@
                             <label for="setting-line-login-enabled" class="ml-3 block text-sm font-medium text-gray-700">เปิดใช้งานปุ่ม "เชื่อมต่อบัญชี Line" ในหน้าโปรไฟล์</label>
                         </div>
                     </div>
-                     <div>
+                     <div class="p-6 bg-gray-50 rounded-xl shadow border border-gray-200 mb-6">
                         <h3 class="text-lg font-medium leading-6 text-gray-900">Facebook Login</h3>
                         <p class="mt-1 text-sm text-gray-500">ตั้งค่าสำหรับการเข้าสู่ระบบด้วย Facebook</p>
                         <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-                            <div>
+                     <div>
                                 <label for="setting-facebook-app-id" class="block text-sm font-medium text-gray-700">App ID</label>
                                 <input type="text" name="facebookAppId" id="setting-facebook-app-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
@@ -742,10 +839,13 @@
                         </button>
                     </div>
                 </form>
-                <!-- Button to access the Line Bot management page (moved from nav) -->
-                <div class="mt-6">
-                    <button id="line-bot-button" class="px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors flex items-center">
-                        <i class="ph ph-robot"></i><span class="hidden md:inline ml-1">แชทบอทไลน์</span>
+                <!-- Additional buttons row -->
+                <div class="mt-8 flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                    <button id="line-bot-button" class="w-full md:w-auto px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center">
+                        <i class="ph ph-robot"></i><span class="ml-1">แชทบอทไลน์</span>
+                    </button>
+                    <button id="wht-form-settings-button" class="w-full md:w-auto px-4 py-2 font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center">
+                        <i class="ph ph-note-pencil"></i><span class="ml-1">ตั้งค่าแบบฟอร์ม หัก ณ ที่จ่าย</span>
                     </button>
                 </div>
             </section>
@@ -915,16 +1015,43 @@
         let financialFilter = '1m'; // '1m', '2m', '3m', '6m', '1y', 'all'
         let draggedItem = null;
         let appSettings = {
+            // เปอร์เซ็นต์หักภาษี ณ ที่จ่ายค่าเริ่มต้น (เช่น 3%)
             whtPercent: 3,
+            // รายละเอียดสำหรับ Cloudinary สำหรับอัปโหลดไฟล์ต่าง ๆ
             cloudinaryName: "dzs7zbikj",
             cloudinaryPreset: "UploadpresetsQ",
+            // ตั้งค่าการเชื่อมต่อ LINE BOT และ Facebook (ค่าดีฟอลต์)
             lineBotChannelAccessToken: "",
             lineBotChannelSecret: "",
             facebookAppId: "",
             facebookAppSecret: "",
+            // ตั้งค่า favicon และ og:image
             faviconUrl: "",
             ogImageUrl: "",
-            isLineLoginEnabled: true
+            // เปิด/ปิดฟังก์ชัน LINE Login
+            isLineLoginEnabled: true,
+            // --- เพิ่มการตั้งค่าสำหรับหนังสือรับรองภาษีหัก ณ ที่จ่าย ---
+            // เลขประจำตัวผู้เสียภาษีอากร (13 หลัก)
+            whtTaxId: "0435562000799",
+            // ชื่อบริษัทผู้มีหน้าที่หักภาษี
+            whtCompanyName: "บริษัท สิรสุภา คอร์ปอเรชั่น (ประเทศไทย) จำกัด",
+            // ที่อยู่ของบริษัท
+            whtCompanyAddress: "121/1 หมู่ที่ 5 ตำบลบ้านเดื่อ อำเภอเมืองหนองคาย จ.หนองคาย 43000",
+            // ประเภทแบบฟอร์ม (เช่น ภ.ด.ง.3)
+            whtFormType: "ภ.ด.ง.3",
+            // ประเภทเงินได้ที่ต้องไฮไลท์ (เช่น ค่าบริการ)
+            whtIncomeType: "ค่าบริการ",
+            // ตัวเลือกผู้จ่ายเงิน (1 = หัก ณ ที่จ่าย, 2 = ไม่หัก เป็นต้น)
+            whtPayerOption: "(1)",
+            // เคาน์เตอร์รันนัมเบอร์สำหรับเลขเล่มหนังสือและเลขหนังสือ (5 หลัก)
+            whtBookCounter: 1,
+            whtDocCounter: 1,
+            // ชื่อผู้จ่ายเงิน (แอดมิน) ที่จะไปแสดงในหนังสือ
+            whtSignerName: "",
+            // URL โลโก้บริษัทที่อัปโหลดไว้ (Cloudinary)
+            whtCompanyLogoUrl: "",
+            // URL ภาพพื้นหลัง/รูปแบบหนังสือ 50 ทวิ ที่ใช้เป็นเทมเพลตในการดาวน์โหลดใบรับรอง
+            whtFormImageUrl: ""
         };
 
         const publicView = document.getElementById('public-view');
@@ -1863,8 +1990,14 @@
                             case 'manage-all-users-button': showUserManagementModal(); break;
                             case 'system-settings-button': showSettingsView(); break;
                             case 'line-bot-button': showLineBotView(); break;
-                            case 'tax-management-button': showTaxManagementView(); break;
-                            case 'withholding-button': showWithholdingView(); break;
+                            case 'tax-management-button':
+                                // ผู้ดูแลจะเข้าสู่หน้าจัดการภาษีหัก ณ ที่จ่าย
+                                showWhtManagementView();
+                                break;
+                            case 'withholding-button':
+                                // สมาชิกจะเข้าสู่หน้า รายการหัก ณ ที่จ่าย
+                                showMemberWhtListView();
+                                break;
                             case 'save-image-btn':
                                 // Build a custom summary for the screenshot that omits monetary values.
                                 if (!currentJobData) return;
@@ -1945,28 +2078,707 @@
             mainApp.classList.remove('hidden');
         });
 
-        // Back buttons for withholding and tax management views
+        // Back buttons and search/export for withholding and tax management views (ใหม่)
         const backWhtBtn = document.getElementById('back-to-financial-from-wht-btn');
         if (backWhtBtn) {
             backWhtBtn.addEventListener('click', () => {
-                document.getElementById('withholding-view').classList.add('hidden');
-                document.getElementById('financial-summary-view').classList.remove('hidden');
-            });
-        }
-
-        // Attach search button listener for withholding view
-        const whtSearchBtn = document.getElementById('wht-search-btn');
-        if (whtSearchBtn) {
-            whtSearchBtn.addEventListener('click', () => {
-                generateWithholdingReport();
+                // ซ่อนหน้าแสดงรายการหัก ณ ที่จ่าย แล้วกลับไปที่สรุปบัญชี
+                document.getElementById('withholding-list-view').classList.add('hidden');
+                showFinancialSummaryView();
             });
         }
         const backTaxBtn = document.getElementById('back-to-financial-from-tax-btn');
         if (backTaxBtn) {
             backTaxBtn.addEventListener('click', () => {
-                document.getElementById('tax-management-view').classList.add('hidden');
-                document.getElementById('financial-summary-view').classList.remove('hidden');
+                // ซ่อนหน้า จัดการภาษี หัก ณ ที่จ่าย แล้วกลับไปที่สรุปบัญชี
+                document.getElementById('wht-management-view').classList.add('hidden');
+                showFinancialSummaryView();
             });
+        }
+        // Attach search button for member withholding list
+        const memberWhtSearchBtn = document.getElementById('member-wht-search-btn');
+        if (memberWhtSearchBtn) {
+            memberWhtSearchBtn.addEventListener('click', () => {
+                generateMemberWhtList();
+            });
+        }
+        // Attach search button for admin tax management
+        const adminWhtSearchBtn = document.getElementById('admin-wht-search-btn');
+        if (adminWhtSearchBtn) {
+            adminWhtSearchBtn.addEventListener('click', () => {
+                generateAdminWhtReport();
+            });
+        }
+        // Attach export buttons for admin
+        const adminExportCsvBtn = document.getElementById('admin-wht-export-csv-btn');
+        if (adminExportCsvBtn) {
+            adminExportCsvBtn.addEventListener('click', () => {
+                exportAdminWhtData();
+            });
+        }
+        const adminExportPdfBtn = document.getElementById('admin-wht-export-pdf-btn');
+        if (adminExportPdfBtn) {
+            adminExportPdfBtn.addEventListener('click', () => {
+                exportAdminWhtDataPdf();
+            });
+        }
+
+        /**
+         * แปลงตัวเลขเป็นตัวหนังสือภาษาไทย เพื่อใช้ในเอกสารหนังสือรับรอง
+         * รองรับเลขจนถึงหลักล้านและจุดทศนิยม (สตางค์)
+         */
+        function numberToThaiText(num) {
+            const numStr = (+num).toFixed(2);
+            const [intPart, decPart] = numStr.split('.');
+            const txtNumArr = ['ศูนย์','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'];
+            const txtDigitArr = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+            function readNumber(n) {
+                let result = '';
+                const len = n.length;
+                [...n].forEach((digit, idx) => {
+                    const num = parseInt(digit);
+                    if (num === 0) return;
+                    const pos = len - idx - 1;
+                    if (pos === 0 && num === 1 && len > 1) {
+                        result += 'เอ็ด';
+                    } else if (pos === 1 && num === 2) {
+                        result += 'ยี่';
+                    } else if (pos === 1 && num === 1) {
+                        result += '';
+                    } else {
+                        result += txtNumArr[num];
+                    }
+                    result += txtDigitArr[pos];
+                });
+                return result;
+            }
+            let bahtText = readNumber(intPart);
+            bahtText += 'บาท';
+            let satangText = '';
+            if (decPart && decPart !== '00') {
+                satangText = readNumber(decPart);
+                satangText += 'สตางค์';
+            } else {
+                satangText = 'ถ้วน';
+            }
+            return bahtText + satangText;
+        }
+
+        /**
+         * เติมตัวเลือกเดือน/ปี สำหรับหน้า รายการหัก ณ ที่จ่าย ของสมาชิก
+         * ดึงข้อมูลจาก allJobs เพื่อดูว่างานใดบ้างในช่วงปีใดเดือนใด
+         */
+        function populateWhtListMonthYearSelect() {
+            const monthSelect = document.getElementById('member-wht-month');
+            const yearSelect = document.getElementById('member-wht-year');
+            if (!monthSelect || !yearSelect) return;
+            // เคลียร์ค่าปัจจุบัน
+            monthSelect.innerHTML = '';
+            yearSelect.innerHTML = '';
+            const monthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+            monthNames.forEach((m, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx + 1;
+                opt.textContent = m;
+                monthSelect.appendChild(opt);
+            });
+            // รวบรวมปีจาก workdays ของทุกคิวงาน
+            const yearSet = new Set();
+            allJobs.forEach(job => {
+                if (!job.workdays || job.workdays.length === 0) return;
+                job.workdays.forEach(day => {
+                    const d = new Date(day);
+                    if (!isNaN(d)) yearSet.add(d.getFullYear());
+                });
+            });
+            // หากยังไม่มีปี ให้ใส่ปีปัจจุบัน
+            if (yearSet.size === 0) yearSet.add(new Date().getFullYear());
+            [...yearSet].sort((a,b) => a - b).forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            });
+            // ตั้งค่าเริ่มต้นเป็นเดือน/ปีปัจจุบัน
+            const now = new Date();
+            monthSelect.value = now.getMonth() + 1;
+            yearSelect.value = now.getFullYear();
+        }
+
+        /**
+         * สร้างตารางรายการหัก ณ ที่จ่ายสำหรับสมาชิกในเดือน/ปีที่เลือก
+         */
+        function generateMemberWhtList() {
+            const tableBody = document.getElementById('member-wht-table-body');
+            if (!tableBody) return;
+            tableBody.innerHTML = '';
+            const selectedMonth = parseInt(document.getElementById('member-wht-month').value);
+            const selectedYear = parseInt(document.getElementById('member-wht-year').value);
+            let rows = '';
+            let hasData = false;
+            allJobs.forEach(job => {
+                if (!job.workdays || !job.team) return;
+                // ตรวจสอบว่ามีวันทำงานในเดือน/ปีนี้หรือไม่
+                const hasWorkInMonth = job.workdays.some(day => {
+                    const d = new Date(day);
+                    return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+                });
+                if (!hasWorkInMonth) return;
+                // หาทีมของผู้ใช้ปัจจุบัน
+                const member = job.team.find(m => m.userId === currentUser.uid);
+                if (!member || !member.whtEnabled) return;
+                // คำนวณรายรับและภาษีที่หัก
+                const totalWage = calculateTeamCostForMember(member, job.workdays);
+                const whtAmount = (totalWage * appSettings.whtPercent) / 100;
+                const net = totalWage - whtAmount;
+                hasData = true;
+                rows += `<tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">${job.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">${totalWage.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">${whtAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">${net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <button type="button" class="text-blue-600 hover:text-blue-800" data-jobid="${job.id}"><i class="ph ph-download-simple"></i></button>
+                    </td>
+                </tr>`;
+            });
+            if (!hasData) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูล</td></tr>';
+            } else {
+                tableBody.innerHTML = rows;
+                // Attach download handler
+                tableBody.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        downloadMemberCertificate();
+                    });
+                });
+            }
+        }
+
+        /**
+         * แสดงหน้า รายการหัก ณ ที่จ่าย สำหรับสมาชิก
+         * ซ่อนหน้าอื่นและตั้งค่าตัวเลือกเดือน/ปี แล้วสร้างตาราง
+         */
+        function showMemberWhtListView() {
+            // ซ่อนสรุปบัญชีและหน้าหลัก
+            document.getElementById('financial-summary-view').classList.add('hidden');
+            // แสดงเมนูหลัก (mainApp) เพื่อให้ส่วนหัวและปุ่มยังอยู่เหมือนเดิม
+            // ป้องกันซ่อน mainApp เพื่อไม่ให้หายไป
+            // แสดงหน้า withholding list
+            const viewEl = document.getElementById('withholding-list-view');
+            if (!viewEl) return;
+            viewEl.classList.remove('hidden');
+            // เตรียมตัวเลือกเดือน/ปีและข้อมูล
+            populateWhtListMonthYearSelect();
+            // เมื่อมีการเปลี่ยนเดือน/ปี ให้สร้างตารางใหม่
+            const monthSel = document.getElementById('member-wht-month');
+            const yearSel = document.getElementById('member-wht-year');
+            if (monthSel) monthSel.onchange = () => generateMemberWhtList();
+            if (yearSel) yearSel.onchange = () => generateMemberWhtList();
+            generateMemberWhtList();
+        }
+
+        /**
+         * helper: ดึงไฟล์รูปภาพและแปลงเป็น dataURL สำหรับใส่ใน PDF
+         */
+        async function toDataUrl(url) {
+            if (!url) return null;
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.error('Error fetching image', e);
+                return null;
+            }
+        }
+
+        /**
+         * สร้างไฟล์ PDF หนังสือรับรองหัก ณ ที่จ่าย (50 ทวิ) ของสมาชิกในเดือนที่เลือก
+         * นำข้อมูลทุกคิวงานในเดือนนั้นมารวมกัน
+         */
+        async function downloadMemberCertificate() {
+            const selectedMonth = parseInt(document.getElementById('member-wht-month').value);
+            const selectedYear = parseInt(document.getElementById('member-wht-year').value);
+            // รวบรวมคิวงานของสมาชิกในเดือน/ปีนี้
+            const jobsForMonth = [];
+            let totalWage = 0;
+            let totalWht = 0;
+            allJobs.forEach(job => {
+                if (!job.workdays || !job.team) return;
+                const hasWork = job.workdays.some(day => {
+                    const d = new Date(day);
+                    return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+                });
+                if (!hasWork) return;
+                const member = job.team.find(m => m.userId === currentUser.uid);
+                if (!member || !member.whtEnabled) return;
+                const wage = calculateTeamCostForMember(member, job.workdays);
+                const wht = wage * appSettings.whtPercent / 100;
+                jobsForMonth.push({ name: job.name, wage, wht });
+                totalWage += wage;
+                totalWht += wht;
+            });
+            if (jobsForMonth.length === 0) {
+                alert('ไม่มีข้อมูลคิวงานที่ต้องหัก ณ ที่จ่ายในเดือนที่เลือก');
+                return;
+            }
+            // เตรียมข้อมูลจาก appSettings
+            const bookNo = String(appSettings.whtBookCounter).padStart(5, '0');
+            const docNo = String(appSettings.whtDocCounter).padStart(5, '0');
+            // วันสิ้นเดือน
+            const issueDate = new Date(selectedYear, selectedMonth, 0);
+            const issueDateStr = `${issueDate.getDate()}/${issueDate.getMonth()+1}/${issueDate.getFullYear()+543}`;
+            // อัพเดตเลขที่เล่ม/เลขที่เอกสารสำหรับครั้งถัดไป
+            appSettings.whtBookCounter += 1;
+            appSettings.whtDocCounter += 1;
+            // บันทึกลง Firestore หากเป็นแอดมิน (จะมีสิทธิแก้ไขได้)
+            try {
+                if (currentUserRole === 'admin') {
+                    await setDoc(doc(db, 'settings', 'app-config'), {
+                        whtBookCounter: appSettings.whtBookCounter,
+                        whtDocCounter: appSettings.whtDocCounter
+                    }, { merge: true });
+                }
+            } catch (err) {
+                console.error('Error updating counters', err);
+            }
+            const thaiWhtText = numberToThaiText(totalWht);
+            // สร้าง PDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            // ใส่ภาพพื้นหลังหนังสือ 50 ทวิ (ถ้ามี)
+            if (appSettings.whtFormImageUrl) {
+                const bgData = await toDataUrl(appSettings.whtFormImageUrl);
+                if (bgData) {
+                    pdf.addImage(bgData, 'PNG', 0, 0, 210, 297);
+                }
+            }
+            pdf.setFont('Helvetica');
+            pdf.setFontSize(12);
+            // โลโก้บริษัท (ถ้ามี)
+            const logoData = await toDataUrl(appSettings.whtCompanyLogoUrl);
+            if (logoData) {
+                pdf.addImage(logoData, 'PNG', 10, 10, 30, 30);
+            }
+            let y = 15;
+            // ส่วนหัว
+            pdf.setFontSize(16);
+            pdf.text('หนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ)', 105, y, { align: 'center' });
+            y += 8;
+            pdf.setFontSize(12);
+            pdf.text(`เล่มที่ ${bookNo}   เลขที่ ${docNo}`, 105, y, { align: 'center' });
+            y += 8;
+            pdf.text(`เลขประจำตัวผู้เสียภาษีอากร: ${appSettings.whtTaxId}`, 105, y, { align: 'center' });
+            y += 8;
+            pdf.text(appSettings.whtCompanyName, 105, y, { align: 'center' });
+            y += 6;
+            pdf.text(appSettings.whtCompanyAddress, 105, y, { align: 'center' });
+            y += 10;
+            pdf.text(`ผู้ออกหนังสือ: ${currentUserData.nickname || currentUserData.name}`, 20, y);
+            y += 8;
+            pdf.text(`ผู้ถูกหักภาษี: ${currentUserData.nickname || currentUserData.name}`, 20, y);
+            y += 8;
+            // ตารางรายการ
+            pdf.text('รายละเอียดคิวงาน', 20, y);
+            y += 6;
+            pdf.setFontSize(10);
+            jobsForMonth.forEach(item => {
+                pdf.text(`- ${item.name}: ${item.wage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 25, y);
+                y += 5;
+            });
+            y += 3;
+            pdf.text(`รวมจำนวนเงินที่จ่ายทั้งสิ้น: ${totalWage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 20, y);
+            y += 5;
+            pdf.text(`ภาษีที่หักและนำส่งไว้: ${totalWht.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 20, y);
+            y += 5;
+            pdf.text(`รวมเงินภาษีที่หักนำส่งไว้ (ตัวอักษร): ${thaiWhtText}`, 20, y);
+            y += 10;
+            pdf.text(`ออกหนังสือ ณ วันที่ ${issueDateStr}`, 20, y);
+            y += 8;
+            pdf.text(`ลงชื่อ _________________________`, 20, y);
+            y += 5;
+            pdf.text(`(${appSettings.whtSignerName || currentUserData.nickname || currentUserData.name})`, 20, y);
+            // บันทึกไฟล์
+            pdf.save(`WHT_${currentUserData.nickname || currentUserData.name}_${selectedMonth}_${selectedYear}.pdf`);
+        }
+
+        /**
+         * เติมตัวเลือกเดือน/ปีสำหรับหน้าจัดการภาษีของผู้ดูแล
+         * หากไม่เลือกเดือน/ปี จะถือเป็นการดูช่วง 3 เดือนล่าสุด
+         */
+        function populateAdminWhtMonthYearSelect() {
+            const monthSelect = document.getElementById('admin-wht-month');
+            const yearSelect = document.getElementById('admin-wht-year');
+            if (!monthSelect || !yearSelect) return;
+            monthSelect.innerHTML = '';
+            yearSelect.innerHTML = '';
+            // ตัวเลือกเริ่มต้น (ว่าง = 3 เดือนล่าสุด)
+            const emptyOptM = document.createElement('option');
+            emptyOptM.value = '';
+            emptyOptM.textContent = '- ทุกเดือน -';
+            monthSelect.appendChild(emptyOptM);
+            const emptyOptY = document.createElement('option');
+            emptyOptY.value = '';
+            emptyOptY.textContent = '- ทุกปี -';
+            yearSelect.appendChild(emptyOptY);
+            const monthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+            monthNames.forEach((m, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx + 1;
+                opt.textContent = m;
+                monthSelect.appendChild(opt);
+            });
+            const yearSet = new Set();
+            allJobs.forEach(job => {
+                if (!job.workdays || job.workdays.length === 0) return;
+                job.workdays.forEach(day => {
+                    const d = new Date(day);
+                    if (!isNaN(d)) yearSet.add(d.getFullYear());
+                });
+            });
+            if (yearSet.size === 0) yearSet.add(new Date().getFullYear());
+            [...yearSet].sort((a,b) => a - b).forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            });
+        }
+
+        /**
+         * สร้างรายงานภาษีหัก ณ ที่จ่ายสำหรับผู้ดูแล แสดงเฉพาะคิวงานที่มีการหักภาษี
+         */
+        function generateAdminWhtReport() {
+            const bodyEl = document.getElementById('admin-wht-table-body');
+            if (!bodyEl) return;
+            bodyEl.innerHTML = '';
+            const monthVal = document.getElementById('admin-wht-month').value;
+            const yearVal = document.getElementById('admin-wht-year').value;
+            const selectedMonth = monthVal ? parseInt(monthVal) : null;
+            const selectedYear = yearVal ? parseInt(yearVal) : null;
+            // ช่วงอ้างอิง 3 เดือนล่าสุดหากไม่เลือก
+            const now = new Date();
+            const jobsToDisplay = [];
+            allJobs.forEach(job => {
+                if (!job.workdays || !job.team) return;
+                // ตรวจสอบช่วงเวลา
+                let include = false;
+                if (selectedMonth && selectedYear) {
+                    include = job.workdays.some(day => {
+                        const d = new Date(day);
+                        return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+                    });
+                } else {
+                    // 3 เดือนล่าสุด
+                    include = job.workdays.some(day => {
+                        const d = new Date(day);
+                        const diffMonths = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+                        return diffMonths >= 0 && diffMonths < 3;
+                    });
+                }
+                if (!include) return;
+                // หาสมาชิกที่มีการหักภาษี
+                let jobGross = 0;
+                let jobWht = 0;
+                const detailMembers = [];
+                job.team.forEach(member => {
+                    if (!member.whtEnabled) return;
+                    const wage = calculateTeamCostForMember(member, job.workdays);
+                    const whtAmt = wage * appSettings.whtPercent / 100;
+                    jobGross += wage;
+                    jobWht += whtAmt;
+                    const userData = allUsers.find(u => u.id === member.userId) || {};
+                    detailMembers.push({
+                        id: member.userId,
+                        name: userData.nickname || userData.name || '',
+                        profilePic: userData.profilePic || '',
+                        wage,
+                        wht: whtAmt
+                    });
+                });
+                if (detailMembers.length > 0) {
+                    jobsToDisplay.push({ id: job.id, name: job.name, gross: jobGross, wht: jobWht, members: detailMembers });
+                }
+            });
+            if (jobsToDisplay.length === 0) {
+                bodyEl.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูล</td></tr>';
+                return;
+            }
+            jobsToDisplay.forEach(job => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 cursor-pointer';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-left font-medium text-gray-800 job-name-cell">${job.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">${job.gross.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">${job.wht.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <button type="button" class="text-blue-600 hover:text-blue-800 view-cert-btn" data-jobid="${job.id}"><i class="ph ph-file-text"></i></button>
+                    </td>`;
+                // Attach event to toggle details on job name click
+                tr.querySelector('.job-name-cell').addEventListener('click', () => {
+                    toggleAdminJobDetails(job, tr);
+                });
+                tr.querySelector('.view-cert-btn').addEventListener('click', () => {
+                    showJobWhtCertificates(job);
+                });
+                bodyEl.appendChild(tr);
+            });
+        }
+
+        /**
+         * แสดง/ซ่อนรายละเอียดสมาชิกของงานในรายงานภาษีหัก ณ ที่จ่ายของผู้ดูแล
+         */
+        function toggleAdminJobDetails(job, rowEl) {
+            // หากมีแถวรายละเอียดอยู่แล้ว ให้ลบทิ้ง
+            const nextRow = rowEl.nextSibling;
+            if (nextRow && nextRow.classList && nextRow.classList.contains('detail-row')) {
+                nextRow.remove();
+                return;
+            }
+            // สร้างแถวรายละเอียดใหม่
+            const detailTr = document.createElement('tr');
+            detailTr.className = 'detail-row bg-gray-50';
+            const td = document.createElement('td');
+            td.colSpan = 4;
+            let html = '<div class="p-4 space-y-2">';
+            job.members.forEach(member => {
+                html += `<div class="flex items-center space-x-3">
+                    <img src="${member.profilePic || 'https://placehold.co/32x32/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full object-cover">
+                    <div class="flex-1">
+                        <p class="font-medium">${member.name}</p>
+                        <p class="text-xs text-gray-500">รายรับ: ${member.wage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท &nbsp;|&nbsp; หัก ณ ที่จ่าย: ${member.wht.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท</p>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+            td.innerHTML = html;
+            detailTr.appendChild(td);
+            rowEl.parentNode.insertBefore(detailTr, rowEl.nextSibling);
+        }
+
+        /**
+         * แสดงรายชื่อทีมงานที่มีการหักภาษีสำหรับคิวงานนั้น ๆ ใน modal เพื่อให้ดาวน์โหลดหนังสือแต่ละคน
+         */
+        function showJobWhtCertificates(job) {
+            let content = '<div class="space-y-2">';
+            // แสดงเลขเล่ม/เลขที่ล่วงหน้าตามลำดับของสมาชิก
+            let bookCounter = appSettings.whtBookCounter;
+            let docCounter = appSettings.whtDocCounter;
+            job.members.forEach(member => {
+                const bookNo = String(bookCounter).padStart(5, '0');
+                const docNo = String(docCounter).padStart(5, '0');
+                content += `<div class="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
+                    <div class="flex items-start space-x-3 flex-1">
+                        <img src="${member.profilePic || 'https://placehold.co/32x32/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full object-cover" />
+                        <div>
+                            <p>${member.name}</p>
+                            <p class="text-xs text-gray-500">เล่มที่ ${bookNo} | เลขที่ ${docNo}</p>
+                        </div>
+                    </div>
+                    <button type="button" class="text-blue-600 hover:text-blue-800 download-certi-btn" data-userid="${member.id}"><i class="ph ph-download-simple"></i> ดาวน์โหลด</button>
+                </div>`;
+                bookCounter++;
+                docCounter++;
+            });
+            content += '</div>';
+            showModal(`หนังสือรับรองหัก ณ ที่จ่าย (${job.name})`, content, null, false, (modal) => {
+                modal.querySelectorAll('.download-certi-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const uid = e.currentTarget.dataset.userid;
+                        downloadCertificateForUser(uid);
+                    });
+                });
+            });
+        }
+
+        /**
+         * สร้างไฟล์ PDF หนังสือรับรองให้สมาชิกเฉพาะผู้ดูแล (เลือก user)
+         */
+        async function downloadCertificateForUser(userId) {
+            const monthVal = document.getElementById('admin-wht-month').value;
+            const yearVal = document.getElementById('admin-wht-year').value;
+            const selectedMonth = monthVal ? parseInt(monthVal) : null;
+            const selectedYear = yearVal ? parseInt(yearVal) : null;
+            const userData = allUsers.find(u => u.id === userId);
+            if (!userData) return;
+            const jobsForUser = [];
+            let totalWage = 0;
+            let totalWht = 0;
+            const now = new Date();
+            allJobs.forEach(job => {
+                if (!job.workdays || !job.team) return;
+                // ตรวจสอบว่าตรงเดือน/ปี หรือช่วง 3 เดือน
+                let include = false;
+                if (selectedMonth && selectedYear) {
+                    include = job.workdays.some(day => {
+                        const d = new Date(day);
+                        return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
+                    });
+                } else {
+                    include = job.workdays.some(day => {
+                        const d = new Date(day);
+                        const diffMonths = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+                        return diffMonths >= 0 && diffMonths < 3;
+                    });
+                }
+                if (!include) return;
+                const member = job.team.find(m => m.userId === userId);
+                if (!member || !member.whtEnabled) return;
+                const wage = calculateTeamCostForMember(member, job.workdays);
+                const whtAmt = wage * appSettings.whtPercent / 100;
+                jobsForUser.push({ name: job.name, wage, wht: whtAmt });
+                totalWage += wage;
+                totalWht += whtAmt;
+            });
+            if (jobsForUser.length === 0) {
+                alert('ไม่มีข้อมูลคิวงานที่ต้องหัก ณ ที่จ่ายสำหรับผู้ใช้นี้');
+                return;
+            }
+            // book/doc no
+            const bookNo = String(appSettings.whtBookCounter).padStart(5, '0');
+            const docNo = String(appSettings.whtDocCounter).padStart(5, '0');
+            appSettings.whtBookCounter += 1;
+            appSettings.whtDocCounter += 1;
+            try {
+                await setDoc(doc(db, 'settings', 'app-config'), {
+                    whtBookCounter: appSettings.whtBookCounter,
+                    whtDocCounter: appSettings.whtDocCounter
+                }, { merge: true });
+            } catch(err) { console.error(err); }
+            const thaiWhtText = numberToThaiText(totalWht);
+            const issueDate = new Date();
+            const issueDateStr = `${issueDate.getDate()}/${issueDate.getMonth()+1}/${issueDate.getFullYear()+543}`;
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p','mm','a4');
+            // ใส่ภาพพื้นหลังหนังสือ 50 ทวิ (ถ้ามี)
+            if (appSettings.whtFormImageUrl) {
+                const bgData = await toDataUrl(appSettings.whtFormImageUrl);
+                if (bgData) {
+                    pdf.addImage(bgData, 'PNG', 0, 0, 210, 297);
+                }
+            }
+            pdf.setFont('Helvetica');
+            pdf.setFontSize(12);
+            const logoData = await toDataUrl(appSettings.whtCompanyLogoUrl);
+            if (logoData) {
+                pdf.addImage(logoData,'PNG',10,10,30,30);
+            }
+            let y = 15;
+            pdf.setFontSize(16);
+            pdf.text('หนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ)',105,y,{align:'center'});
+            y += 8;
+            pdf.setFontSize(12);
+            pdf.text(`เล่มที่ ${bookNo}   เลขที่ ${docNo}`,105,y,{align:'center'});
+            y += 8;
+            pdf.text(`เลขประจำตัวผู้เสียภาษีอากร: ${appSettings.whtTaxId}`,105,y,{align:'center'});
+            y += 8;
+            pdf.text(appSettings.whtCompanyName,105,y,{align:'center'});
+            y += 6;
+            pdf.text(appSettings.whtCompanyAddress,105,y,{align:'center'});
+            y += 10;
+            pdf.text(`ผู้ออกหนังสือ: ${currentUserData.nickname || currentUserData.name}`,20,y);
+            y += 8;
+            pdf.text(`ผู้ถูกหักภาษี: ${userData.nickname || userData.name}`,20,y);
+            y += 8;
+            pdf.text('รายละเอียดคิวงาน',20,y);
+            y += 6;
+            pdf.setFontSize(10);
+            jobsForUser.forEach(item => {
+                pdf.text(`- ${item.name}: ${item.wage.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`,25,y);
+                y += 5;
+            });
+            y += 3;
+            pdf.text(`รวมจำนวนเงินที่จ่ายทั้งสิ้น: ${totalWage.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`,20,y);
+            y += 5;
+            pdf.text(`ภาษีที่หักและนำส่งไว้: ${totalWht.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`,20,y);
+            y += 5;
+            pdf.text(`รวมเงินภาษีที่หักนำส่งไว้ (ตัวอักษร): ${thaiWhtText}`,20,y);
+            y += 10;
+            pdf.text(`ออกหนังสือ ณ วันที่ ${issueDateStr}`,20,y);
+            y += 8;
+            pdf.text(`ลงชื่อ _________________________`,20,y);
+            y += 5;
+            pdf.text(`(${appSettings.whtSignerName || currentUserData.nickname || currentUserData.name})`,20,y);
+            pdf.save(`WHT_${userData.nickname || userData.name}.pdf`);
+        }
+
+        /**
+         * ส่งออกข้อมูลตารางภาษีหัก ณ ที่จ่ายของผู้ดูแลเป็นไฟล์ CSV
+         */
+        function exportAdminWhtData() {
+            const bodyEl = document.getElementById('admin-wht-table-body');
+            if (!bodyEl) return;
+            let csv = 'ชื่องาน,รายรับ (BG),หัก ณ ที่จ่าย\n';
+            bodyEl.querySelectorAll('tr').forEach(tr => {
+                // ข้ามแถวรายละเอียด
+                if (tr.classList.contains('detail-row')) return;
+                const cells = tr.querySelectorAll('td');
+                if (cells.length >= 3) {
+                    const name = cells[0].textContent.trim();
+                    const gross = cells[1].textContent.trim();
+                    const wht = cells[2].textContent.trim();
+                    csv += `${name},${gross},${wht}\n`;
+                }
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'wht-report.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * ส่งออกข้อมูลตารางภาษีหัก ณ ที่จ่ายเป็น PDF (ใช้ html2canvas + jsPDF)
+         * เพื่อความง่าย จะทำการแปลงทั้งตารางเป็นภาพและบันทึกเป็น PDF
+         */
+        function exportAdminWhtDataPdf() {
+            const tableContainer = document.querySelector('#wht-management-view table');
+            if (!tableContainer) return;
+            html2canvas(tableContainer, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 10;
+                let imgWidth = pageWidth - 2 * margin;
+                let imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const maxHeight = pageHeight - 2 * margin;
+                if (imgHeight > maxHeight) {
+                    imgHeight = maxHeight;
+                    imgWidth = (canvas.width * imgHeight) / canvas.height;
+                }
+                const imgX = margin + ((pageWidth - 2 * margin - imgWidth) / 2);
+                const imgY = margin;
+                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth, imgHeight);
+                pdf.save('wht-report.pdf');
+            });
+        }
+
+        /**
+         * แสดงหน้า จัดการภาษีหัก ณ ที่จ่าย สำหรับผู้ดูแล
+         */
+        function showWhtManagementView() {
+            // ซ่อนสรุปบัญชี
+            document.getElementById('financial-summary-view').classList.add('hidden');
+            const viewEl = document.getElementById('wht-management-view');
+            if (!viewEl) return;
+            viewEl.classList.remove('hidden');
+            populateAdminWhtMonthYearSelect();
+            // เมื่อมีการเปลี่ยนเดือน/ปี ให้สร้างรายงานใหม่
+            const mSel = document.getElementById('admin-wht-month');
+            const ySel = document.getElementById('admin-wht-year');
+            if (mSel) mSel.onchange = () => generateAdminWhtReport();
+            if (ySel) ySel.onchange = () => generateAdminWhtReport();
+            generateAdminWhtReport();
         }
 
         document.getElementById('settings-form').addEventListener('submit', async (e) => {
@@ -2069,6 +2881,14 @@
                 }
             }
         });
+
+        // Attach event listener for withholding form settings button (admin)
+        const whtFormSettingsBtn = document.getElementById('wht-form-settings-button');
+        if (whtFormSettingsBtn) {
+            whtFormSettingsBtn.addEventListener('click', () => {
+                showWhtFormSettingsModal();
+            });
+        }
 
 
         function completeJob(jobId) {
@@ -2907,7 +3727,27 @@
             allUsers.forEach(user => {
                 const displayName = user.nickname || user.name;
                 const bankInfo = user.bankAccount;
-                userListHTML += `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4"><div><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p><div class="text-xs text-gray-400 mt-1"><i class="ph ph-bank"></i> ${bankInfo?.bank || 'N/A'}: ${bankInfo?.number || 'N/A'}</div></div></div><div class="flex items-center space-x-2"><button class="modal-switch-view-btn p-2 text-green-500 hover:bg-green-100 rounded-full" data-userid="${user.id}"><i class="ph ph-eye"></i></button><button class="modal-delete-user-btn p-2 text-red-500 hover:bg-red-100 rounded-full" data-userid="${user.id}"><i class="ph ph-trash"></i></button></div></div>`;
+                // When constructing the user list, ensure that action buttons inside the form
+                // are explicitly marked as type="button". Without this attribute, buttons
+                // default to type="submit", which causes the parent form (created by showModal)
+                // to submit and inadvertently close the modal when clicked.  Adding
+                // type="button" prevents this undesired form submission.
+                userListHTML += `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4">
+                        <div>
+                            <p class="font-semibold">${displayName}</p>
+                            <p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p>
+                            <div class="text-xs text-gray-400 mt-1"><i class="ph ph-bank"></i> ${bankInfo?.bank || 'N/A'}: ${bankInfo?.number || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" class="modal-switch-view-btn p-2 text-green-500 hover:bg-green-100 rounded-full" data-userid="${user.id}"><i class="ph ph-eye"></i></button>
+                        <!-- View withholding account info button -->
+                        <button type="button" class="modal-view-wht-btn p-2 text-blue-500 hover:bg-blue-100 rounded-full" data-userid="${user.id}"><i class="ph ph-file-text"></i></button>
+                        <button type="button" class="modal-delete-user-btn p-2 text-red-500 hover:bg-red-100 rounded-full" data-userid="${user.id}"><i class="ph ph-trash"></i></button>
+                    </div>
+                </div>`;
             });
             userListHTML += `</div>`;
 
@@ -2963,22 +3803,42 @@
                     switchToUserView(userIdToImpersonate);
                     modal.remove();
                 });
+                // Attach handlers to view withholding account buttons
+                modal.querySelectorAll('.modal-view-wht-btn').forEach(btn => btn.onclick = (e) => {
+                    const userId = e.currentTarget.dataset.userid;
+                    showUserWhtDetailModal(userId);
+                });
             });
         }
 
         function showManageProfileModal() {
             const content = `
-                <div class="flex flex-col items-center space-y-2">
-                    <input type="text" name="nickname" required class="w-1/2 p-2 border rounded text-center" placeholder="ชื่อเล่น" value="${currentUserData.nickname || ''}">
-                    <img id="profile-pic-preview" src="${currentUserData.profilePic || 'https://placehold.co/100x100/E2E8F0/4A5568?text=รูป'}" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200">
-                    <label for="profilePicFile" class="cursor-pointer text-sm text-violet-700 font-semibold hover:text-violet-900">เลือกรูปภาพ</label>
-                    <input type="file" name="profilePicFile" id="profilePicFile" accept="image/*" class="hidden"/>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left: Profile picture -->
+                    <div class="flex flex-col items-center space-y-3">
+                        <img id="profile-pic-preview" src="${currentUserData.profilePic || 'https://placehold.co/150x150/E2E8F0/4A5568?text=รูป'}" class="w-32 h-32 rounded-full object-cover border-2 border-gray-200" />
+                        <label for="profilePicFile" class="cursor-pointer text-sm text-violet-700 font-semibold hover:text-violet-900">เลือกรูปภาพ</label>
+                        <input type="file" name="profilePicFile" id="profilePicFile" accept="image/*" class="hidden" />
+                    </div>
+                    <!-- Right: Fields -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">ชื่อเล่น</label>
+                            <input type="text" name="nickname" required class="mt-1 block w-full p-2 border rounded" placeholder="ชื่อเล่น" value="${currentUserData.nickname || ''}" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" readonly class="mt-1 block w-full p-2 border rounded bg-gray-100" value="${currentUserData.name}" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
+                            <input type="tel" name="phone" required class="mt-1 block w-full p-2 border rounded" value="${currentUserData.phone || ''}" />
+                        </div>
+                    </div>
                 </div>
-                <label>Username</label><input type="text" readonly class="w-full p-2 border rounded bg-gray-100" value="${currentUserData.name}">
-                <label>เบอร์โทร</label><input type="tel" name="phone" required class="w-full p-2 border rounded" value="${currentUserData.phone || ''}">
-                <hr>
+                <hr class="my-4" />
                 <div id="social-linking-container" class="space-y-2"></div>
-                <hr>
+                <hr class="my-4" />
                 <div class="grid grid-cols-2 gap-4">
                     <button type="button" id="manage-bank-account-btn" class="w-full px-4 py-2 font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors">บัญชีธนาคาร</button>
                     <button type="button" id="change-password-from-profile-btn" class="w-full px-4 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors">เปลี่ยนรหัสผ่าน</button>
@@ -3083,6 +3943,12 @@
                 <label>ชื่อบัญชี</label><input type="text" name="accountName" class="w-full p-2 border rounded" value="${bankInfo.name || ''}">
                 <label>ธนาคาร</label><select name="bankName" class="w-full p-2 border rounded">${bankOptions}</select>
                 <label>หมายเลขบัญชี</label><input type="text" name="accountNumber" class="w-full p-2 border rounded" value="${bankInfo.number || ''}">
+                <!-- Button to configure withholding account -->
+                <div class="pt-2 flex justify-end">
+                    <button type="button" id="open-wht-account-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                        ตั้งค่าบัญชีหัก ณ ที่จ่าย
+                    </button>
+                </div>
             `;
             showModal('ข้อมูลบัญชีธนาคาร', content, async (formData, submitButton, modal) => {
                 submitButton.disabled = true;
@@ -3100,7 +3966,17 @@
                 currentUserData.bankAccount = updatedBankAccount;
                 alert('บันทึกข้อมูลบัญชีธนาคารเรียบร้อยแล้ว');
                 modal.remove();
-            }, true, () => {});
+            }, true, (modal) => {
+                // When the modal is ready, attach click handler for the withholding account button
+                const whtBtn = modal.querySelector('#open-wht-account-btn');
+                if (whtBtn) {
+                    whtBtn.onclick = () => {
+                        // Close the bank account modal and open the withholding account settings
+                        modal.remove();
+                        showWithholdingAccountModal();
+                    };
+                }
+            });
         }
 
 
@@ -3115,6 +3991,287 @@
                 } catch (error) {
                     console.error("Password reset error:", error);
                     alert('เกิดข้อผิดพลาด: ไม่สามารถส่งอีเมลรีเซ็ตรหัสผ่านได้ อาจเป็นเพราะไม่มีอีเมลนี้ในระบบ');
+                }
+            });
+        }
+
+        /**
+         * รายการจังหวัดของประเทศไทย สำหรับการเลือกที่อยู่ในแบบฟอร์มบัญชีหัก ณ ที่จ่าย
+         * จัดเตรียมรายชื่อจังหวัดโดยประมาณ 77 จังหวัด เพื่อใช้ใน dropdown
+         */
+        const thaiProvinces = [
+            'กรุงเทพมหานคร', 'กระบี่', 'กาญจนบุรี', 'กาฬสินธุ์', 'ขอนแก่น',
+            'จันทบุรี', 'ฉะเชิงเทรา', 'ชลบุรี', 'ชัยนาท', 'ชัยภูมิ', 'ชุมพร',
+            'เชียงราย', 'เชียงใหม่', 'ตรัง', 'ตราด', 'ตาก', 'นครนายก', 'นครปฐม',
+            'นครพนม', 'นครราชสีมา', 'นครศรีธรรมราช', 'นครสวรรค์', 'นนทบุรี',
+            'นราธิวาส', 'น่าน', 'บึงกาฬ', 'บุรีรัมย์', 'ปทุมธานี', 'ประจวบคีรีขันธ์',
+            'ปราจีนบุรี', 'ปัตตานี', 'พระนครศรีอยุธยา', 'พังงา', 'พัทลุง',
+            'พิจิตร', 'พิษณุโลก', 'เพชรบุรี', 'เพชรบูรณ์', 'แพร่', 'พะเยา',
+            'ภูเก็ต', 'มหาสารคาม', 'มุกดาหาร', 'แม่ฮ่องสอน', 'ยะลา', 'ยโสธร',
+            'ระนอง', 'ระยอง', 'ราชบุรี', 'ลพบุรี', 'ลำปาง', 'ลำพูน', 'ศรีสะเกษ',
+            'สกลนคร', 'สงขลา', 'สตูล', 'สมุทรปราการ', 'สมุทรสงคราม', 'สมุทรสาคร',
+            'สระแก้ว', 'สระบุรี', 'สิงห์บุรี', 'สุโขทัย', 'สุพรรณบุรี',
+            'สุราษฎร์ธานี', 'สุรินทร์', 'หนองคาย', 'หนองบัวลำภู', 'อ่างทอง',
+            'อำนาจเจริญ', 'อุดรธานี', 'อุตรดิตถ์', 'อุทัยธานี', 'อุบลราชธานี'
+        ];
+
+        /**
+         * แสดงหน้าตั้งค่าบัญชีหัก ณ ที่จ่าย สำหรับทีมงาน
+         * แบบฟอร์มนี้จะบันทึกข้อมูลลงในผู้ใช้ (users) ที่เข้าสู่ระบบปัจจุบัน
+         */
+        function showWithholdingAccountModal() {
+            // ดึงข้อมูลการตั้งค่าบัญชีหัก ณ ที่จ่ายปัจจุบัน หากมี
+            const whtInfo = currentUserData.withholdingAccount || {};
+            // เตรียมข้อมูลที่อยู่ย่อย
+            const address = whtInfo.address || {};
+            // สร้าง options สำหรับรายชื่อจังหวัด
+            const provinceOptions = thaiProvinces.map(prov => `<option value="${prov}" ${prov === (address.province || '') ? 'selected' : ''}>${prov}</option>`).join('');
+            // ชื่อ-สกุลจะดึงมาจากชื่อบัญชีธนาคาร หากไม่มีให้ใช้ชื่อ-สกุลใน whtInfo
+            const defaultName = whtInfo.name || (currentUserData.bankAccount && currentUserData.bankAccount.name ? currentUserData.bankAccount.name : '');
+            // สร้าง HTML ของแบบฟอร์ม
+            const content = `
+                <label>ชื่อ-สกุล</label><input type="text" name="whtName" class="w-full p-2 border rounded" value="${defaultName}" readonly>
+                <label>เลขบัตรประชาชน</label><input type="text" name="idCardNumber" class="w-full p-2 border rounded" value="${whtInfo.idNumber || ''}" required>
+                <label>ที่อยู่</label>
+                <input type="text" name="houseNumber" placeholder="บ้านเลขที่" class="w-full p-2 border rounded mt-1" value="${address.houseNumber || ''}">
+                <input type="text" name="moo" placeholder="หมู่ที่" class="w-full p-2 border rounded mt-1" value="${address.moo || ''}">
+                <input type="text" name="subdistrict" placeholder="ตำบล" class="w-full p-2 border rounded mt-1" value="${address.subdistrict || ''}">
+                <input type="text" name="district" placeholder="อำเภอ" class="w-full p-2 border rounded mt-1" value="${address.district || ''}">
+                <select name="province" class="w-full p-2 border rounded mt-1">
+                    <option value="">-- เลือกจังหวัด --</option>
+                    ${provinceOptions}
+                </select>
+                <input type="text" name="postalCode" placeholder="รหัสไปรษณีย์" class="w-full p-2 border rounded mt-1" value="${address.postalCode || ''}">
+                <label class="block mt-4">อัปโหลดสำเนาบัตรประชาชน</label>
+                ${whtInfo.idCardCopyUrl ? `<img src="${whtInfo.idCardCopyUrl}" class="w-40 h-24 object-cover rounded border mt-1" />` : ''}
+                <input type="file" name="idCardFile" accept="image/*" class="mt-2">
+            `;
+            showModal('ตั้งค่าบัญชีหัก ณ ที่จ่าย', content, async (formData, submitButton, modal) => {
+                submitButton.disabled = true;
+                submitButton.textContent = 'กำลังบันทึก...';
+                // เตรียม URL สำเนาบัตรประชาชน
+                let idCardUrl = whtInfo.idCardCopyUrl || '';
+                const file = formData.get('idCardFile');
+                if (file && file.size > 0) {
+                    // อัปโหลดภาพไป Cloudinary หากมีการเลือกไฟล์
+                    const uploaded = await uploadToCloudinary(file);
+                    if (uploaded) {
+                        idCardUrl = uploaded;
+                    } else {
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'บันทึก';
+                        return;
+                    }
+                }
+                const newWht = {
+                    name: formData.get('whtName'),
+                    idNumber: formData.get('idCardNumber'),
+                    address: {
+                        houseNumber: formData.get('houseNumber'),
+                        moo: formData.get('moo'),
+                        subdistrict: formData.get('subdistrict'),
+                        district: formData.get('district'),
+                        province: formData.get('province'),
+                        postalCode: formData.get('postalCode')
+                    },
+                    idCardCopyUrl: idCardUrl
+                };
+                try {
+                    await updateDoc(doc(db, 'users', currentUser.uid), { withholdingAccount: newWht });
+                    currentUserData.withholdingAccount = newWht;
+                    alert('บันทึกข้อมูลบัญชีหัก ณ ที่จ่ายเรียบร้อยแล้ว');
+                    modal.remove();
+                } catch (err) {
+                    console.error('Error saving withholding account:', err);
+                    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'บันทึก';
+                }
+            });
+        }
+
+        /**
+         * แสดงข้อมูลบัญชีหัก ณ ที่จ่ายของทีมงานแต่ละคน (เฉพาะแอดมิน)
+         * เมื่อเรียกใช้จะเปิด modal พร้อมรายละเอียด หากไม่มีข้อมูลจะแจ้งว่าไม่ได้ตั้งค่า
+         */
+        function showUserWhtDetailModal(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            const whtInfo = user.withholdingAccount;
+            let content = '';
+            if (!whtInfo) {
+                content = `<p class="text-center text-gray-500">ทีมงานคนนี้ยังไม่ได้ตั้งค่าบัญชีหัก ณ ที่จ่าย</p>`;
+            } else {
+                const addr = whtInfo.address || {};
+                const addressStr = `${addr.houseNumber || ''} ${addr.moo ? 'หมู่ ' + addr.moo : ''} ${addr.subdistrict || ''} ${addr.district || ''} ${addr.province || ''} ${addr.postalCode || ''}`.trim();
+                content = `
+                    <p><strong>ชื่อ-สกุล:</strong> ${whtInfo.name || ''}</p>
+                    <p><strong>เลขบัตรประชาชน:</strong> ${whtInfo.idNumber || ''}</p>
+                    <p><strong>ที่อยู่:</strong> ${addressStr || '-'}</p>
+                    ${whtInfo.idCardCopyUrl ? `<div class="mt-2"><img src="${whtInfo.idCardCopyUrl}" class="w-full object-cover rounded" /></div>` : ''}
+                `;
+            }
+            const title = `ข้อมูลบัญชีหัก ณ ที่จ่าย (${user.nickname || user.name})`;
+            showModal(title, content, null, false);
+        }
+
+        /**
+         * แสดงหน้าตั้งค่าแบบฟอร์ม หัก ณ ที่จ่าย สำหรับแอดมิน
+         * ผู้ดูแลสามารถปรับแก้ค่าต่าง ๆ เช่นเปอร์เซ็นต์หัก ณ ที่จ่าย
+         */
+        function showWhtFormSettingsModal() {
+            // สร้างแบบฟอร์มเพื่อแก้ไขรายละเอียดแบบฟอร์มหักภาษี
+            const content = `
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">เล่มที่ (อัตโนมัติ)</label>
+                        <input type="text" disabled value="${String(appSettings.whtBookCounter).padStart(5,'0')}" class="w-full p-2 border rounded bg-gray-100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">เลขที่ (อัตโนมัติ)</label>
+                        <input type="text" disabled value="${String(appSettings.whtDocCounter).padStart(5,'0')}" class="w-full p-2 border rounded bg-gray-100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">เปอร์เซ็นต์หัก ณ ที่จ่าย (%)</label>
+                        <input type="number" step="0.01" min="0" name="whtPercent" class="w-full p-2 border rounded" value="${appSettings.whtPercent ?? 0}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">เลขประจำตัวผู้เสียภาษีอากร</label>
+                        <input type="text" name="whtTaxId" maxlength="13" class="w-full p-2 border rounded" value="${appSettings.whtTaxId || ''}" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ชื่อบริษัทผู้หักภาษี</label>
+                        <input type="text" name="whtCompanyName" class="w-full p-2 border rounded" value="${appSettings.whtCompanyName || ''}" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ที่อยู่บริษัท</label>
+                        <textarea name="whtCompanyAddress" class="w-full p-2 border rounded" rows="2" required>${appSettings.whtCompanyAddress || ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ประเภทแบบฟอร์ม</label>
+                        <select name="whtFormType" class="w-full p-2 border rounded">
+                            <option value="ภ.ด.ง.3" ${appSettings.whtFormType === 'ภ.ด.ง.3' ? 'selected' : ''}>ภ.ด.ง.3</option>
+                            <option value="ภ.ง.ด.53" ${appSettings.whtFormType === 'ภ.ง.ด.53' ? 'selected' : ''}>ภ.ง.ด.53</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ประเภทเงินได้</label>
+                        <select name="whtIncomeType" class="w-full p-2 border rounded">
+                            <option value="ค่าบริการ" ${appSettings.whtIncomeType === 'ค่าบริการ' ? 'selected' : ''}>ค่าบริการ</option>
+                            <option value="ค่าเช่า" ${appSettings.whtIncomeType === 'ค่าเช่า' ? 'selected' : ''}>ค่าเช่า</option>
+                            <option value="อื่นๆ" ${appSettings.whtIncomeType === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ตัวเลือกผู้จ่ายเงิน</label>
+                        <select name="whtPayerOption" class="w-full p-2 border rounded">
+                            <option value="(1)" ${appSettings.whtPayerOption === '(1)' ? 'selected' : ''}>(1) หัก ณ ที่จ่าย</option>
+                            <option value="(2)" ${appSettings.whtPayerOption === '(2)' ? 'selected' : ''}>(2) ไม่หัก ณ ที่จ่าย</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ลงชื่อ (ผู้จ่ายเงิน)</label>
+                        <input type="text" name="whtSignerName" class="w-full p-2 border rounded" value="${appSettings.whtSignerName || ''}" placeholder="ชื่อผู้จ่ายเงิน">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">อัปโหลดโลโก้บริษัท</label>
+                        <input type="file" name="whtCompanyLogoFile" accept="image/*" class="block w-full text-sm text-gray-600">
+                        <img id="wht-logo-preview" src="${appSettings.whtCompanyLogoUrl || ''}" class="mt-2 max-h-20" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">อัปโหลดภาพหนังสือ 50 ทวิ</label>
+                        <input type="file" name="whtFormImageFile" accept="image/*" class="block w-full text-sm text-gray-600">
+                        <img id="wht-form-preview" src="${appSettings.whtFormImageUrl || ''}" class="mt-2 max-h-32" />
+                        <p class="text-xs text-gray-500 mt-1">ภาพนี้จะถูกใช้เป็นพื้นหลัง/รูปแบบในไฟล์ 50 ทวิ เมื่อดาวน์โหลด</p>
+                    </div>
+                </div>
+            `;
+            showModal('ตั้งค่าแบบฟอร์ม หัก ณ ที่จ่าย', content, async (formData, submitButton, modal) => {
+                // ตรวจสอบและบันทึกค่าจากฟอร์ม
+                const percentVal = parseFloat(formData.get('whtPercent'));
+                if (isNaN(percentVal) || percentVal < 0) {
+                    alert('กรุณากรอกเปอร์เซ็นต์ที่ถูกต้อง');
+                    return;
+                }
+                // ดึงค่าจากฟอร์ม
+                const taxId = formData.get('whtTaxId');
+                const companyName = formData.get('whtCompanyName');
+                const companyAddress = formData.get('whtCompanyAddress');
+                const formType = formData.get('whtFormType');
+                const incomeType = formData.get('whtIncomeType');
+                const payerOption = formData.get('whtPayerOption');
+                const signerName = formData.get('whtSignerName');
+                const logoFile = formData.get('whtCompanyLogoFile');
+                const formImageFile = formData.get('whtFormImageFile');
+                submitButton.disabled = true;
+                submitButton.textContent = 'กำลังบันทึก...';
+                let logoUrl = appSettings.whtCompanyLogoUrl;
+                // หากมีอัปโหลดโลโก้ใหม่
+                if (logoFile && logoFile.size > 0) {
+                    const uploaded = await uploadToCloudinary(logoFile);
+                    if (uploaded) logoUrl = uploaded;
+                }
+                let formImgUrl = appSettings.whtFormImageUrl;
+                // หากมีอัปโหลดภาพหนังสือ 50 ทวิ ใหม่
+                if (formImageFile && formImageFile.size > 0) {
+                    const uploadedFormImg = await uploadToCloudinary(formImageFile);
+                    if (uploadedFormImg) formImgUrl = uploadedFormImg;
+                }
+                try {
+                    // บันทึกลง Firestore
+                    await setDoc(doc(db, 'settings', 'app-config'), {
+                        whtPercent: percentVal,
+                        whtTaxId: taxId,
+                        whtCompanyName: companyName,
+                        whtCompanyAddress: companyAddress,
+                        whtFormType: formType,
+                        whtIncomeType: incomeType,
+                        whtPayerOption: payerOption,
+                        whtSignerName: signerName,
+                        whtCompanyLogoUrl: logoUrl,
+                        whtFormImageUrl: formImgUrl
+                    }, { merge: true });
+                    // อัปเดตค่าใน appSettings
+                    Object.assign(appSettings, {
+                        whtPercent: percentVal,
+                        whtTaxId: taxId,
+                        whtCompanyName: companyName,
+                        whtCompanyAddress: companyAddress,
+                        whtFormType: formType,
+                        whtIncomeType: incomeType,
+                        whtPayerOption: payerOption,
+                        whtSignerName: signerName,
+                        whtCompanyLogoUrl: logoUrl,
+                        whtFormImageUrl: formImgUrl
+                    });
+                    alert('บันทึกการตั้งค่าแบบฟอร์ม หัก ณ ที่จ่ายเรียบร้อยแล้ว');
+                    modal.remove();
+                } catch (err) {
+                    console.error('Error updating withholding form settings:', err);
+                    alert('เกิดข้อผิดพลาดในการบันทึกการตั้งค่า');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'บันทึก';
+                }
+            }, true, (modalEl) => {
+                // preview change of logo on input change
+                const logoInput = modalEl.querySelector('input[name="whtCompanyLogoFile"]');
+                const logoPreview = modalEl.querySelector('#wht-logo-preview');
+                if (logoInput) {
+                    logoInput.addEventListener('change', (e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            logoPreview.src = URL.createObjectURL(e.target.files[0]);
+                        }
+                    });
+                }
+                // preview change of certificate template image on input change
+                const formInput = modalEl.querySelector('input[name="whtFormImageFile"]');
+                const formPreview = modalEl.querySelector('#wht-form-preview');
+                if (formInput) {
+                    formInput.addEventListener('change', (e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            formPreview.src = URL.createObjectURL(e.target.files[0]);
+                        }
+                    });
                 }
             });
         }
