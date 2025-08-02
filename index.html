@@ -1052,6 +1052,10 @@
             whtCompanyLogoUrl: "",
             // URL ภาพพื้นหลัง/รูปแบบหนังสือ 50 ทวิ ที่ใช้เป็นเทมเพลตในการดาวน์โหลดใบรับรอง
             whtFormImageUrl: ""
+            ,
+            // เค้าโครงตำแหน่งของข้อมูลบนแบบฟอร์ม 50 ทวิ (กำหนดโดยผู้ดูแลผ่านตัวแก้ไขลาก-วาง)
+            // โครงสร้าง: { fieldName: { x: <มม>, y: <มม> }, ... }
+            whtFormLayout: {}
         };
 
         const publicView = document.getElementById('public-view');
@@ -1422,7 +1426,8 @@
 
                 if (teamNeeded > 0) {
                      if (remaining <= 0) {
-                        teamStatusHTML = `<p class="text-xs text-center mt-1 job-team-status loss-text font-bold">เต็มแล้ว</p>`;
+                        // หากคิวงานเต็มแต่ผู้ใช้เป็นสมาชิกในทีม ให้ไม่แสดงข้อความเต็มแล้ว
+                        teamStatusHTML = isMyJob ? '' : `<p class="text-xs text-center mt-1 job-team-status loss-text font-bold">เต็มแล้ว</p>`;
                      } else {
                         teamStatusHTML = `<p class="text-xs text-center mt-1 job-team-status profit-text">ขาด ${remaining} คน</p>`;
                      }
@@ -1628,7 +1633,12 @@
                 const displayName = memberData.nickname || memberData.name;
                 const isTeamLeader = job.teamLeaderId === member.userId;
                 const draggableClass = currentUserRole === 'admin' ? 'draggable-row' : '';
-                let rowHTML = `<tr class="${draggableClass}" draggable="${currentUserRole === 'admin'}" data-userid="${member.userId}"><td class="py-2 px-3 border-b"><div class="flex items-center"><i class="ph ph-dots-six-vertical drag-handle text-gray-400 mr-2 admin-only"></i><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3 object-cover"><div><p class="font-medium flex items-center">${displayName} ${isTeamLeader ? '<i class="ph-fill ph-crown text-yellow-500 ml-1"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
+                // determine if member has complete withholding account
+                const wht = memberData.withholdingAccount || {};
+                const addr2 = wht.address || {};
+                const completeWht = wht && wht.idNumber && addr2.houseNumber && addr2.subdistrict && addr2.district && addr2.province && addr2.postalCode && wht.idCardCopyUrl;
+                const starIcon = completeWht ? '<i class="ph-fill ph-star text-yellow-400 mr-1"></i>' : '';
+                let rowHTML = `<tr class="${draggableClass}" draggable="${currentUserRole === 'admin'}" data-userid="${member.userId}"><td class="py-2 px-3 border-b"><div class="flex items-center"><i class="ph ph-dots-six-vertical drag-handle text-gray-400 mr-2 admin-only"></i><img src="${memberData.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full mr-3 object-cover"><div><p class="font-medium flex items-center">${starIcon}${displayName} ${isTeamLeader ? '<i class="ph-fill ph-crown text-yellow-500 ml-1"></i>' : ''}</p><p class="text-xs text-gray-500">${member.position}</p></div></div></td>`;
 
                 job.workdays.forEach(day => {
                     const isWorking = member.workdays.includes(day);
@@ -2327,26 +2337,12 @@
                 alert('ไม่มีข้อมูลคิวงานที่ต้องหัก ณ ที่จ่ายในเดือนที่เลือก');
                 return;
             }
-            // เตรียมข้อมูลจาก appSettings
-            const bookNo = String(appSettings.whtBookCounter).padStart(5, '0');
-            const docNo = String(appSettings.whtDocCounter).padStart(5, '0');
+            // กำหนดหมายเลขเล่ม/เลขที่สำหรับสมาชิกตามเดือน/ปี
+            const uniqueKey = `${selectedYear}_${selectedMonth}`;
+            const { bookNo, docNo } = await getOrAssignBookDoc(uniqueKey, currentUser.uid);
             // วันสิ้นเดือน
             const issueDate = new Date(selectedYear, selectedMonth, 0);
             const issueDateStr = `${issueDate.getDate()}/${issueDate.getMonth()+1}/${issueDate.getFullYear()+543}`;
-            // อัพเดตเลขที่เล่ม/เลขที่เอกสารสำหรับครั้งถัดไป
-            appSettings.whtBookCounter += 1;
-            appSettings.whtDocCounter += 1;
-            // บันทึกลง Firestore หากเป็นแอดมิน (จะมีสิทธิแก้ไขได้)
-            try {
-                if (currentUserRole === 'admin') {
-                    await setDoc(doc(db, 'settings', 'app-config'), {
-                        whtBookCounter: appSettings.whtBookCounter,
-                        whtDocCounter: appSettings.whtDocCounter
-                    }, { merge: true });
-                }
-            } catch (err) {
-                console.error('Error updating counters', err);
-            }
             const thaiWhtText = numberToThaiText(totalWht);
             // สร้าง PDF
             const { jsPDF } = window.jspdf;
@@ -2365,44 +2361,66 @@
             if (logoData) {
                 pdf.addImage(logoData, 'PNG', 10, 10, 30, 30);
             }
-            let y = 15;
+            const layout = appSettings.whtFormLayout || {};
             // ส่วนหัว
-            pdf.setFontSize(16);
-            pdf.text('หนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ)', 105, y, { align: 'center' });
-            y += 8;
-            pdf.setFontSize(12);
-            pdf.text(`เล่มที่ ${bookNo}   เลขที่ ${docNo}`, 105, y, { align: 'center' });
-            y += 8;
-            pdf.text(`เลขประจำตัวผู้เสียภาษีอากร: ${appSettings.whtTaxId}`, 105, y, { align: 'center' });
-            y += 8;
-            pdf.text(appSettings.whtCompanyName, 105, y, { align: 'center' });
-            y += 6;
-            pdf.text(appSettings.whtCompanyAddress, 105, y, { align: 'center' });
-            y += 10;
-            pdf.text(`ผู้ออกหนังสือ: ${currentUserData.nickname || currentUserData.name}`, 20, y);
-            y += 8;
-            pdf.text(`ผู้ถูกหักภาษี: ${currentUserData.nickname || currentUserData.name}`, 20, y);
-            y += 8;
-            // ตารางรายการ
-            pdf.text('รายละเอียดคิวงาน', 20, y);
-            y += 6;
-            pdf.setFontSize(10);
+            const titlePos = layout.title || { x: 105, y: 20 };
+            pdf.setFontSize(layout.title?.size || 16);
+            pdf.text('หนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ)', titlePos.x, titlePos.y, { align: 'center' });
+            const bookPos = layout.bookNo || { x: 105, y: titlePos.y + 8 };
+            pdf.setFontSize(layout.bookNo?.size || 12);
+            pdf.text(`เล่มที่ ${bookNo}   เลขที่ ${docNo}`, bookPos.x, bookPos.y, { align: 'center' });
+            const taxPos = layout.taxId || { x: 105, y: bookPos.y + 8 };
+            pdf.setFontSize(layout.taxId?.size || 12);
+            pdf.text(`เลขประจำตัวผู้เสียภาษีอากร: ${appSettings.whtTaxId}`, taxPos.x, taxPos.y, { align: 'center' });
+            const compNamePos = layout.companyName || { x: 105, y: taxPos.y + 8 };
+            pdf.setFontSize(layout.companyName?.size || 12);
+            pdf.text(appSettings.whtCompanyName, compNamePos.x, compNamePos.y, { align: 'center' });
+            const compAddrPos = layout.companyAddress || { x: 105, y: compNamePos.y + 6 };
+            pdf.setFontSize(layout.companyAddress?.size || 12);
+            pdf.text(appSettings.whtCompanyAddress, compAddrPos.x, compAddrPos.y, { align: 'center' });
+            if (layout.formType) { pdf.setFontSize(layout.formType.size || 12); pdf.text(appSettings.whtFormType || '', layout.formType.x, layout.formType.y); }
+            if (layout.incomeType) { pdf.setFontSize(layout.incomeType.size || 12); pdf.text(appSettings.whtIncomeType || '', layout.incomeType.x, layout.incomeType.y); }
+            if (layout.payerOption) { pdf.setFontSize(layout.payerOption.size || 12); pdf.text(appSettings.whtPayerOption || '', layout.payerOption.x, layout.payerOption.y); }
+            // ผู้ออกหนังสือ
+            const signerLabel = `ผู้ออกหนังสือ: ${currentUserData.nickname || currentUserData.name}`;
+            if (layout.signerName) {
+                pdf.setFontSize(layout.signerName.size || 12);
+                pdf.text(signerLabel, layout.signerName.x, layout.signerName.y);
+            } else {
+                pdf.setFontSize(12);
+                pdf.text(signerLabel, 20, compAddrPos.y + 20);
+            }
+            // ผู้ถูกหักภาษี (คือสมาชิกเอง)
+            const recipientLabel = `ผู้ถูกหักภาษี: ${currentUserData.nickname || currentUserData.name}`;
+            if (layout.recipientName) {
+                pdf.setFontSize(layout.recipientName.size || 12);
+                pdf.text(recipientLabel, layout.recipientName.x, layout.recipientName.y);
+            } else {
+                pdf.setFontSize(12);
+                pdf.text(recipientLabel, 20, compAddrPos.y + 28);
+            }
+            // รายละเอียดคิวงาน
+            const detailsStartY = (layout.totalPay && layout.totalPay.y) ? layout.totalPay.y - (jobsForMonth.length * 5) - 15 : (layout.recipientName ? layout.recipientName.y + 6 : compAddrPos.y + 34);
+            pdf.text('รายละเอียดคิวงาน', 20, detailsStartY);
+            let runningY = detailsStartY + 6;
+            pdf.setFontSize(layout.detailItem?.size || 10);
             jobsForMonth.forEach(item => {
-                pdf.text(`- ${item.name}: ${item.wage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 25, y);
-                y += 5;
+                pdf.text(`- ${item.name}: ${item.wage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 25, runningY);
+                runningY += 5;
             });
-            y += 3;
-            pdf.text(`รวมจำนวนเงินที่จ่ายทั้งสิ้น: ${totalWage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 20, y);
-            y += 5;
-            pdf.text(`ภาษีที่หักและนำส่งไว้: ${totalWht.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 20, y);
-            y += 5;
-            pdf.text(`รวมเงินภาษีที่หักนำส่งไว้ (ตัวอักษร): ${thaiWhtText}`, 20, y);
-            y += 10;
-            pdf.text(`ออกหนังสือ ณ วันที่ ${issueDateStr}`, 20, y);
-            y += 8;
-            pdf.text(`ลงชื่อ _________________________`, 20, y);
-            y += 5;
-            pdf.text(`(${appSettings.whtSignerName || currentUserData.nickname || currentUserData.name})`, 20, y);
+            pdf.setFontSize(layout.totalPay?.size || 12);
+            const totalPayPos = layout.totalPay || { x: 20, y: runningY + 3 };
+            pdf.text(`รวมจำนวนเงินที่จ่ายทั้งสิ้น: ${totalWage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, totalPayPos.x, totalPayPos.y);
+            const taxAmtPos = layout.taxAmount || { x: 20, y: totalPayPos.y + 6 };
+            pdf.text(`ภาษีที่หักและนำส่งไว้: ${totalWht.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, taxAmtPos.x, taxAmtPos.y);
+            const taxTextPos = layout.taxAmountText || { x: 20, y: taxAmtPos.y + 6 };
+            pdf.text(`รวมเงินภาษีที่หักนำส่งไว้ (ตัวอักษร): ${thaiWhtText}`, taxTextPos.x, taxTextPos.y);
+            const datePos = layout.issueDate || { x: 20, y: taxTextPos.y + 6 };
+            pdf.text(`ออกหนังสือ ณ วันที่ ${issueDateStr}`, datePos.x, datePos.y);
+            const signLineY = datePos.y + 8;
+            pdf.text('ลงชื่อ _________________________', 20, signLineY);
+            const signNamePos = layout.signerName || { x: 20, y: signLineY + 6 };
+            pdf.text(`(${appSettings.whtSignerName || currentUserData.nickname || currentUserData.name})`, signNamePos.x, signNamePos.y);
             // บันทึกไฟล์
             pdf.save(`WHT_${currentUserData.nickname || currentUserData.name}_${selectedMonth}_${selectedYear}.pdf`);
         }
@@ -2547,10 +2565,15 @@
             td.colSpan = 4;
             let html = '<div class="p-4 space-y-2">';
             job.members.forEach(member => {
+                // ตรวจสอบว่ามีการกรอกบัญชีหัก ณ ที่จ่ายครบหรือไม่
+                const wht = member.withholdingAccount || {};
+                const addr = (wht && wht.address) || {};
+                const complete = wht && wht.idNumber && addr.houseNumber && addr.subdistrict && addr.district && addr.province && addr.postalCode && wht.idCardCopyUrl;
+                const star = complete ? '<i class="ph-fill ph-star text-yellow-400 mr-1"></i>' : '';
                 html += `<div class="flex items-center space-x-3">
                     <img src="${member.profilePic || 'https://placehold.co/32x32/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full object-cover">
                     <div class="flex-1">
-                        <p class="font-medium">${member.name}</p>
+                        <p class="font-medium flex items-center">${star}${member.name}</p>
                         <p class="text-xs text-gray-500">รายรับ: ${member.wage.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท &nbsp;|&nbsp; หัก ณ ที่จ่าย: ${member.wht.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} บาท</p>
                     </div>
                 </div>`;
@@ -2566,27 +2589,31 @@
          */
         function showJobWhtCertificates(job) {
             let content = '<div class="space-y-2">';
-            // แสดงเลขเล่ม/เลขที่ล่วงหน้าตามลำดับของสมาชิก
-            let bookCounter = appSettings.whtBookCounter;
-            let docCounter = appSettings.whtDocCounter;
+            // แสดงรายการทีมงาน และจะแสดงเลขเล่ม/เลขที่ เมื่อโหลดเสร็จ
             job.members.forEach(member => {
-                const bookNo = String(bookCounter).padStart(5, '0');
-                const docNo = String(docCounter).padStart(5, '0');
                 content += `<div class="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
                     <div class="flex items-start space-x-3 flex-1">
                         <img src="${member.profilePic || 'https://placehold.co/32x32/E2E8F0/4A5568?text=??'}" class="w-8 h-8 rounded-full object-cover" />
                         <div>
                             <p>${member.name}</p>
-                            <p class="text-xs text-gray-500">เล่มที่ ${bookNo} | เลขที่ ${docNo}</p>
+                            <p id="book-doc-${member.id}" class="text-xs text-gray-500">กำลังโหลด...</p>
                         </div>
                     </div>
                     <button type="button" class="text-blue-600 hover:text-blue-800 download-certi-btn" data-userid="${member.id}"><i class="ph ph-download-simple"></i> ดาวน์โหลด</button>
                 </div>`;
-                bookCounter++;
-                docCounter++;
             });
             content += '</div>';
-            showModal(`หนังสือรับรองหัก ณ ที่จ่าย (${job.name})`, content, null, false, (modal) => {
+            showModal(`หนังสือรับรองหัก ณ ที่จ่าย (${job.name})`, content, null, false, async (modal) => {
+                // หลังจากเปิดโมดอล ให้ดึงเลขเล่ม/เลขที่จริงจากฟังก์ชัน getOrAssignBookDoc
+                for (const member of job.members) {
+                    try {
+                        const labels = modal.querySelector(`#book-doc-${member.id}`);
+                        const { bookNo, docNo } = await getOrAssignBookDoc(job.id, member.id);
+                        if (labels) labels.textContent = `เล่มที่ ${bookNo} | เลขที่ ${docNo}`;
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
                 modal.querySelectorAll('.download-certi-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const uid = e.currentTarget.dataset.userid;
@@ -2639,17 +2666,15 @@
                 alert('ไม่มีข้อมูลคิวงานที่ต้องหัก ณ ที่จ่ายสำหรับผู้ใช้นี้');
                 return;
             }
-            // book/doc no
-            const bookNo = String(appSettings.whtBookCounter).padStart(5, '0');
-            const docNo = String(appSettings.whtDocCounter).padStart(5, '0');
-            appSettings.whtBookCounter += 1;
-            appSettings.whtDocCounter += 1;
-            try {
-                await setDoc(doc(db, 'settings', 'app-config'), {
-                    whtBookCounter: appSettings.whtBookCounter,
-                    whtDocCounter: appSettings.whtDocCounter
-                }, { merge: true });
-            } catch(err) { console.error(err); }
+            // ดึงหรือกำหนดหมายเลขเล่ม/เลขที่จากฟังก์ชัน getOrAssignBookDoc แทนการใช้เคาน์เตอร์โดยตรง
+            let uniqueKey;
+            if (selectedYear && selectedMonth) {
+                uniqueKey = `${selectedYear}_${selectedMonth}`;
+            } else {
+                const nowKey = new Date();
+                uniqueKey = `recent_${nowKey.getFullYear()}_${nowKey.getMonth()+1}`;
+            }
+            const { bookNo, docNo } = await getOrAssignBookDoc(uniqueKey, userId);
             const thaiWhtText = numberToThaiText(totalWht);
             const issueDate = new Date();
             const issueDateStr = `${issueDate.getDate()}/${issueDate.getMonth()+1}/${issueDate.getFullYear()+543}`;
@@ -2668,42 +2693,72 @@
             if (logoData) {
                 pdf.addImage(logoData,'PNG',10,10,30,30);
             }
-            let y = 15;
-            pdf.setFontSize(16);
-            pdf.text('หนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ)',105,y,{align:'center'});
-            y += 8;
-            pdf.setFontSize(12);
-            pdf.text(`เล่มที่ ${bookNo}   เลขที่ ${docNo}`,105,y,{align:'center'});
-            y += 8;
-            pdf.text(`เลขประจำตัวผู้เสียภาษีอากร: ${appSettings.whtTaxId}`,105,y,{align:'center'});
-            y += 8;
-            pdf.text(appSettings.whtCompanyName,105,y,{align:'center'});
-            y += 6;
-            pdf.text(appSettings.whtCompanyAddress,105,y,{align:'center'});
-            y += 10;
-            pdf.text(`ผู้ออกหนังสือ: ${currentUserData.nickname || currentUserData.name}`,20,y);
-            y += 8;
-            pdf.text(`ผู้ถูกหักภาษี: ${userData.nickname || userData.name}`,20,y);
-            y += 8;
-            pdf.text('รายละเอียดคิวงาน',20,y);
-            y += 6;
-            pdf.setFontSize(10);
+            const layout = appSettings.whtFormLayout || {};
+            // Title
+            const titlePos = layout.title || { x: 105, y: 20 };
+            pdf.setFontSize(layout.title?.size || 16);
+            pdf.text('หนังสือรับรองการหักภาษี ณ ที่จ่าย (50 ทวิ)', titlePos.x, titlePos.y, { align: 'center' });
+            // book/doc
+            const bookPos = layout.bookNo || { x: 105, y: titlePos.y + 8 };
+            pdf.setFontSize(layout.bookNo?.size || 12);
+            pdf.text(`เล่มที่ ${bookNo}   เลขที่ ${docNo}`, bookPos.x, bookPos.y, { align: 'center' });
+            // tax id
+            const taxPos = layout.taxId || { x: 105, y: bookPos.y + 8 };
+            pdf.setFontSize(layout.taxId?.size || 12);
+            pdf.text(`เลขประจำตัวผู้เสียภาษีอากร: ${appSettings.whtTaxId}`, taxPos.x, taxPos.y, { align: 'center' });
+            // company name & address
+            const compNamePos = layout.companyName || { x: 105, y: taxPos.y + 8 };
+            pdf.setFontSize(layout.companyName?.size || 12);
+            pdf.text(appSettings.whtCompanyName, compNamePos.x, compNamePos.y, { align: 'center' });
+            const compAddrPos = layout.companyAddress || { x: 105, y: compNamePos.y + 6 };
+            pdf.setFontSize(layout.companyAddress?.size || 12);
+            pdf.text(appSettings.whtCompanyAddress, compAddrPos.x, compAddrPos.y, { align: 'center' });
+            // form type & income type & payer option
+            if (layout.formType) { pdf.setFontSize(layout.formType.size || 12); pdf.text(appSettings.whtFormType || '', layout.formType.x, layout.formType.y); }
+            if (layout.incomeType) { pdf.setFontSize(layout.incomeType.size || 12); pdf.text(appSettings.whtIncomeType || '', layout.incomeType.x, layout.incomeType.y); }
+            if (layout.payerOption) { pdf.setFontSize(layout.payerOption.size || 12); pdf.text(appSettings.whtPayerOption || '', layout.payerOption.x, layout.payerOption.y); }
+            // signer
+            const signerLabel = `ผู้ออกหนังสือ: ${currentUserData.nickname || currentUserData.name}`;
+            if (layout.signerName) {
+                pdf.setFontSize(layout.signerName.size || 12);
+                pdf.text(signerLabel, layout.signerName.x, layout.signerName.y);
+            } else {
+                pdf.setFontSize(12);
+                pdf.text(signerLabel, 20, compAddrPos.y + 20);
+            }
+            // recipient
+            const recipientLabel = `ผู้ถูกหักภาษี: ${userData.nickname || userData.name}`;
+            if (layout.recipientName) {
+                pdf.setFontSize(layout.recipientName.size || 12);
+                pdf.text(recipientLabel, layout.recipientName.x, layout.recipientName.y);
+            } else {
+                pdf.setFontSize(12);
+                pdf.text(recipientLabel, 20, compAddrPos.y + 28);
+            }
+            // details header
+            const detailsStartY = (layout.totalPay && layout.totalPay.y) ? layout.totalPay.y - (jobsForUser.length * 5) - 15 : (layout.recipientName ? layout.recipientName.y + 6 : compAddrPos.y + 34);
+            pdf.setFontSize(layout.detailsHeader?.size || 12);
+            pdf.text('รายละเอียดคิวงาน', 20, detailsStartY);
+            let runningY = detailsStartY + 6;
+            pdf.setFontSize(layout.detailItem?.size || 10);
             jobsForUser.forEach(item => {
-                pdf.text(`- ${item.name}: ${item.wage.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`,25,y);
-                y += 5;
+                pdf.text(`- ${item.name}: ${item.wage.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, 25, runningY);
+                runningY += 5;
             });
-            y += 3;
-            pdf.text(`รวมจำนวนเงินที่จ่ายทั้งสิ้น: ${totalWage.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`,20,y);
-            y += 5;
-            pdf.text(`ภาษีที่หักและนำส่งไว้: ${totalWht.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`,20,y);
-            y += 5;
-            pdf.text(`รวมเงินภาษีที่หักนำส่งไว้ (ตัวอักษร): ${thaiWhtText}`,20,y);
-            y += 10;
-            pdf.text(`ออกหนังสือ ณ วันที่ ${issueDateStr}`,20,y);
-            y += 8;
-            pdf.text(`ลงชื่อ _________________________`,20,y);
-            y += 5;
-            pdf.text(`(${appSettings.whtSignerName || currentUserData.nickname || currentUserData.name})`,20,y);
+            pdf.setFontSize(layout.totalPay?.size || 12);
+            // totals
+            const totalPayPos = layout.totalPay || { x: 20, y: runningY + 3 };
+            pdf.text(`รวมจำนวนเงินที่จ่ายทั้งสิ้น: ${totalWage.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, totalPayPos.x, totalPayPos.y);
+            const taxAmtPos = layout.taxAmount || { x: 20, y: totalPayPos.y + 6 };
+            pdf.text(`ภาษีที่หักและนำส่งไว้: ${totalWht.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})} บาท`, taxAmtPos.x, taxAmtPos.y);
+            const taxTextPos = layout.taxAmountText || { x: 20, y: taxAmtPos.y + 6 };
+            pdf.text(`รวมเงินภาษีที่หักนำส่งไว้ (ตัวอักษร): ${thaiWhtText}`, taxTextPos.x, taxTextPos.y);
+            const datePos = layout.issueDate || { x: 20, y: taxTextPos.y + 6 };
+            pdf.text(`ออกหนังสือ ณ วันที่ ${issueDateStr}`, datePos.x, datePos.y);
+            const signLineY = datePos.y + 8;
+            pdf.text('ลงชื่อ _________________________', 20, signLineY);
+            const signNamePos = layout.signerName || { x: 20, y: signLineY + 6 };
+            pdf.text(`(${appSettings.whtSignerName || currentUserData.nickname || currentUserData.name})`, signNamePos.x, signNamePos.y);
             pdf.save(`WHT_${userData.nickname || userData.name}.pdf`);
         }
 
@@ -3435,6 +3490,64 @@
                 return total;
             }, 0);
         }
+
+        /**
+         * จัดสรรและดึงหมายเลขเล่มและเลขที่หนังสือที่ไม่ซ้ำกัน
+         * uniqueKey ควรเป็นตัวแทนที่ไม่ซ้ำของใบรับรอง เช่น jobId หรือ ปี-เดือนของสมาชิก
+         * userId คือรหัสผู้รับใบรับรอง
+         * ฟังก์ชันนี้จะตรวจสอบใน Firestore ว่ามีการกำหนดไว้แล้วหรือไม่ หากไม่มีก็จะใช้เคาน์เตอร์ปัจจุบันและอัปเดต
+         */
+        async function getOrAssignBookDoc(uniqueKey, userId) {
+            try {
+                const docId = `${uniqueKey}_${userId}`;
+                const numRef = doc(db, 'assignedWhtNumbers', docId);
+                const snap = await getDoc(numRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    return { bookNo: data.bookNo, docNo: data.docNo };
+                }
+                // หากยังไม่มี เลือกเลขใหม่จากเคาน์เตอร์ (2 หลัก)
+                // bookNo และ docNo เป็นเลข 2 หลัก 01-99 ตามลำดับ เมื่อ docNo เกิน 99 จะขึ้นเล่มใหม่และวน docNo กลับมา 01
+                let bookNo = appSettings.whtBookCounter;
+                let docNo = appSettings.whtDocCounter;
+                // prepare return values with padding
+                const paddedBook = String(bookNo).padStart(2, '0');
+                const paddedDoc = String(docNo).padStart(2, '0');
+                // update counters for next assignment
+                appSettings.whtDocCounter++;
+                if (appSettings.whtDocCounter > 99) {
+                    appSettings.whtDocCounter = 1;
+                    appSettings.whtBookCounter++;
+                    if (appSettings.whtBookCounter > 99) {
+                        appSettings.whtBookCounter = 1;
+                    }
+                }
+                // บันทึกการจองไว้ใน Firestore และอัปเดตเคาน์เตอร์ใน settings
+                await setDoc(numRef, { bookNo: paddedBook, docNo: paddedDoc });
+                await setDoc(doc(db, 'settings', 'app-config'), {
+                    whtBookCounter: appSettings.whtBookCounter,
+                    whtDocCounter: appSettings.whtDocCounter
+                }, { merge: true });
+                return { bookNo: paddedBook, docNo: paddedDoc };
+            } catch (err) {
+                console.error('Error assigning book/doc numbers:', err);
+                // fallback: still return numbers without saving
+                // fallback ใช้รูปแบบ 2 หลักแบบเดียวกับด้านบน
+                let bookNo = appSettings.whtBookCounter;
+                let docNo = appSettings.whtDocCounter;
+                const paddedBook = String(bookNo).padStart(2, '0');
+                const paddedDoc = String(docNo).padStart(2, '0');
+                appSettings.whtDocCounter++;
+                if (appSettings.whtDocCounter > 99) {
+                    appSettings.whtDocCounter = 1;
+                    appSettings.whtBookCounter++;
+                    if (appSettings.whtBookCounter > 99) {
+                        appSettings.whtBookCounter = 1;
+                    }
+                }
+                return { bookNo: paddedBook, docNo: paddedDoc };
+            }
+        }
         function formatDateRange(start, end) {
             if (!start || !end) return 'N/A';
             const options = { day: 'numeric', month: 'short', year: 'numeric' };
@@ -3527,12 +3640,36 @@
 
         function showJobModal() {
             const content = `
-                <input type="text" name="name" placeholder="ชื่อคิวงาน" required class="w-full p-2 border rounded">
-                <input type="text" name="location" placeholder="สถานที่" required class="w-full p-2 border rounded">
-                <input type="number" name="income" placeholder="งบประมาณ" required class="w-full p-2 border rounded">
-                <input type="number" name="teamNeeded" placeholder="จำนวนทีมงานที่รับ" required class="w-full p-2 border rounded">
-                <label>วันที่เริ่ม</label><input type="date" name="startDate" required class="w-full p-2 border rounded">
-                <label>วันที่สิ้นสุด</label><input type="date" name="endDate" required class="w-full p-2 border rounded">`;
+                <div class="space-y-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">ชื่อคิวงาน</label>
+                        <input type="text" name="name" required class="w-full p-2 border rounded" placeholder="ระบุชื่อคิวงาน">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">สถานที่</label>
+                        <input type="text" name="location" required class="w-full p-2 border rounded" placeholder="ระบุสถานที่">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700">งบประมาณ (บาท)</label>
+                            <input type="number" name="income" min="0" required class="w-full p-2 border rounded" placeholder="0">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700">จำนวนทีมงานที่รับ</label>
+                            <input type="number" name="teamNeeded" min="0" required class="w-full p-2 border rounded" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700">วันที่เริ่ม</label>
+                            <input type="date" name="startDate" required class="w-full p-2 border rounded">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700">วันที่สิ้นสุด</label>
+                            <input type="date" name="endDate" required class="w-full p-2 border rounded">
+                        </div>
+                    </div>
+                </div>`;
             showModal('เพิ่มคิวงานใหม่', content, async (formData, submitButton, modal) => {
                 const startDate = formData.get('startDate'), endDate = formData.get('endDate');
                 let workdays = [];
@@ -3566,11 +3703,30 @@
                     <img id="add-member-pic-preview" src="https://placehold.co/40x40/E2E8F0/4A5568?text=รูป" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
                     <select id="add-member-select" name="userId" required class="w-full p-2 border rounded flex-grow">${userOptions}</select>
                 </div>
-                <input type="text" name="position" placeholder="ตำแหน่ง" required class="w-full p-2 border rounded">
-                <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded">`;
+                <div class="space-y-2 mt-3">
+                    <label class="block text-sm font-semibold text-gray-700">ตำแหน่ง (เลือกได้หลายตำแหน่ง)</label>
+                    <div class="flex flex-wrap gap-3">
+                        ${['Switcher','Lowertrid','Camera','Support'].map(pos => `<label class="flex items-center space-x-1"><input type="checkbox" class="position-checkbox" value="${pos}"><span>${pos}</span></label>`).join('')}
+                    </div>
+                    <input type="text" name="otherPosition" placeholder="ตำแหน่งอื่นๆ (คั่นด้วย /)" class="w-full p-2 border rounded">
+                </div>
+                <div class="mt-3">
+                    <input type="number" name="dailyRate" placeholder="ค่าแรง/วัน" required class="w-full p-2 border rounded">
+                </div>`;
             showModal('เพิ่มสมาชิกในทีม', content, async (formData, submitButton, modal) => {
                 const userId = formData.get('userId');
-                await updateDoc(doc(db, "jobs", currentJobId), { team: arrayUnion({ userId: userId, position: formData.get('position'), dailyRate: Number(formData.get('dailyRate')), workdays: [], dailyOverrides: {}, isPaid: false, whtEnabled: false })})
+                // รวบรวมตำแหน่งจากช่องเลือกและช่องอื่นๆ
+                const checks = modal.querySelectorAll('.position-checkbox');
+                let posList = [];
+                checks.forEach(cb => {
+                    if (cb.checked) posList.push(cb.value);
+                });
+                const otherPos = formData.get('otherPosition')?.trim() || '';
+                if (otherPos) {
+                    posList = posList.concat(otherPos.split('/').map(s => s.trim()).filter(Boolean));
+                }
+                const positionStr = posList.join('/');
+                await updateDoc(doc(db, "jobs", currentJobId), { team: arrayUnion({ userId: userId, position: positionStr, dailyRate: Number(formData.get('dailyRate')), workdays: [], dailyOverrides: {}, isPaid: false, whtEnabled: false })});
                 await createNotification(userId, `คุณถูกเพิ่มเข้าคิวงาน: <b>${currentJobData.name}</b>`, currentJobId, currentJobData.name);
                 modal.remove();
             }, true, (modal) => {
@@ -3736,7 +3892,14 @@
                     <div class="flex items-center">
                         <img src="${user.profilePic || 'https://placehold.co/40x40/E2E8F0/4A5568?text=??'}" class="w-10 h-10 rounded-full mr-4">
                         <div>
-                            <p class="font-semibold">${displayName}</p>
+                            <p class="font-semibold flex items-center">
+                                ${(() => {
+                                    const wht = user.withholdingAccount || {};
+                                    const addr = wht.address || {};
+                                    const complete = wht && wht.idNumber && addr.houseNumber && addr.subdistrict && addr.district && addr.province && addr.postalCode && wht.idCardCopyUrl;
+                                    return complete ? '<i class="ph-fill ph-star text-yellow-400 mr-1"></i>' : '';
+                                })()}${displayName}
+                            </p>
                             <p class="text-sm text-gray-500">${user.email} - <span class="font-medium">${user.role}</span></p>
                             <div class="text-xs text-gray-400 mt-1"><i class="ph ph-bank"></i> ${bankInfo?.bank || 'N/A'}: ${bankInfo?.number || 'N/A'}</div>
                         </div>
@@ -3903,10 +4066,22 @@
 
         function showChangePasswordForCurrentUserModal() {
              const content = `
-                <label>รหัสผ่านปัจจุบัน</label><input type="password" name="oldPassword" required class="w-full p-2 border rounded">
-                <label>รหัสผ่านใหม่</label><input type="password" name="newPassword" required class="w-full p-2 border rounded">
-                <label>ยืนยันรหัสผ่านใหม่</label><input type="password" name="confirmPassword" required class="w-full p-2 border rounded">
-                <p id="change-pass-error" class="text-sm text-red-500 hidden"></p>`;
+                <div class="space-y-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">รหัสผ่านปัจจุบัน</label>
+                        <input type="password" name="oldPassword" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">รหัสผ่านใหม่</label>
+                        <input type="password" name="newPassword" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">ยืนยันรหัสผ่านใหม่</label>
+                        <input type="password" name="confirmPassword" required class="w-full p-2 border rounded">
+                    </div>
+                    <p id="change-pass-error" class="text-sm text-red-500 hidden"></p>
+                </div>
+             `;
              showModal('เปลี่ยนรหัสผ่าน', content, async (formData, submitButton, modal) => {
                 const oldPass = formData.get('oldPassword');
                 const newPass = formData.get('newPassword');
@@ -3940,14 +4115,24 @@
             const bankOptions = banks.map(b => `<option value="${b}" ${b === bankInfo.bank ? 'selected' : ''}>${b}</option>`).join('');
             // Create the modal content without the ID card upload section (moved to the withholding page)
             const content = `
-                <label>ชื่อบัญชี</label><input type="text" name="accountName" class="w-full p-2 border rounded" value="${bankInfo.name || ''}">
-                <label>ธนาคาร</label><select name="bankName" class="w-full p-2 border rounded">${bankOptions}</select>
-                <label>หมายเลขบัญชี</label><input type="text" name="accountNumber" class="w-full p-2 border rounded" value="${bankInfo.number || ''}">
-                <!-- Button to configure withholding account -->
-                <div class="pt-2 flex justify-end">
-                    <button type="button" id="open-wht-account-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                        ตั้งค่าบัญชีหัก ณ ที่จ่าย
-                    </button>
+                <div class="space-y-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">ชื่อบัญชี</label>
+                        <input type="text" name="accountName" class="w-full p-2 border rounded" value="${bankInfo.name || ''}" placeholder="ระบุชื่อบัญชี">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">ธนาคาร</label>
+                        <select name="bankName" class="w-full p-2 border rounded">${bankOptions}</select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">หมายเลขบัญชี</label>
+                        <input type="text" name="accountNumber" class="w-full p-2 border rounded" value="${bankInfo.number || ''}" placeholder="ระบุเลขบัญชี">
+                    </div>
+                    <div class="flex justify-end pt-2">
+                        <button type="button" id="open-wht-account-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                            ตั้งค่าบัญชีหัก ณ ที่จ่าย
+                        </button>
+                    </div>
                 </div>
             `;
             showModal('ข้อมูลบัญชีธนาคาร', content, async (formData, submitButton, modal) => {
@@ -4030,21 +4215,35 @@
             const defaultName = whtInfo.name || (currentUserData.bankAccount && currentUserData.bankAccount.name ? currentUserData.bankAccount.name : '');
             // สร้าง HTML ของแบบฟอร์ม
             const content = `
-                <label>ชื่อ-สกุล</label><input type="text" name="whtName" class="w-full p-2 border rounded" value="${defaultName}" readonly>
-                <label>เลขบัตรประชาชน</label><input type="text" name="idCardNumber" class="w-full p-2 border rounded" value="${whtInfo.idNumber || ''}" required>
-                <label>ที่อยู่</label>
-                <input type="text" name="houseNumber" placeholder="บ้านเลขที่" class="w-full p-2 border rounded mt-1" value="${address.houseNumber || ''}">
-                <input type="text" name="moo" placeholder="หมู่ที่" class="w-full p-2 border rounded mt-1" value="${address.moo || ''}">
-                <input type="text" name="subdistrict" placeholder="ตำบล" class="w-full p-2 border rounded mt-1" value="${address.subdistrict || ''}">
-                <input type="text" name="district" placeholder="อำเภอ" class="w-full p-2 border rounded mt-1" value="${address.district || ''}">
-                <select name="province" class="w-full p-2 border rounded mt-1">
-                    <option value="">-- เลือกจังหวัด --</option>
-                    ${provinceOptions}
-                </select>
-                <input type="text" name="postalCode" placeholder="รหัสไปรษณีย์" class="w-full p-2 border rounded mt-1" value="${address.postalCode || ''}">
-                <label class="block mt-4">อัปโหลดสำเนาบัตรประชาชน</label>
-                ${whtInfo.idCardCopyUrl ? `<img src="${whtInfo.idCardCopyUrl}" class="w-40 h-24 object-cover rounded border mt-1" />` : ''}
-                <input type="file" name="idCardFile" accept="image/*" class="mt-2">
+                <div class="space-y-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">ชื่อ-สกุล</label>
+                        <input type="text" name="whtName" class="w-full p-2 border rounded bg-gray-100" value="${defaultName}" readonly>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">เลขบัตรประชาชน</label>
+                        <input type="text" name="idCardNumber" class="w-full p-2 border rounded" value="${whtInfo.idNumber || ''}" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">ที่อยู่</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <input type="text" name="houseNumber" placeholder="บ้านเลขที่" class="w-full p-2 border rounded" value="${address.houseNumber || ''}">
+                            <input type="text" name="moo" placeholder="หมู่ที่" class="w-full p-2 border rounded" value="${address.moo || ''}">
+                            <input type="text" name="subdistrict" placeholder="ตำบล" class="w-full p-2 border rounded" value="${address.subdistrict || ''}">
+                            <input type="text" name="district" placeholder="อำเภอ" class="w-full p-2 border rounded" value="${address.district || ''}">
+                            <select name="province" class="w-full p-2 border rounded">
+                                <option value="">-- เลือกจังหวัด --</option>
+                                ${provinceOptions}
+                            </select>
+                            <input type="text" name="postalCode" placeholder="รหัสไปรษณีย์" class="w-full p-2 border rounded" value="${address.postalCode || ''}">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">อัปโหลดสำเนาบัตรประชาชน</label>
+                        ${whtInfo.idCardCopyUrl ? `<img src="${whtInfo.idCardCopyUrl}" class="w-40 h-24 object-cover rounded border" />` : ''}
+                        <input type="file" name="idCardFile" accept="image/*" class="w-full">
+                    </div>
+                </div>
             `;
             showModal('ตั้งค่าบัญชีหัก ณ ที่จ่าย', content, async (formData, submitButton, modal) => {
                 submitButton.disabled = true;
@@ -4178,12 +4377,7 @@
                         <input type="file" name="whtCompanyLogoFile" accept="image/*" class="block w-full text-sm text-gray-600">
                         <img id="wht-logo-preview" src="${appSettings.whtCompanyLogoUrl || ''}" class="mt-2 max-h-20" />
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">อัปโหลดภาพหนังสือ 50 ทวิ</label>
-                        <input type="file" name="whtFormImageFile" accept="image/*" class="block w-full text-sm text-gray-600">
-                        <img id="wht-form-preview" src="${appSettings.whtFormImageUrl || ''}" class="mt-2 max-h-32" />
-                        <p class="text-xs text-gray-500 mt-1">ภาพนี้จะถูกใช้เป็นพื้นหลัง/รูปแบบในไฟล์ 50 ทวิ เมื่อดาวน์โหลด</p>
-                    </div>
+                    <!-- removed certificate template upload and editor as per new requirements -->
                 </div>
             `;
             showModal('ตั้งค่าแบบฟอร์ม หัก ณ ที่จ่าย', content, async (formData, submitButton, modal) => {
@@ -4218,6 +4412,24 @@
                     if (uploadedFormImg) formImgUrl = uploadedFormImg;
                 }
                 try {
+                    // สร้างอ็อบเจ็กต์ layout จากตำแหน่งจริงในตัวแก้ไขเทมเพลต
+                    let layoutObj = {};
+                    if (modal) {
+                        const editorEl = modal.querySelector('#wht-template-editor');
+                        if (editorEl) {
+                            const editorRect = editorEl.getBoundingClientRect();
+                            editorEl.querySelectorAll('[data-field].template-field').forEach(el => {
+                                const rect = el.getBoundingClientRect();
+                                const field = el.dataset.field;
+                                const mmX = ((rect.left - editorRect.left) / editorRect.width) * 210;
+                                const mmY = ((rect.top - editorRect.top) / editorRect.height) * 297;
+                                // เก็บขนาดตัวอักษรเป็นหน่วย point (px * 0.75)
+                                const fontSizePx = parseFloat(window.getComputedStyle(el).fontSize);
+                                const fontSizePt = fontSizePx * 0.75;
+                                layoutObj[field] = { x: mmX, y: mmY, size: fontSizePt };
+                            });
+                        }
+                    }
                     // บันทึกลง Firestore
                     await setDoc(doc(db, 'settings', 'app-config'), {
                         whtPercent: percentVal,
@@ -4229,7 +4441,8 @@
                         whtPayerOption: payerOption,
                         whtSignerName: signerName,
                         whtCompanyLogoUrl: logoUrl,
-                        whtFormImageUrl: formImgUrl
+                        whtFormImageUrl: formImgUrl,
+                        whtFormLayout: layoutObj
                     }, { merge: true });
                     // อัปเดตค่าใน appSettings
                     Object.assign(appSettings, {
@@ -4242,7 +4455,8 @@
                         whtPayerOption: payerOption,
                         whtSignerName: signerName,
                         whtCompanyLogoUrl: logoUrl,
-                        whtFormImageUrl: formImgUrl
+                        whtFormImageUrl: formImgUrl,
+                        whtFormLayout: layoutObj
                     });
                     alert('บันทึกการตั้งค่าแบบฟอร์ม หัก ณ ที่จ่ายเรียบร้อยแล้ว');
                     modal.remove();
@@ -4269,8 +4483,147 @@
                 if (formInput) {
                     formInput.addEventListener('change', (e) => {
                         if (e.target.files && e.target.files[0]) {
-                            formPreview.src = URL.createObjectURL(e.target.files[0]);
+                            const url = URL.createObjectURL(e.target.files[0]);
+                            formPreview.src = url;
+                            // update background of editor as well
+                            const editor = modalEl.querySelector('#wht-template-editor');
+                            if (editor) {
+                                editor.style.backgroundImage = `url(${url})`;
+                            }
                         }
+                    });
+                }
+                // ตั้งค่า editor background
+                const editor = modalEl.querySelector('#wht-template-editor');
+                if (editor) {
+                    if (appSettings.whtFormImageUrl) {
+                            editor.style.backgroundImage = `url(${appSettings.whtFormImageUrl})`;
+                            editor.style.backgroundSize = 'contain';
+                            editor.style.backgroundRepeat = 'no-repeat';
+                            editor.style.backgroundPosition = 'center';
+                    }
+                    // helper to make an element draggable within the editor
+                    function makeDraggable(el) {
+                        el.classList.add('template-field');
+                        el.style.position = 'absolute';
+                        el.style.cursor = 'move';
+                        el.style.backgroundColor = 'rgba(255,255,255,0.7)';
+                        el.style.padding = '2px 4px';
+                        if (!el.style.fontSize) {
+                            el.style.fontSize = '12px';
+                        }
+                        el.style.border = '1px dashed #888';
+                        // เพิ่มปุ่มเพิ่ม/ลดขนาด
+                        const plus = document.createElement('span');
+                        plus.textContent = '+';
+                        plus.style.position = 'absolute';
+                        plus.style.right = '0px';
+                        plus.style.top = '-10px';
+                        plus.style.cursor = 'pointer';
+                        plus.style.fontSize = '10px';
+                        plus.style.color = '#4a5568';
+                        const minus = document.createElement('span');
+                        minus.textContent = '-';
+                        minus.style.position = 'absolute';
+                        minus.style.right = '12px';
+                        minus.style.top = '-10px';
+                        minus.style.cursor = 'pointer';
+                        minus.style.fontSize = '10px';
+                        minus.style.color = '#4a5568';
+                        plus.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+                            el.style.fontSize = (currentSize + 1) + 'px';
+                        });
+                        minus.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+                            el.style.fontSize = Math.max(6, currentSize - 1) + 'px';
+                        });
+                        el.appendChild(plus);
+                        el.appendChild(minus);
+
+                        // Allow adjusting font size via mouse wheel: scroll up to increase, down to decrease
+                        el.addEventListener('wheel', (ev) => {
+                            ev.preventDefault();
+                            const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+                            if (ev.deltaY < 0) {
+                                el.style.fontSize = (currentSize + 1) + 'px';
+                            } else {
+                                el.style.fontSize = Math.max(6, currentSize - 1) + 'px';
+                            }
+                        });
+                        let offsetX, offsetY;
+                        const onMouseMove = (ev) => {
+                            const rect = editor.getBoundingClientRect();
+                            let x = ev.clientX - rect.left - offsetX;
+                            let y = ev.clientY - rect.top - offsetY;
+                            x = Math.max(0, Math.min(x, rect.width - el.offsetWidth));
+                            y = Math.max(0, Math.min(y, rect.height - el.offsetHeight));
+                            el.style.left = x + 'px';
+                            el.style.top = y + 'px';
+                        };
+                        const onMouseUp = () => {
+                            window.removeEventListener('mousemove', onMouseMove);
+                            window.removeEventListener('mouseup', onMouseUp);
+                        };
+                        el.addEventListener('mousedown', (ev) => {
+                            ev.preventDefault();
+                            // ignore drag when clicking plus/minus
+                            if (ev.target === plus || ev.target === minus) return;
+                            const rect = el.getBoundingClientRect();
+                            offsetX = ev.clientX - rect.left;
+                            offsetY = ev.clientY - rect.top;
+                            window.addEventListener('mousemove', onMouseMove);
+                            window.addEventListener('mouseup', onMouseUp);
+                        });
+                    }
+                    // handle palette dragstart
+                    const palette = modalEl.querySelector('#wht-field-palette');
+                    if (palette) {
+                        palette.querySelectorAll('[draggable]').forEach(item => {
+                            item.addEventListener('dragstart', (ev) => {
+                                ev.dataTransfer.setData('text/plain', item.dataset.field);
+                            });
+                        });
+                    }
+                    // allow drop on editor
+                    editor.addEventListener('dragover', (ev) => {
+                        ev.preventDefault();
+                    });
+                    editor.addEventListener('drop', (ev) => {
+                        ev.preventDefault();
+                        const field = ev.dataTransfer.getData('text/plain');
+                        if (!field) return;
+                        // check if exists
+                        let existing = editor.querySelector(`[data-field="${field}"]`);
+                        if (!existing) {
+                            existing = document.createElement('div');
+                            existing.textContent = field;
+                            existing.dataset.field = field;
+                            editor.appendChild(existing);
+                            makeDraggable(existing);
+                        }
+                        const rect = editor.getBoundingClientRect();
+                        const x = ev.clientX - rect.left;
+                        const y = ev.clientY - rect.top;
+                        existing.style.left = x + 'px';
+                        existing.style.top = y + 'px';
+                    });
+                    // load existing layout positions if any
+                    const layout = appSettings.whtFormLayout || {};
+                    Object.keys(layout).forEach(field => {
+                        const cfg = layout[field];
+                        const el = document.createElement('div');
+                        el.textContent = field;
+                        el.dataset.field = field;
+                        editor.appendChild(el);
+                        makeDraggable(el);
+                        // convert mm back to px
+                        const xPx = (cfg.x / 210) * editor.clientWidth;
+                        const yPx = (cfg.y / 297) * editor.clientHeight;
+                        el.style.left = xPx + 'px';
+                        el.style.top = yPx + 'px';
                     });
                 }
             });
